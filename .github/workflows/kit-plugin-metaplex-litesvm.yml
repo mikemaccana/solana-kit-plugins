@@ -1,0 +1,53 @@
+name: kit-plugin-metaplex-litesvm
+
+# Integration test: loads the real mainnet Metaplex Token Metadata program into an in-process
+# LiteSVM and exercises the plugin against it. Runs when the metaplex plugin or the LiteSVM
+# adapter changes. Unlike the offline unit jobs, this fetches the program .so from mainnet.
+on:
+  push:
+    paths:
+      - 'kit-plugin-metaplex/**'
+      - 'kit-plugin-litesvm/**'
+      - '.github/workflows/kit-plugin-metaplex-litesvm.yml'
+  pull_request:
+    paths:
+      - 'kit-plugin-metaplex/**'
+      - 'kit-plugin-litesvm/**'
+      - '.github/workflows/kit-plugin-metaplex-litesvm.yml'
+
+jobs:
+  litesvm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Build the LiteSVM adapter so the file: dependency resolves to a built dist.
+      - name: Build kit-plugin-litesvm
+        working-directory: kit-plugin-litesvm
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install kit-plugin-metaplex
+        working-directory: kit-plugin-metaplex
+        run: npm ci
+
+      # Cache the fetched program binary across runs (it changes only on program upgrades).
+      - name: Cache Token Metadata program
+        id: cache-program
+        uses: actions/cache@v4
+        with:
+          path: kit-plugin-metaplex/tests/fixtures/mpl_token_metadata.so
+          key: mpl-token-metadata-so-v1
+
+      - name: Fetch Token Metadata program from mainnet
+        if: steps.cache-program.outputs.cache-hit != 'true'
+        working-directory: kit-plugin-metaplex
+        run: node scripts/fetch-program.mjs metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s tests/fixtures/mpl_token_metadata.so mainnet
+
+      - name: Run LiteSVM integration tests
+        working-directory: kit-plugin-metaplex
+        run: npm run test:litesvm
