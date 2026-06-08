@@ -55,11 +55,11 @@ import {
   type MemberArgs,
 } from "../types";
 
-export const MULTISIG_DISCRIMINATOR = new Uint8Array([
+export const MULTISIG_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   224, 116, 121, 186, 68, 161, 79, 236,
 ]);
 
-export function getMultisigDiscriminatorBytes() {
+export function getMultisigDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(MULTISIG_DISCRIMINATOR);
 }
 

@@ -28,3 +28,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run test:ci
+      # Regenerate the Codama clients from the checked-in IDLs and fail if they drift.
+      - name: Verify generated clients match the IDLs
+        run: |
+          npm run generate
+          git diff --exit-code -- src/generated

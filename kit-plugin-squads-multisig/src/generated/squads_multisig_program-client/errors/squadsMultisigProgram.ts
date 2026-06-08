@@ -155,7 +155,7 @@ export type SquadsMultisigProgramError =
 let squadsMultisigProgramErrorMessages:
   | Record<SquadsMultisigProgramError, string>
   | undefined;
-if (process.env.NODE_ENV !== "production") {
+if (process.env["NODE_ENV"] !== "production") {
   squadsMultisigProgramErrorMessages = {
     [SQUADS_MULTISIG_PROGRAM_ERROR__ALREADY_APPROVED]: `Member already approved the transaction`,
     [SQUADS_MULTISIG_PROGRAM_ERROR__ALREADY_CANCELLED]: `Member already cancelled the transaction`,
@@ -208,7 +208,7 @@ if (process.env.NODE_ENV !== "production") {
 export function getSquadsMultisigProgramErrorMessage(
   code: SquadsMultisigProgramError,
 ): string {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env["NODE_ENV"] !== "production") {
     return (
       squadsMultisigProgramErrorMessages as Record<
         SquadsMultisigProgramError,

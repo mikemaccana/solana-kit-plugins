@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -31,14 +33,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const CLOSE_TASK_QUEUE_V0_DISCRIMINATOR = new Uint8Array([
-  196, 228, 35, 71, 131, 69, 175, 176,
-]);
+export const CLOSE_TASK_QUEUE_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([196, 228, 35, 71, 131, 69, 175, 176]);
 
-export function getCloseTaskQueueV0DiscriminatorBytes() {
+export function getCloseTaskQueueV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     CLOSE_TASK_QUEUE_V0_DISCRIMINATOR,
   );
@@ -184,7 +188,7 @@ export function getCloseTaskQueueV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -196,13 +200,13 @@ export function getCloseTaskQueueV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.rentRefund),
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.updateAuthority),
-      getAccountMeta(accounts.tuktukConfig),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.taskQueueNameMapping),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("rentRefund", accounts.rentRefund),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("updateAuthority", accounts.updateAuthority),
+      getAccountMeta("tuktukConfig", accounts.tuktukConfig),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("taskQueueNameMapping", accounts.taskQueueNameMapping),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getCloseTaskQueueV0InstructionDataEncoder().encode({}),
     programAddress,
@@ -244,8 +248,13 @@ export function parseCloseTaskQueueV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedCloseTaskQueueV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 7) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 7,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

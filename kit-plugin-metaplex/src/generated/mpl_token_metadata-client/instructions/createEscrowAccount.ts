@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -29,12 +31,15 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const CREATE_ESCROW_ACCOUNT_DISCRIMINATOR = 38;
 
-export function getCreateEscrowAccountDiscriminatorBytes() {
+export function getCreateEscrowAccountDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(CREATE_ESCROW_ACCOUNT_DISCRIMINATOR);
 }
 
@@ -205,7 +210,7 @@ export function getCreateEscrowAccountInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -221,15 +226,15 @@ export function getCreateEscrowAccountInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.escrow),
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.tokenAccount),
-      getAccountMeta(accounts.edition),
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.sysvarInstructions),
-      getAccountMeta(accounts.authority),
+      getAccountMeta("escrow", accounts.escrow),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("tokenAccount", accounts.tokenAccount),
+      getAccountMeta("edition", accounts.edition),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("sysvarInstructions", accounts.sysvarInstructions),
+      getAccountMeta("authority", accounts.authority),
     ],
     data: getCreateEscrowAccountInstructionDataEncoder().encode({}),
     programAddress,
@@ -284,8 +289,13 @@ export function parseCreateEscrowAccountInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedCreateEscrowAccountInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 9) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 9,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

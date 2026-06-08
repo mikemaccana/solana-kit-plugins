@@ -10,12 +10,12 @@ import {
   combineCodec,
   fixDecoderSize,
   fixEncoderSize,
-  getAddressEncoder,
   getBytesDecoder,
   getBytesEncoder,
-  getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type Address,
@@ -29,18 +29,18 @@ import {
   type ReadonlyUint8Array,
   type WritableAccount,
 } from "@solana/kit";
-import { CRON_PROGRAM_ADDRESS } from "../programs";
 import {
-  expectAddress,
   getAccountMetaFactory,
-  type ResolvedAccount,
-} from "../shared";
+  getAddressFromResolvedInstructionAccount,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
+import { findTaskReturnAccount1Pda, findTaskReturnAccount2Pda } from "../pdas";
+import { CRON_PROGRAM_ADDRESS } from "../programs";
 
-export const QUEUE_CRON_TASKS_V0_DISCRIMINATOR = new Uint8Array([
-  189, 88, 205, 111, 249, 161, 241, 211,
-]);
+export const QUEUE_CRON_TASKS_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([189, 88, 205, 111, 249, 161, 241, 211]);
 
-export function getQueueCronTasksV0DiscriminatorBytes() {
+export function getQueueCronTasksV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     QUEUE_CRON_TASKS_V0_DISCRIMINATOR,
   );
@@ -166,36 +166,24 @@ export async function getQueueCronTasksV0InstructionAsync<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
   if (!accounts.taskReturnAccount1.value) {
-    accounts.taskReturnAccount1.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([
-            116, 97, 115, 107, 95, 114, 101, 116, 117, 114, 110, 95, 97, 99, 99,
-            111, 117, 110, 116, 95, 49,
-          ]),
-        ),
-        getAddressEncoder().encode(expectAddress(accounts.cronJob.value)),
-      ],
+    accounts.taskReturnAccount1.value = await findTaskReturnAccount1Pda({
+      cronJob: getAddressFromResolvedInstructionAccount(
+        "cronJob",
+        accounts.cronJob.value,
+      ),
     });
   }
   if (!accounts.taskReturnAccount2.value) {
-    accounts.taskReturnAccount2.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([
-            116, 97, 115, 107, 95, 114, 101, 116, 117, 114, 110, 95, 97, 99, 99,
-            111, 117, 110, 116, 95, 50,
-          ]),
-        ),
-        getAddressEncoder().encode(expectAddress(accounts.cronJob.value)),
-      ],
+    accounts.taskReturnAccount2.value = await findTaskReturnAccount2Pda({
+      cronJob: getAddressFromResolvedInstructionAccount(
+        "cronJob",
+        accounts.cronJob.value,
+      ),
     });
   }
   if (!accounts.systemProgram.value) {
@@ -206,11 +194,11 @@ export async function getQueueCronTasksV0InstructionAsync<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.cronJob),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.taskReturnAccount1),
-      getAccountMeta(accounts.taskReturnAccount2),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("cronJob", accounts.cronJob),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("taskReturnAccount1", accounts.taskReturnAccount1),
+      getAccountMeta("taskReturnAccount2", accounts.taskReturnAccount2),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getQueueCronTasksV0InstructionDataEncoder().encode({}),
     programAddress,
@@ -281,7 +269,7 @@ export function getQueueCronTasksV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -293,11 +281,11 @@ export function getQueueCronTasksV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.cronJob),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.taskReturnAccount1),
-      getAccountMeta(accounts.taskReturnAccount2),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("cronJob", accounts.cronJob),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("taskReturnAccount1", accounts.taskReturnAccount1),
+      getAccountMeta("taskReturnAccount2", accounts.taskReturnAccount2),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getQueueCronTasksV0InstructionDataEncoder().encode({}),
     programAddress,
@@ -335,8 +323,13 @@ export function parseQueueCronTasksV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedQueueCronTasksV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

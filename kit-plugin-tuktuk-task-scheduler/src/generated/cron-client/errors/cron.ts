@@ -42,7 +42,7 @@ export type CronError =
   | typeof CRON_ERROR__TRANSACTION_ALREADY_EXISTS;
 
 let cronErrorMessages: Record<CronError, string> | undefined;
-if (process.env.NODE_ENV !== "production") {
+if (process.env["NODE_ENV"] !== "production") {
   cronErrorMessages = {
     [CRON_ERROR__CRON_JOB_HAS_TRANSACTIONS]: `Cron job has transactions`,
     [CRON_ERROR__INSUFFICIENT_FUNDS]: `Insufficient funds`,
@@ -56,7 +56,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export function getCronErrorMessage(code: CronError): string {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env["NODE_ENV"] !== "production") {
     return (cronErrorMessages as Record<CronError, string>)[code];
   }
 

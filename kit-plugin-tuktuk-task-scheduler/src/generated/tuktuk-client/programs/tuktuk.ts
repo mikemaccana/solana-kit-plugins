@@ -7,13 +7,81 @@
  */
 
 import {
+  assertIsInstructionWithAccounts,
   containsBytes,
+  extendClient,
   fixEncoderSize,
   getBytesEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_ACCOUNT,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+  SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+  SolanaError,
   type Address,
+  type ClientWithPayer,
+  type ClientWithRpc,
+  type ClientWithTransactionPlanning,
+  type ClientWithTransactionSending,
+  type GetAccountInfoApi,
+  type GetMultipleAccountsApi,
+  type Instruction,
+  type InstructionWithData,
   type ReadonlyUint8Array,
 } from "@solana/kit";
 import {
+  addSelfFetchFunctions,
+  addSelfPlanAndSendFunctions,
+  type SelfFetchFunctions,
+  type SelfPlanAndSendFunctions,
+} from "@solana/program-client-core";
+import {
+  getRemoteTaskTransactionV0Codec,
+  getTaskQueueAuthorityV0Codec,
+  getTaskQueueNameMappingV0Codec,
+  getTaskQueueV0Codec,
+  getTaskV0Codec,
+  getTuktukConfigV0Codec,
+  type RemoteTaskTransactionV0,
+  type RemoteTaskTransactionV0Args,
+  type TaskQueueAuthorityV0,
+  type TaskQueueAuthorityV0Args,
+  type TaskQueueNameMappingV0,
+  type TaskQueueNameMappingV0Args,
+  type TaskQueueV0,
+  type TaskQueueV0Args,
+  type TaskV0,
+  type TaskV0Args,
+  type TuktukConfigV0,
+  type TuktukConfigV0Args,
+} from "../accounts";
+import {
+  getAddQueueAuthorityV0InstructionAsync,
+  getCloseTaskQueueV0Instruction,
+  getDequeueTaskV0InstructionAsync,
+  getDummyIxInstruction,
+  getInitializeTaskQueueV0Instruction,
+  getInitializeTuktukConfigV0InstructionAsync,
+  getQueueTaskV0InstructionAsync,
+  getRemoveQueueAuthorityV0InstructionAsync,
+  getReturnTasksV0Instruction,
+  getRunTaskV0Instruction,
+  getUpdateTaskQueueV0Instruction,
+  parseAddQueueAuthorityV0Instruction,
+  parseCloseTaskQueueV0Instruction,
+  parseDequeueTaskV0Instruction,
+  parseDummyIxInstruction,
+  parseInitializeTaskQueueV0Instruction,
+  parseInitializeTuktukConfigV0Instruction,
+  parseQueueTaskV0Instruction,
+  parseRemoveQueueAuthorityV0Instruction,
+  parseReturnTasksV0Instruction,
+  parseRunTaskV0Instruction,
+  parseUpdateTaskQueueV0Instruction,
+  type AddQueueAuthorityV0AsyncInput,
+  type CloseTaskQueueV0Input,
+  type DequeueTaskV0AsyncInput,
+  type DummyIxInput,
+  type InitializeTaskQueueV0Input,
+  type InitializeTuktukConfigV0AsyncInput,
   type ParsedAddQueueAuthorityV0Instruction,
   type ParsedCloseTaskQueueV0Instruction,
   type ParsedDequeueTaskV0Instruction,
@@ -25,7 +93,13 @@ import {
   type ParsedReturnTasksV0Instruction,
   type ParsedRunTaskV0Instruction,
   type ParsedUpdateTaskQueueV0Instruction,
+  type QueueTaskV0AsyncInput,
+  type RemoveQueueAuthorityV0AsyncInput,
+  type ReturnTasksV0Input,
+  type RunTaskV0Input,
+  type UpdateTaskQueueV0Input,
 } from "../instructions";
+import { findTaskQueueAuthorityPda, findTuktukConfigPda } from "../pdas";
 
 export const TUKTUK_PROGRAM_ADDRESS =
   "tuktukUrfhXT6ZT77QTU8RQtvgL967uRuVagWF57zVA" as Address<"tuktukUrfhXT6ZT77QTU8RQtvgL967uRuVagWF57zVA">;
@@ -109,8 +183,9 @@ export function identifyTuktukAccount(
   ) {
     return TuktukAccount.TuktukConfigV0;
   }
-  throw new Error(
-    "The provided account could not be identified as a tuktuk account.",
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_ACCOUNT,
+    { accountData: data, programName: "tuktuk" },
   );
 }
 
@@ -253,8 +328,9 @@ export function identifyTuktukInstruction(
   ) {
     return TuktukInstruction.UpdateTaskQueueV0;
   }
-  throw new Error(
-    "The provided instruction could not be identified as a tuktuk instruction.",
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+    { instructionData: data, programName: "tuktuk" },
   );
 }
 
@@ -294,3 +370,280 @@ export type ParsedTuktukInstruction<
   | ({
       instructionType: TuktukInstruction.UpdateTaskQueueV0;
     } & ParsedUpdateTaskQueueV0Instruction<TProgram>);
+
+export function parseTuktukInstruction<TProgram extends string>(
+  instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
+): ParsedTuktukInstruction<TProgram> {
+  const instructionType = identifyTuktukInstruction(instruction);
+  switch (instructionType) {
+    case TuktukInstruction.AddQueueAuthorityV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.AddQueueAuthorityV0,
+        ...parseAddQueueAuthorityV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.CloseTaskQueueV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.CloseTaskQueueV0,
+        ...parseCloseTaskQueueV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.DequeueTaskV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.DequeueTaskV0,
+        ...parseDequeueTaskV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.DummyIx: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.DummyIx,
+        ...parseDummyIxInstruction(instruction),
+      };
+    }
+    case TuktukInstruction.InitializeTaskQueueV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.InitializeTaskQueueV0,
+        ...parseInitializeTaskQueueV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.InitializeTuktukConfigV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.InitializeTuktukConfigV0,
+        ...parseInitializeTuktukConfigV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.QueueTaskV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.QueueTaskV0,
+        ...parseQueueTaskV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.RemoveQueueAuthorityV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.RemoveQueueAuthorityV0,
+        ...parseRemoveQueueAuthorityV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.ReturnTasksV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.ReturnTasksV0,
+        ...parseReturnTasksV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.RunTaskV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.RunTaskV0,
+        ...parseRunTaskV0Instruction(instruction),
+      };
+    }
+    case TuktukInstruction.UpdateTaskQueueV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: TuktukInstruction.UpdateTaskQueueV0,
+        ...parseUpdateTaskQueueV0Instruction(instruction),
+      };
+    }
+    default:
+      throw new SolanaError(
+        SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+        { instructionType: instructionType as string, programName: "tuktuk" },
+      );
+  }
+}
+
+export type TuktukPlugin = {
+  accounts: TuktukPluginAccounts;
+  instructions: TuktukPluginInstructions;
+  pdas: TuktukPluginPdas;
+};
+
+export type TuktukPluginAccounts = {
+  remoteTaskTransactionV0: ReturnType<typeof getRemoteTaskTransactionV0Codec> &
+    SelfFetchFunctions<RemoteTaskTransactionV0Args, RemoteTaskTransactionV0>;
+  taskQueueAuthorityV0: ReturnType<typeof getTaskQueueAuthorityV0Codec> &
+    SelfFetchFunctions<TaskQueueAuthorityV0Args, TaskQueueAuthorityV0>;
+  taskQueueNameMappingV0: ReturnType<typeof getTaskQueueNameMappingV0Codec> &
+    SelfFetchFunctions<TaskQueueNameMappingV0Args, TaskQueueNameMappingV0>;
+  taskQueueV0: ReturnType<typeof getTaskQueueV0Codec> &
+    SelfFetchFunctions<TaskQueueV0Args, TaskQueueV0>;
+  taskV0: ReturnType<typeof getTaskV0Codec> &
+    SelfFetchFunctions<TaskV0Args, TaskV0>;
+  tuktukConfigV0: ReturnType<typeof getTuktukConfigV0Codec> &
+    SelfFetchFunctions<TuktukConfigV0Args, TuktukConfigV0>;
+};
+
+export type TuktukPluginInstructions = {
+  addQueueAuthorityV0: (
+    input: MakeOptional<AddQueueAuthorityV0AsyncInput, "payer">,
+  ) => ReturnType<typeof getAddQueueAuthorityV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  closeTaskQueueV0: (
+    input: MakeOptional<CloseTaskQueueV0Input, "payer">,
+  ) => ReturnType<typeof getCloseTaskQueueV0Instruction> &
+    SelfPlanAndSendFunctions;
+  dequeueTaskV0: (
+    input: DequeueTaskV0AsyncInput,
+  ) => ReturnType<typeof getDequeueTaskV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  dummyIx: (
+    input: DummyIxInput,
+  ) => ReturnType<typeof getDummyIxInstruction> & SelfPlanAndSendFunctions;
+  initializeTaskQueueV0: (
+    input: MakeOptional<InitializeTaskQueueV0Input, "payer">,
+  ) => ReturnType<typeof getInitializeTaskQueueV0Instruction> &
+    SelfPlanAndSendFunctions;
+  initializeTuktukConfigV0: (
+    input: MakeOptional<InitializeTuktukConfigV0AsyncInput, "payer">,
+  ) => ReturnType<typeof getInitializeTuktukConfigV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  queueTaskV0: (
+    input: MakeOptional<QueueTaskV0AsyncInput, "payer">,
+  ) => ReturnType<typeof getQueueTaskV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  removeQueueAuthorityV0: (
+    input: MakeOptional<RemoveQueueAuthorityV0AsyncInput, "payer">,
+  ) => ReturnType<typeof getRemoveQueueAuthorityV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  returnTasksV0: (
+    input: ReturnTasksV0Input,
+  ) => ReturnType<typeof getReturnTasksV0Instruction> &
+    SelfPlanAndSendFunctions;
+  runTaskV0: (
+    input: RunTaskV0Input,
+  ) => ReturnType<typeof getRunTaskV0Instruction> & SelfPlanAndSendFunctions;
+  updateTaskQueueV0: (
+    input: MakeOptional<UpdateTaskQueueV0Input, "payer">,
+  ) => ReturnType<typeof getUpdateTaskQueueV0Instruction> &
+    SelfPlanAndSendFunctions;
+};
+
+export type TuktukPluginPdas = {
+  taskQueueAuthority: typeof findTaskQueueAuthorityPda;
+  tuktukConfig: typeof findTuktukConfigPda;
+};
+
+export type TuktukPluginRequirements = ClientWithRpc<
+  GetAccountInfoApi & GetMultipleAccountsApi
+> &
+  ClientWithPayer &
+  ClientWithTransactionPlanning &
+  ClientWithTransactionSending;
+
+export function tuktukProgram() {
+  return <T extends TuktukPluginRequirements>(
+    client: T,
+  ): Omit<T, "tuktuk"> & { tuktuk: TuktukPlugin } => {
+    return extendClient(client, {
+      tuktuk: <TuktukPlugin>{
+        accounts: {
+          remoteTaskTransactionV0: addSelfFetchFunctions(
+            client,
+            getRemoteTaskTransactionV0Codec(),
+          ),
+          taskQueueAuthorityV0: addSelfFetchFunctions(
+            client,
+            getTaskQueueAuthorityV0Codec(),
+          ),
+          taskQueueNameMappingV0: addSelfFetchFunctions(
+            client,
+            getTaskQueueNameMappingV0Codec(),
+          ),
+          taskQueueV0: addSelfFetchFunctions(client, getTaskQueueV0Codec()),
+          taskV0: addSelfFetchFunctions(client, getTaskV0Codec()),
+          tuktukConfigV0: addSelfFetchFunctions(
+            client,
+            getTuktukConfigV0Codec(),
+          ),
+        },
+        instructions: {
+          addQueueAuthorityV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getAddQueueAuthorityV0InstructionAsync({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          closeTaskQueueV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getCloseTaskQueueV0Instruction({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          dequeueTaskV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getDequeueTaskV0InstructionAsync(input),
+            ),
+          dummyIx: (input) =>
+            addSelfPlanAndSendFunctions(client, getDummyIxInstruction(input)),
+          initializeTaskQueueV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getInitializeTaskQueueV0Instruction({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          initializeTuktukConfigV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getInitializeTuktukConfigV0InstructionAsync({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          queueTaskV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getQueueTaskV0InstructionAsync({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          removeQueueAuthorityV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getRemoveQueueAuthorityV0InstructionAsync({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          returnTasksV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getReturnTasksV0Instruction(input),
+            ),
+          runTaskV0: (input) =>
+            addSelfPlanAndSendFunctions(client, getRunTaskV0Instruction(input)),
+          updateTaskQueueV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getUpdateTaskQueueV0Instruction({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+        },
+        pdas: {
+          taskQueueAuthority: findTaskQueueAuthorityPda,
+          tuktukConfig: findTuktukConfigPda,
+        },
+      },
+    });
+  };
+}
+
+type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

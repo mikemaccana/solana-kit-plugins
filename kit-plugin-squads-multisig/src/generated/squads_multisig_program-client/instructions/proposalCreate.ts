@@ -18,6 +18,8 @@ import {
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -35,14 +37,17 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const PROPOSAL_CREATE_DISCRIMINATOR = new Uint8Array([
-  220, 60, 73, 224, 30, 108, 79, 159,
-]);
+export const PROPOSAL_CREATE_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array(
+  [220, 60, 73, 224, 30, 108, 79, 159],
+);
 
-export function getProposalCreateDiscriminatorBytes() {
+export function getProposalCreateDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     PROPOSAL_CREATE_DISCRIMINATOR,
   );
@@ -183,7 +188,7 @@ export function getProposalCreateInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -198,11 +203,11 @@ export function getProposalCreateInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.proposal),
-      getAccountMeta(accounts.creator),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("proposal", accounts.proposal),
+      getAccountMeta("creator", accounts.creator),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getProposalCreateInstructionDataEncoder().encode(
       args as ProposalCreateInstructionDataArgs,
@@ -244,8 +249,13 @@ export function parseProposalCreateInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedProposalCreateInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

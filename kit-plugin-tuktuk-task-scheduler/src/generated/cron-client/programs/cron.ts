@@ -7,20 +7,84 @@
  */
 
 import {
+  assertIsInstructionWithAccounts,
   containsBytes,
+  extendClient,
   fixEncoderSize,
   getBytesEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_ACCOUNT,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+  SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+  SolanaError,
   type Address,
+  type ClientWithPayer,
+  type ClientWithRpc,
+  type ClientWithTransactionPlanning,
+  type ClientWithTransactionSending,
+  type GetAccountInfoApi,
+  type GetMultipleAccountsApi,
+  type Instruction,
+  type InstructionWithData,
   type ReadonlyUint8Array,
 } from "@solana/kit";
 import {
+  addSelfFetchFunctions,
+  addSelfPlanAndSendFunctions,
+  type SelfFetchFunctions,
+  type SelfPlanAndSendFunctions,
+} from "@solana/program-client-core";
+import {
+  getCronJobNameMappingV0Codec,
+  getCronJobTransactionV0Codec,
+  getCronJobV0Codec,
+  getTaskQueueAuthorityV0Codec,
+  getTaskQueueV0Codec,
+  getUserCronJobsV0Codec,
+  type CronJobNameMappingV0,
+  type CronJobNameMappingV0Args,
+  type CronJobTransactionV0,
+  type CronJobTransactionV0Args,
+  type CronJobV0,
+  type CronJobV0Args,
+  type TaskQueueAuthorityV0,
+  type TaskQueueAuthorityV0Args,
+  type TaskQueueV0,
+  type TaskQueueV0Args,
+  type UserCronJobsV0,
+  type UserCronJobsV0Args,
+} from "../accounts";
+import {
+  getAddCronTransactionV0Instruction,
+  getCloseCronJobV0InstructionAsync,
+  getInitializeCronJobV0InstructionAsync,
+  getQueueCronTasksV0InstructionAsync,
+  getRemoveCronTransactionV0Instruction,
+  getRequeueCronTaskV0InstructionAsync,
+  parseAddCronTransactionV0Instruction,
+  parseCloseCronJobV0Instruction,
+  parseInitializeCronJobV0Instruction,
+  parseQueueCronTasksV0Instruction,
+  parseRemoveCronTransactionV0Instruction,
+  parseRequeueCronTaskV0Instruction,
+  type AddCronTransactionV0Input,
+  type CloseCronJobV0AsyncInput,
+  type InitializeCronJobV0AsyncInput,
   type ParsedAddCronTransactionV0Instruction,
   type ParsedCloseCronJobV0Instruction,
   type ParsedInitializeCronJobV0Instruction,
   type ParsedQueueCronTasksV0Instruction,
   type ParsedRemoveCronTransactionV0Instruction,
   type ParsedRequeueCronTaskV0Instruction,
+  type QueueCronTasksV0AsyncInput,
+  type RemoveCronTransactionV0Input,
+  type RequeueCronTaskV0AsyncInput,
 } from "../instructions";
+import {
+  findTaskQueueAuthorityPda,
+  findTaskReturnAccount1Pda,
+  findTaskReturnAccount2Pda,
+  findUserCronJobsPda,
+} from "../pdas";
 
 export const CRON_PROGRAM_ADDRESS =
   "cronAjRZnJn3MTP3B9kE62NWDrjSuAPVXf9c4hu4grM" as Address<"cronAjRZnJn3MTP3B9kE62NWDrjSuAPVXf9c4hu4grM">;
@@ -104,8 +168,9 @@ export function identifyCronAccount(
   ) {
     return CronAccount.UserCronJobsV0;
   }
-  throw new Error(
-    "The provided account could not be identified as a cron account.",
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_ACCOUNT,
+    { accountData: data, programName: "cron" },
   );
 }
 
@@ -188,8 +253,9 @@ export function identifyCronInstruction(
   ) {
     return CronInstruction.RequeueCronTaskV0;
   }
-  throw new Error(
-    "The provided instruction could not be identified as a cron instruction.",
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+    { instructionData: data, programName: "cron" },
   );
 }
 
@@ -214,3 +280,200 @@ export type ParsedCronInstruction<
   | ({
       instructionType: CronInstruction.RequeueCronTaskV0;
     } & ParsedRequeueCronTaskV0Instruction<TProgram>);
+
+export function parseCronInstruction<TProgram extends string>(
+  instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
+): ParsedCronInstruction<TProgram> {
+  const instructionType = identifyCronInstruction(instruction);
+  switch (instructionType) {
+    case CronInstruction.AddCronTransactionV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: CronInstruction.AddCronTransactionV0,
+        ...parseAddCronTransactionV0Instruction(instruction),
+      };
+    }
+    case CronInstruction.CloseCronJobV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: CronInstruction.CloseCronJobV0,
+        ...parseCloseCronJobV0Instruction(instruction),
+      };
+    }
+    case CronInstruction.InitializeCronJobV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: CronInstruction.InitializeCronJobV0,
+        ...parseInitializeCronJobV0Instruction(instruction),
+      };
+    }
+    case CronInstruction.QueueCronTasksV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: CronInstruction.QueueCronTasksV0,
+        ...parseQueueCronTasksV0Instruction(instruction),
+      };
+    }
+    case CronInstruction.RemoveCronTransactionV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: CronInstruction.RemoveCronTransactionV0,
+        ...parseRemoveCronTransactionV0Instruction(instruction),
+      };
+    }
+    case CronInstruction.RequeueCronTaskV0: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: CronInstruction.RequeueCronTaskV0,
+        ...parseRequeueCronTaskV0Instruction(instruction),
+      };
+    }
+    default:
+      throw new SolanaError(
+        SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+        { instructionType: instructionType as string, programName: "cron" },
+      );
+  }
+}
+
+export type CronPlugin = {
+  accounts: CronPluginAccounts;
+  instructions: CronPluginInstructions;
+  pdas: CronPluginPdas;
+};
+
+export type CronPluginAccounts = {
+  cronJobNameMappingV0: ReturnType<typeof getCronJobNameMappingV0Codec> &
+    SelfFetchFunctions<CronJobNameMappingV0Args, CronJobNameMappingV0>;
+  cronJobTransactionV0: ReturnType<typeof getCronJobTransactionV0Codec> &
+    SelfFetchFunctions<CronJobTransactionV0Args, CronJobTransactionV0>;
+  cronJobV0: ReturnType<typeof getCronJobV0Codec> &
+    SelfFetchFunctions<CronJobV0Args, CronJobV0>;
+  taskQueueAuthorityV0: ReturnType<typeof getTaskQueueAuthorityV0Codec> &
+    SelfFetchFunctions<TaskQueueAuthorityV0Args, TaskQueueAuthorityV0>;
+  taskQueueV0: ReturnType<typeof getTaskQueueV0Codec> &
+    SelfFetchFunctions<TaskQueueV0Args, TaskQueueV0>;
+  userCronJobsV0: ReturnType<typeof getUserCronJobsV0Codec> &
+    SelfFetchFunctions<UserCronJobsV0Args, UserCronJobsV0>;
+};
+
+export type CronPluginInstructions = {
+  addCronTransactionV0: (
+    input: MakeOptional<AddCronTransactionV0Input, "payer">,
+  ) => ReturnType<typeof getAddCronTransactionV0Instruction> &
+    SelfPlanAndSendFunctions;
+  closeCronJobV0: (
+    input: CloseCronJobV0AsyncInput,
+  ) => ReturnType<typeof getCloseCronJobV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  initializeCronJobV0: (
+    input: MakeOptional<InitializeCronJobV0AsyncInput, "payer">,
+  ) => ReturnType<typeof getInitializeCronJobV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  queueCronTasksV0: (
+    input: QueueCronTasksV0AsyncInput,
+  ) => ReturnType<typeof getQueueCronTasksV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+  removeCronTransactionV0: (
+    input: RemoveCronTransactionV0Input,
+  ) => ReturnType<typeof getRemoveCronTransactionV0Instruction> &
+    SelfPlanAndSendFunctions;
+  requeueCronTaskV0: (
+    input: MakeOptional<RequeueCronTaskV0AsyncInput, "payer">,
+  ) => ReturnType<typeof getRequeueCronTaskV0InstructionAsync> &
+    SelfPlanAndSendFunctions;
+};
+
+export type CronPluginPdas = {
+  taskReturnAccount1: typeof findTaskReturnAccount1Pda;
+  taskReturnAccount2: typeof findTaskReturnAccount2Pda;
+  taskQueueAuthority: typeof findTaskQueueAuthorityPda;
+  userCronJobs: typeof findUserCronJobsPda;
+};
+
+export type CronPluginRequirements = ClientWithRpc<
+  GetAccountInfoApi & GetMultipleAccountsApi
+> &
+  ClientWithPayer &
+  ClientWithTransactionPlanning &
+  ClientWithTransactionSending;
+
+export function cronProgram() {
+  return <T extends CronPluginRequirements>(
+    client: T,
+  ): Omit<T, "cron"> & { cron: CronPlugin } => {
+    return extendClient(client, {
+      cron: <CronPlugin>{
+        accounts: {
+          cronJobNameMappingV0: addSelfFetchFunctions(
+            client,
+            getCronJobNameMappingV0Codec(),
+          ),
+          cronJobTransactionV0: addSelfFetchFunctions(
+            client,
+            getCronJobTransactionV0Codec(),
+          ),
+          cronJobV0: addSelfFetchFunctions(client, getCronJobV0Codec()),
+          taskQueueAuthorityV0: addSelfFetchFunctions(
+            client,
+            getTaskQueueAuthorityV0Codec(),
+          ),
+          taskQueueV0: addSelfFetchFunctions(client, getTaskQueueV0Codec()),
+          userCronJobsV0: addSelfFetchFunctions(
+            client,
+            getUserCronJobsV0Codec(),
+          ),
+        },
+        instructions: {
+          addCronTransactionV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getAddCronTransactionV0Instruction({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          closeCronJobV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getCloseCronJobV0InstructionAsync(input),
+            ),
+          initializeCronJobV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getInitializeCronJobV0InstructionAsync({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+          queueCronTasksV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getQueueCronTasksV0InstructionAsync(input),
+            ),
+          removeCronTransactionV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getRemoveCronTransactionV0Instruction(input),
+            ),
+          requeueCronTaskV0: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getRequeueCronTaskV0InstructionAsync({
+                ...input,
+                payer: input.payer ?? client.payer,
+              }),
+            ),
+        },
+        pdas: {
+          taskReturnAccount1: findTaskReturnAccount1Pda,
+          taskReturnAccount2: findTaskReturnAccount2Pda,
+          taskQueueAuthority: findTaskQueueAuthorityPda,
+          userCronJobs: findUserCronJobsPda,
+        },
+      },
+    });
+  };
+}
+
+type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

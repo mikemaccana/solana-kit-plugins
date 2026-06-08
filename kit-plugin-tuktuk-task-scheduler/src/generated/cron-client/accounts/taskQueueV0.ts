@@ -51,11 +51,11 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const TASK_QUEUE_V0_DISCRIMINATOR = new Uint8Array([
+export const TASK_QUEUE_V0_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   150, 24, 232, 159, 105, 32, 161, 17,
 ]);
 
-export function getTaskQueueV0DiscriminatorBytes() {
+export function getTaskQueueV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TASK_QUEUE_V0_DISCRIMINATOR,
   );

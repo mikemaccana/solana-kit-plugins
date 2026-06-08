@@ -47,11 +47,10 @@ import {
   type ConfigActionArgs,
 } from "../types";
 
-export const CONFIG_TRANSACTION_DISCRIMINATOR = new Uint8Array([
-  94, 8, 4, 35, 113, 139, 139, 112,
-]);
+export const CONFIG_TRANSACTION_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([94, 8, 4, 35, 113, 139, 139, 112]);
 
-export function getConfigTransactionDiscriminatorBytes() {
+export function getConfigTransactionDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     CONFIG_TRANSACTION_DISCRIMINATOR,
   );

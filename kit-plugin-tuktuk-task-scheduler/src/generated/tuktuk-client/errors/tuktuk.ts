@@ -50,11 +50,31 @@ export const TUKTUK_ERROR__DUMMY_INSTRUCTION = 0x177f; // 6015
 export const TUKTUK_ERROR__INVALID_DESCRIPTION_LENGTH = 0x1780; // 6016
 /** TaskQueueHasQueueAuthorities: Task queue has queue authorities */
 export const TUKTUK_ERROR__TASK_QUEUE_HAS_QUEUE_AUTHORITIES = 0x1781; // 6017
+/** FreeTasksGreaterThanCapacity: Free tasks must be less than the capacity of the task queue */
+export const TUKTUK_ERROR__FREE_TASKS_GREATER_THAN_CAPACITY = 0x1782; // 6018
+/** TaskIdAlreadyInUse: Task ID is already in use */
+export const TUKTUK_ERROR__TASK_ID_ALREADY_IN_USE = 0x1783; // 6019
+/** DuplicateTaskIds: Duplicate task IDs provided */
+export const TUKTUK_ERROR__DUPLICATE_TASK_IDS = 0x1784; // 6020
+/** MismatchedFreeTaskCounts: Number of free task IDs does not match number of free task accounts */
+export const TUKTUK_ERROR__MISMATCHED_FREE_TASK_COUNTS = 0x1785; // 6021
+/** TooManyReturnedTasks: Too many returned tasks, increase free tasks count */
+export const TUKTUK_ERROR__TOO_MANY_RETURNED_TASKS = 0x1786; // 6022
+/** MalformedRemoteTransaction: Malformed remote transaction */
+export const TUKTUK_ERROR__MALFORMED_REMOTE_TRANSACTION = 0x1787; // 6023
+/** InvalidAccountKey: Invalid account key */
+export const TUKTUK_ERROR__INVALID_ACCOUNT_KEY = 0x1788; // 6024
+/** InvalidCrankReward: Invalid crank reward */
+export const TUKTUK_ERROR__INVALID_CRANK_REWARD = 0x1789; // 6025
 
 export type TuktukError =
   | typeof TUKTUK_ERROR__DUMMY_INSTRUCTION
+  | typeof TUKTUK_ERROR__DUPLICATE_TASK_IDS
   | typeof TUKTUK_ERROR__FREE_TASK_ACCOUNT_NOT_EMPTY
+  | typeof TUKTUK_ERROR__FREE_TASKS_GREATER_THAN_CAPACITY
   | typeof TUKTUK_ERROR__INVALID_ACCOUNT
+  | typeof TUKTUK_ERROR__INVALID_ACCOUNT_KEY
+  | typeof TUKTUK_ERROR__INVALID_CRANK_REWARD
   | typeof TUKTUK_ERROR__INVALID_DATA_INCREASE
   | typeof TUKTUK_ERROR__INVALID_DESCRIPTION_LENGTH
   | typeof TUKTUK_ERROR__INVALID_RENT_REFUND
@@ -64,19 +84,27 @@ export type TuktukError =
   | typeof TUKTUK_ERROR__INVALID_TRANSACTION_SOURCE
   | typeof TUKTUK_ERROR__INVALID_VERIFICATION_ACCOUNTS_HASH
   | typeof TUKTUK_ERROR__INVALID_WRITABLE
+  | typeof TUKTUK_ERROR__MALFORMED_REMOTE_TRANSACTION
+  | typeof TUKTUK_ERROR__MISMATCHED_FREE_TASK_COUNTS
   | typeof TUKTUK_ERROR__SIG_VERIFICATION_FAILED
   | typeof TUKTUK_ERROR__TASK_ALREADY_EXISTS
+  | typeof TUKTUK_ERROR__TASK_ID_ALREADY_IN_USE
   | typeof TUKTUK_ERROR__TASK_NOT_READY
   | typeof TUKTUK_ERROR__TASK_QUEUE_HAS_QUEUE_AUTHORITIES
   | typeof TUKTUK_ERROR__TASK_QUEUE_INSUFFICIENT_FUNDS
-  | typeof TUKTUK_ERROR__TASK_QUEUE_NOT_EMPTY;
+  | typeof TUKTUK_ERROR__TASK_QUEUE_NOT_EMPTY
+  | typeof TUKTUK_ERROR__TOO_MANY_RETURNED_TASKS;
 
 let tuktukErrorMessages: Record<TuktukError, string> | undefined;
-if (process.env.NODE_ENV !== "production") {
+if (process.env["NODE_ENV"] !== "production") {
   tuktukErrorMessages = {
     [TUKTUK_ERROR__DUMMY_INSTRUCTION]: `Don't use the dummy instruction`,
+    [TUKTUK_ERROR__DUPLICATE_TASK_IDS]: `Duplicate task IDs provided`,
     [TUKTUK_ERROR__FREE_TASK_ACCOUNT_NOT_EMPTY]: `Free task account not empty`,
+    [TUKTUK_ERROR__FREE_TASKS_GREATER_THAN_CAPACITY]: `Free tasks must be less than the capacity of the task queue`,
     [TUKTUK_ERROR__INVALID_ACCOUNT]: `Account mismatched account in definition`,
+    [TUKTUK_ERROR__INVALID_ACCOUNT_KEY]: `Invalid account key`,
+    [TUKTUK_ERROR__INVALID_CRANK_REWARD]: `Invalid crank reward`,
     [TUKTUK_ERROR__INVALID_DATA_INCREASE]: `Invalid data increase`,
     [TUKTUK_ERROR__INVALID_DESCRIPTION_LENGTH]: `Invalid description length`,
     [TUKTUK_ERROR__INVALID_RENT_REFUND]: `Invalid rent refund`,
@@ -86,17 +114,21 @@ if (process.env.NODE_ENV !== "production") {
     [TUKTUK_ERROR__INVALID_TRANSACTION_SOURCE]: `Invalid transaction source`,
     [TUKTUK_ERROR__INVALID_VERIFICATION_ACCOUNTS_HASH]: `Invalid task verification hash`,
     [TUKTUK_ERROR__INVALID_WRITABLE]: `Writable account mismatched account in definition`,
+    [TUKTUK_ERROR__MALFORMED_REMOTE_TRANSACTION]: `Malformed remote transaction`,
+    [TUKTUK_ERROR__MISMATCHED_FREE_TASK_COUNTS]: `Number of free task IDs does not match number of free task accounts`,
     [TUKTUK_ERROR__SIG_VERIFICATION_FAILED]: `Sig verification failed`,
     [TUKTUK_ERROR__TASK_ALREADY_EXISTS]: `Task already exists`,
+    [TUKTUK_ERROR__TASK_ID_ALREADY_IN_USE]: `Task ID is already in use`,
     [TUKTUK_ERROR__TASK_NOT_READY]: `Task not ready`,
     [TUKTUK_ERROR__TASK_QUEUE_HAS_QUEUE_AUTHORITIES]: `Task queue has queue authorities`,
     [TUKTUK_ERROR__TASK_QUEUE_INSUFFICIENT_FUNDS]: `Task queue insufficient funds`,
     [TUKTUK_ERROR__TASK_QUEUE_NOT_EMPTY]: `Task queue not empty`,
+    [TUKTUK_ERROR__TOO_MANY_RETURNED_TASKS]: `Too many returned tasks, increase free tasks count`,
   };
 }
 
 export function getTuktukErrorMessage(code: TuktukError): string {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env["NODE_ENV"] !== "production") {
     return (tuktukErrorMessages as Record<TuktukError, string>)[code];
   }
 

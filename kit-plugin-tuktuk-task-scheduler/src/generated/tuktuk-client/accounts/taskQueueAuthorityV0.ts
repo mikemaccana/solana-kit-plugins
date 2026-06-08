@@ -37,11 +37,10 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const TASK_QUEUE_AUTHORITY_V0_DISCRIMINATOR = new Uint8Array([
-  206, 37, 171, 34, 162, 191, 47, 50,
-]);
+export const TASK_QUEUE_AUTHORITY_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([206, 37, 171, 34, 162, 191, 47, 50]);
 
-export function getTaskQueueAuthorityV0DiscriminatorBytes() {
+export function getTaskQueueAuthorityV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TASK_QUEUE_AUTHORITY_V0_DISCRIMINATOR,
   );

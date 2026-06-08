@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type Address,
@@ -26,14 +28,17 @@ import {
   type ReadonlyUint8Array,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const DUMMY_IX_DISCRIMINATOR = new Uint8Array([
+export const DUMMY_IX_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   234, 95, 176, 185, 7, 42, 35, 159,
 ]);
 
-export function getDummyIxDiscriminatorBytes() {
+export function getDummyIxDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(DUMMY_IX_DISCRIMINATOR);
 }
 
@@ -99,12 +104,12 @@ export function getDummyIxInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
-    accounts: [getAccountMeta(accounts.dummy)],
+    accounts: [getAccountMeta("dummy", accounts.dummy)],
     data: getDummyIxInstructionDataEncoder().encode({}),
     programAddress,
   } as DummyIxInstruction<TProgramAddress, TAccountDummy>);
@@ -130,8 +135,13 @@ export function parseDummyIxInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedDummyIxInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 1) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 1,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

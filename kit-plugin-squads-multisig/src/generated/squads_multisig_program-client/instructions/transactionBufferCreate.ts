@@ -22,6 +22,8 @@ import {
   getU32Encoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -39,14 +41,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const TRANSACTION_BUFFER_CREATE_DISCRIMINATOR = new Uint8Array([
-  245, 201, 113, 108, 37, 63, 29, 89,
-]);
+export const TRANSACTION_BUFFER_CREATE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([245, 201, 113, 108, 37, 63, 29, 89]);
 
-export function getTransactionBufferCreateDiscriminatorBytes() {
+export function getTransactionBufferCreateDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TRANSACTION_BUFFER_CREATE_DISCRIMINATOR,
   );
@@ -214,7 +218,7 @@ export function getTransactionBufferCreateInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -229,11 +233,11 @@ export function getTransactionBufferCreateInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.transactionBuffer),
-      getAccountMeta(accounts.creator),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("transactionBuffer", accounts.transactionBuffer),
+      getAccountMeta("creator", accounts.creator),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getTransactionBufferCreateInstructionDataEncoder().encode(
       args as TransactionBufferCreateInstructionDataArgs,
@@ -275,8 +279,13 @@ export function parseTransactionBufferCreateInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedTransactionBufferCreateInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

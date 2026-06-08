@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,12 +30,15 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const SET_TOKEN_STANDARD_DISCRIMINATOR = 35;
 
-export function getSetTokenStandardDiscriminatorBytes() {
+export function getSetTokenStandardDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(SET_TOKEN_STANDARD_DISCRIMINATOR);
 }
 
@@ -143,16 +148,16 @@ export function getSetTokenStandardInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.updateAuthority),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.edition),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("updateAuthority", accounts.updateAuthority),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("edition", accounts.edition),
     ],
     data: getSetTokenStandardInstructionDataEncoder().encode({}),
     programAddress,
@@ -192,8 +197,13 @@ export function parseSetTokenStandardInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedSetTokenStandardInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

@@ -26,6 +26,8 @@ import {
   getU8Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -44,14 +46,16 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const SPENDING_LIMIT_USE_DISCRIMINATOR = new Uint8Array([
-  16, 57, 130, 127, 193, 20, 155, 134,
-]);
+export const SPENDING_LIMIT_USE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([16, 57, 130, 127, 193, 20, 155, 134]);
 
-export function getSpendingLimitUseDiscriminatorBytes() {
+export function getSpendingLimitUseDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     SPENDING_LIMIT_USE_DISCRIMINATOR,
   );
@@ -268,7 +272,7 @@ export function getSpendingLimitUseInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -277,16 +281,19 @@ export function getSpendingLimitUseInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.member),
-      getAccountMeta(accounts.spendingLimit),
-      getAccountMeta(accounts.vault),
-      getAccountMeta(accounts.destination),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.vaultTokenAccount),
-      getAccountMeta(accounts.destinationTokenAccount),
-      getAccountMeta(accounts.tokenProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("member", accounts.member),
+      getAccountMeta("spendingLimit", accounts.spendingLimit),
+      getAccountMeta("vault", accounts.vault),
+      getAccountMeta("destination", accounts.destination),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("vaultTokenAccount", accounts.vaultTokenAccount),
+      getAccountMeta(
+        "destinationTokenAccount",
+        accounts.destinationTokenAccount,
+      ),
+      getAccountMeta("tokenProgram", accounts.tokenProgram),
     ],
     data: getSpendingLimitUseInstructionDataEncoder().encode(
       args as SpendingLimitUseInstructionDataArgs,
@@ -345,8 +352,13 @@ export function parseSpendingLimitUseInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedSpendingLimitUseInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 10) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 10,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

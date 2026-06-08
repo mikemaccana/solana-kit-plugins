@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type Address,
@@ -27,14 +29,16 @@ import {
   type ReadonlyUint8Array,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const BATCH_ACCOUNTS_CLOSE_DISCRIMINATOR = new Uint8Array([
-  218, 196, 7, 175, 130, 102, 11, 255,
-]);
+export const BATCH_ACCOUNTS_CLOSE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([218, 196, 7, 175, 130, 102, 11, 255]);
 
-export function getBatchAccountsCloseDiscriminatorBytes() {
+export function getBatchAccountsCloseDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     BATCH_ACCOUNTS_CLOSE_DISCRIMINATOR,
   );
@@ -160,7 +164,7 @@ export function getBatchAccountsCloseInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -172,11 +176,11 @@ export function getBatchAccountsCloseInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.proposal),
-      getAccountMeta(accounts.batch),
-      getAccountMeta(accounts.rentCollector),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("proposal", accounts.proposal),
+      getAccountMeta("batch", accounts.batch),
+      getAccountMeta("rentCollector", accounts.rentCollector),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getBatchAccountsCloseInstructionDataEncoder().encode({}),
     programAddress,
@@ -217,8 +221,13 @@ export function parseBatchAccountsCloseInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedBatchAccountsCloseInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

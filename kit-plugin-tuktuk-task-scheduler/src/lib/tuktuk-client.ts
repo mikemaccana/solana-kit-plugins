@@ -131,7 +131,8 @@ export class TukTukClient {
 
     const getTaskQueueNameMappings = this.connection.getAccountsFactory(
       TUKTUK_PROGRAM_ADDRESS,
-      TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR,
+      // Codama emits discriminators as ReadonlyUint8Array; getAccountsFactory wants a mutable Uint8Array.
+      new Uint8Array(TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR),
       getTaskQueueNameMappingV0Decoder(),
     );
 

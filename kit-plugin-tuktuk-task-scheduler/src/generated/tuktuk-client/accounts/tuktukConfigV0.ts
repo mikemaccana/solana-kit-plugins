@@ -41,11 +41,10 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const TUKTUK_CONFIG_V0_DISCRIMINATOR = new Uint8Array([
-  198, 255, 138, 207, 252, 149, 60, 1,
-]);
+export const TUKTUK_CONFIG_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([198, 255, 138, 207, 252, 149, 60, 1]);
 
-export function getTuktukConfigV0DiscriminatorBytes() {
+export function getTuktukConfigV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TUKTUK_CONFIG_V0_DISCRIMINATOR,
   );

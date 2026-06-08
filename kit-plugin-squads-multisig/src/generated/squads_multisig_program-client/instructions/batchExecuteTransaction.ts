@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -30,14 +32,16 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const BATCH_EXECUTE_TRANSACTION_DISCRIMINATOR = new Uint8Array([
-  172, 44, 179, 152, 21, 127, 234, 180,
-]);
+export const BATCH_EXECUTE_TRANSACTION_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([172, 44, 179, 152, 21, 127, 234, 180]);
 
-export function getBatchExecuteTransactionDiscriminatorBytes() {
+export function getBatchExecuteTransactionDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     BATCH_EXECUTE_TRANSACTION_DISCRIMINATOR,
   );
@@ -167,17 +171,17 @@ export function getBatchExecuteTransactionInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.member),
-      getAccountMeta(accounts.proposal),
-      getAccountMeta(accounts.batch),
-      getAccountMeta(accounts.transaction),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("member", accounts.member),
+      getAccountMeta("proposal", accounts.proposal),
+      getAccountMeta("batch", accounts.batch),
+      getAccountMeta("transaction", accounts.transaction),
     ],
     data: getBatchExecuteTransactionInstructionDataEncoder().encode({}),
     programAddress,
@@ -222,8 +226,13 @@ export function parseBatchExecuteTransactionInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedBatchExecuteTransactionInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

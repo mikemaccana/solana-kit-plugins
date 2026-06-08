@@ -24,6 +24,8 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -43,14 +45,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const MULTISIG_REMOVE_MEMBER_DISCRIMINATOR = new Uint8Array([
-  217, 117, 177, 210, 182, 145, 218, 72,
-]);
+export const MULTISIG_REMOVE_MEMBER_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([217, 117, 177, 210, 182, 145, 218, 72]);
 
-export function getMultisigRemoveMemberDiscriminatorBytes() {
+export function getMultisigRemoveMemberDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     MULTISIG_REMOVE_MEMBER_DISCRIMINATOR,
   );
@@ -197,7 +201,7 @@ export function getMultisigRemoveMemberInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -206,10 +210,10 @@ export function getMultisigRemoveMemberInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.configAuthority),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("configAuthority", accounts.configAuthority),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getMultisigRemoveMemberInstructionDataEncoder().encode(
       args as MultisigRemoveMemberInstructionDataArgs,
@@ -254,8 +258,13 @@ export function parseMultisigRemoveMemberInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedMultisigRemoveMemberInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

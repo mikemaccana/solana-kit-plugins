@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -31,8 +33,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getVaultTransactionCreateArgsDecoder,
   getVaultTransactionCreateArgsEncoder,
@@ -40,11 +45,10 @@ import {
   type VaultTransactionCreateArgsArgs,
 } from "../types";
 
-export const VAULT_TRANSACTION_CREATE_DISCRIMINATOR = new Uint8Array([
-  48, 250, 78, 168, 208, 226, 218, 211,
-]);
+export const VAULT_TRANSACTION_CREATE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([48, 250, 78, 168, 208, 226, 218, 211]);
 
-export function getVaultTransactionCreateDiscriminatorBytes() {
+export function getVaultTransactionCreateDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     VAULT_TRANSACTION_CREATE_DISCRIMINATOR,
   );
@@ -179,7 +183,7 @@ export function getVaultTransactionCreateInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -194,11 +198,11 @@ export function getVaultTransactionCreateInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.transaction),
-      getAccountMeta(accounts.creator),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("transaction", accounts.transaction),
+      getAccountMeta("creator", accounts.creator),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getVaultTransactionCreateInstructionDataEncoder().encode(
       args as VaultTransactionCreateInstructionDataArgs,
@@ -240,8 +244,13 @@ export function parseVaultTransactionCreateInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedVaultTransactionCreateInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

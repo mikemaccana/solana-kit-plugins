@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -31,14 +33,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const CONFIG_TRANSACTION_EXECUTE_DISCRIMINATOR = new Uint8Array([
-  114, 146, 244, 189, 252, 140, 36, 40,
-]);
+export const CONFIG_TRANSACTION_EXECUTE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([114, 146, 244, 189, 252, 140, 36, 40]);
 
-export function getConfigTransactionExecuteDiscriminatorBytes() {
+export function getConfigTransactionExecuteDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     CONFIG_TRANSACTION_EXECUTE_DISCRIMINATOR,
   );
@@ -182,18 +186,18 @@ export function getConfigTransactionExecuteInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.member),
-      getAccountMeta(accounts.proposal),
-      getAccountMeta(accounts.transaction),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("member", accounts.member),
+      getAccountMeta("proposal", accounts.proposal),
+      getAccountMeta("transaction", accounts.transaction),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getConfigTransactionExecuteInstructionDataEncoder().encode({}),
     programAddress,
@@ -243,8 +247,13 @@ export function parseConfigTransactionExecuteInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedConfigTransactionExecuteInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 6) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 6,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

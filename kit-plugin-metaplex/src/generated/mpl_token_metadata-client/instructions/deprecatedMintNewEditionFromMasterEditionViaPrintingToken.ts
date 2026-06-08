@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,12 +30,15 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const DEPRECATED_MINT_NEW_EDITION_FROM_MASTER_EDITION_VIA_PRINTING_TOKEN_DISCRIMINATOR = 3;
 
-export function getDeprecatedMintNewEditionFromMasterEditionViaPrintingTokenDiscriminatorBytes() {
+export function getDeprecatedMintNewEditionFromMasterEditionViaPrintingTokenDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(
     DEPRECATED_MINT_NEW_EDITION_FROM_MASTER_EDITION_VIA_PRINTING_TOKEN_DISCRIMINATOR,
   );
@@ -291,7 +296,7 @@ export function getDeprecatedMintNewEditionFromMasterEditionViaPrintingTokenInst
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -311,22 +316,22 @@ export function getDeprecatedMintNewEditionFromMasterEditionViaPrintingTokenInst
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.edition),
-      getAccountMeta(accounts.masterEdition),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.mintAuthority),
-      getAccountMeta(accounts.printingMint),
-      getAccountMeta(accounts.masterTokenAccount),
-      getAccountMeta(accounts.editionMarker),
-      getAccountMeta(accounts.burnAuthority),
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.masterUpdateAuthority),
-      getAccountMeta(accounts.masterMetadata),
-      getAccountMeta(accounts.tokenProgram),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.rent),
-      getAccountMeta(accounts.reservationList),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("edition", accounts.edition),
+      getAccountMeta("masterEdition", accounts.masterEdition),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("mintAuthority", accounts.mintAuthority),
+      getAccountMeta("printingMint", accounts.printingMint),
+      getAccountMeta("masterTokenAccount", accounts.masterTokenAccount),
+      getAccountMeta("editionMarker", accounts.editionMarker),
+      getAccountMeta("burnAuthority", accounts.burnAuthority),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("masterUpdateAuthority", accounts.masterUpdateAuthority),
+      getAccountMeta("masterMetadata", accounts.masterMetadata),
+      getAccountMeta("tokenProgram", accounts.tokenProgram),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("rent", accounts.rent),
+      getAccountMeta("reservationList", accounts.reservationList),
     ],
     data: getDeprecatedMintNewEditionFromMasterEditionViaPrintingTokenInstructionDataEncoder().encode(
       {},
@@ -407,8 +412,13 @@ export function parseDeprecatedMintNewEditionFromMasterEditionViaPrintingTokenIn
   TAccountMetas
 > {
   if (instruction.accounts.length < 16) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 16,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

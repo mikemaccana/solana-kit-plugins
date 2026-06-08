@@ -22,6 +22,8 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -40,14 +42,16 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const MULTISIG_REMOVE_SPENDING_LIMIT_DISCRIMINATOR = new Uint8Array([
-  228, 198, 136, 111, 123, 4, 178, 113,
-]);
+export const MULTISIG_REMOVE_SPENDING_LIMIT_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([228, 198, 136, 111, 123, 4, 178, 113]);
 
-export function getMultisigRemoveSpendingLimitDiscriminatorBytes() {
+export function getMultisigRemoveSpendingLimitDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     MULTISIG_REMOVE_SPENDING_LIMIT_DISCRIMINATOR,
   );
@@ -183,7 +187,7 @@ export function getMultisigRemoveSpendingLimitInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -192,10 +196,10 @@ export function getMultisigRemoveSpendingLimitInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.configAuthority),
-      getAccountMeta(accounts.spendingLimit),
-      getAccountMeta(accounts.rentCollector),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("configAuthority", accounts.configAuthority),
+      getAccountMeta("spendingLimit", accounts.spendingLimit),
+      getAccountMeta("rentCollector", accounts.rentCollector),
     ],
     data: getMultisigRemoveSpendingLimitInstructionDataEncoder().encode(
       args as MultisigRemoveSpendingLimitInstructionDataArgs,
@@ -235,8 +239,13 @@ export function parseMultisigRemoveSpendingLimitInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedMultisigRemoveSpendingLimitInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {
