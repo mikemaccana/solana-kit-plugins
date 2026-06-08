@@ -349,6 +349,7 @@ const connection = connect("localnet")
 - Node.js 18+
 - Solana Kite 3.0+
 - Solana Kit 5.0+
+- Arcium program IDL 0.10.4
 
 ## License
 

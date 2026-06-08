@@ -2,7 +2,7 @@
   "address": "Arcj82pX7HxYKLR92qvgZUAd7vGS1k4hQvAFcPATFdEQ",
   "metadata": {
     "name": "arcium",
-    "version": "0.8.3",
+    "version": "0.10.4",
     "spec": "0.1.0",
     "description": "The Arcium program"
   },
@@ -129,6 +129,167 @@
         {
           "name": "cluster_id",
           "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "add_permissioned_recovery_peers",
+      "docs": [
+        "Add permissioned recovery peers"
+      ],
+      "discriminator": [
+        190,
+        177,
+        28,
+        28,
+        204,
+        131,
+        176,
+        251
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "permissioned_recovery_peers_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  80,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  101,
+                  100,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  115,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program_data",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  146,
+                  111,
+                  9,
+                  170,
+                  109,
+                  72,
+                  125,
+                  226,
+                  216,
+                  140,
+                  55,
+                  106,
+                  22,
+                  29,
+                  7,
+                  127,
+                  176,
+                  129,
+                  11,
+                  19,
+                  35,
+                  107,
+                  124,
+                  118,
+                  71,
+                  160,
+                  112,
+                  40,
+                  3,
+                  250,
+                  93,
+                  137
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "peers",
+          "type": {
+            "vec": "pubkey"
+          }
         }
       ]
     },
@@ -288,7 +449,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -324,7 +485,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               },
               {
@@ -353,7 +514,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -379,7 +540,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -709,7 +870,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -734,7 +895,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -770,7 +931,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               },
               {
@@ -825,7 +986,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -943,7 +1104,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               },
               {
@@ -972,7 +1133,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -1098,9 +1259,410 @@
       ]
     },
     {
+      "name": "claim_node_fees",
+      "discriminator": [
+        68,
+        13,
+        185,
+        34,
+        151,
+        76,
+        194,
+        43
+      ],
+      "accounts": [
+        {
+          "name": "node_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "recipient",
+          "writable": true
+        },
+        {
+          "name": "cluster",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cluster_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "node",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  65,
+                  114,
+                  120,
+                  78,
+                  111,
+                  100,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "node_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  70,
+                  101,
+                  101,
+                  80,
+                  111,
+                  111,
+                  108
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "cluster_offset",
+          "type": "u32"
+        },
+        {
+          "name": "node_offset",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "close_computation_definition",
+      "docs": [
+        "Closes a computation definition after TTL wait and verifying no active computations."
+      ],
+      "discriminator": [
+        175,
+        224,
+        148,
+        1,
+        107,
+        74,
+        70,
+        110
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mxe",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "comp_def_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              },
+              {
+                "kind": "arg",
+                "path": "comp_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "executing_pool",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  69,
+                  120,
+                  101,
+                  99,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_cluster_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "docs": [
+            "System program account."
+          ],
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "comp_offset",
+          "type": "u32"
+        },
+        {
+          "name": "mxe_program",
+          "type": "pubkey"
+        },
+        {
+          "name": "cluster_offset",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "close_computation_definition_buffers",
+      "docs": [
+        "Closes the raw circuit buffer account for a computation definition."
+      ],
+      "discriminator": [
+        98,
+        101,
+        140,
+        112,
+        8,
+        211,
+        211,
+        1
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mxe",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "comp_def_acc",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              },
+              {
+                "kind": "arg",
+                "path": "_comp_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "comp_def_raw",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  82,
+                  97,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "comp_def_acc"
+              },
+              {
+                "kind": "arg",
+                "path": "_raw_circuit_index"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "comp_offset",
+          "type": "u32"
+        },
+        {
+          "name": "mxe_program",
+          "type": "pubkey"
+        },
+        {
+          "name": "raw_circuit_index",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "close_key_recovery",
       "docs": [
-        "Closes all recovery-related accounts."
+        "Closes all recovery-related accounts in the success path."
       ],
       "discriminator": [
         249,
@@ -1165,8 +1727,8 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "_backup_mxe_program"
+                "kind": "account",
+                "path": "mxe_recovery_account"
               }
             ]
           }
@@ -1200,12 +1762,8 @@
                 ]
               },
               {
-                "kind": "account",
-                "path": "backup_mxe_program"
-              },
-              {
-                "kind": "account",
-                "path": "original_mxe_program"
+                "kind": "arg",
+                "path": "_original_mxe_program"
               }
             ]
           }
@@ -1250,7 +1808,7 @@
               },
               {
                 "kind": "account",
-                "path": "backup_mxe_program"
+                "path": "mxe_recovery_account"
               },
               {
                 "kind": "const",
@@ -1260,6 +1818,45 @@
                   0,
                   0
                 ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "key_recovery_finalize_computation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "backup_cluster_offset"
+              },
+              {
+                "kind": "account",
+                "path": "mxe_recovery_account"
               }
             ]
           }
@@ -1277,10 +1874,461 @@
           "type": "pubkey"
         },
         {
-          "name": "backup_mxe_program",
-          "type": "pubkey"
+          "name": "backup_cluster_offset",
+          "type": "u32"
         }
       ]
+    },
+    {
+      "name": "close_mxe",
+      "docs": [
+        "Closes an MXE account and auto-closes the keygen computation definition."
+      ],
+      "discriminator": [
+        121,
+        143,
+        242,
+        246,
+        169,
+        45,
+        13,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mxe_program",
+          "docs": [
+            "constraint in tests because setting it would require us to deploy a program each time."
+          ]
+        },
+        {
+          "name": "mxe",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mxe_keygen_computation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_cluster_offset"
+              },
+              {
+                "kind": "arg",
+                "path": "_keygen_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mxe_keygen_comp_def",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe_program"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  1,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "mxe_key_recovery_init_comp_def",
+          "docs": [
+            "Optional: only exists if key recovery was initiated."
+          ],
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe_program"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  2,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "key_recovery_init_computation",
+          "writable": true,
+          "optional": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_cluster_offset"
+              },
+              {
+                "kind": "account",
+                "path": "mxe.key_recovery_init_offset",
+                "account": "MXEAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recovery_cluster_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe_program"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "cluster_offset",
+          "type": "u32"
+        },
+        {
+          "name": "keygen_offset",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "close_permissioned_recovery_peers_account",
+      "docs": [
+        "Close the permissioned recovery peers account"
+      ],
+      "discriminator": [
+        55,
+        55,
+        184,
+        150,
+        82,
+        190,
+        205,
+        92
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "permissioned_recovery_peers_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  80,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  101,
+                  100,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  115,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program_data",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  146,
+                  111,
+                  9,
+                  170,
+                  109,
+                  72,
+                  125,
+                  226,
+                  216,
+                  140,
+                  55,
+                  106,
+                  22,
+                  29,
+                  7,
+                  127,
+                  176,
+                  129,
+                  11,
+                  19,
+                  35,
+                  107,
+                  124,
+                  118,
+                  71,
+                  160,
+                  112,
+                  40,
+                  3,
+                  250,
+                  93,
+                  137
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     },
     {
       "name": "deactivate_arx",
@@ -1461,6 +2509,114 @@
               "name": "Epoch"
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "deactivate_computation_definition",
+      "docs": [
+        "Deactivates a computation definition, preventing new computations from being queued."
+      ],
+      "discriminator": [
+        170,
+        212,
+        226,
+        44,
+        43,
+        226,
+        117,
+        162
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mxe",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "comp_def_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              },
+              {
+                "kind": "arg",
+                "path": "comp_offset"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "comp_offset",
+          "type": "u32"
+        },
+        {
+          "name": "mxe_program",
+          "type": "pubkey"
         }
       ]
     },
@@ -1763,7 +2919,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -2032,10 +3188,6 @@
               },
               {
                 "kind": "account",
-                "path": "backup_mxe_program"
-              },
-              {
-                "kind": "account",
                 "path": "original_mxe_program"
               }
             ]
@@ -2157,6 +3309,29 @@
           }
         },
         {
+          "name": "cluster_acc",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cluster_offset"
+              }
+            ]
+          }
+        },
+        {
           "name": "executing_pool",
           "writable": true,
           "pda": {
@@ -2244,13 +3419,26 @@
         {
           "name": "callback_transaction_index",
           "type": "u8"
+        },
+        {
+          "name": "output_bytes",
+          "type": "bytes"
+        },
+        {
+          "name": "bls_sig",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          }
         }
       ]
     },
     {
       "name": "finalize_key_recovery_execution",
       "docs": [
-        "Finalizes the key recovery execution after threshold is met and queues the computation."
+        "Queues the key_recovery_finalize computation after threshold is met."
       ],
       "discriminator": [
         211,
@@ -2365,7 +3553,6 @@
         },
         {
           "name": "mxe_recovery_account",
-          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -2390,10 +3577,6 @@
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "backup_mxe_program"
               },
               {
                 "kind": "account",
@@ -2564,6 +3747,40 @@
           }
         },
         {
+          "name": "cluster_acc",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "cluster_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "address_lookup_table",
+          "docs": [
+            "Seeds are checked in the CPI to LUT program, so no need to check them here."
+          ],
+          "writable": true
+        },
+        {
+          "name": "lut_program",
+          "address": "AddressLookupTab1e1111111111111111111111111"
+        },
+        {
           "name": "original_mxe_program"
         },
         {
@@ -2713,7 +3930,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -2748,7 +3965,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               },
               {
@@ -2838,7 +4055,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -3084,6 +4301,15 @@
             "defined": {
               "name": "BN254G2BLSPublicKey"
             }
+          }
+        },
+        {
+          "name": "bls_pop_sig",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
           }
         },
         {
@@ -3336,6 +4562,17 @@
           }
         },
         {
+          "name": "address_lookup_table",
+          "docs": [
+            "Seeds are checked in the CPI to LUT program, so no need to check them here."
+          ],
+          "writable": true
+        },
+        {
+          "name": "lut_program",
+          "address": "AddressLookupTab1e1111111111111111111111111"
+        },
+        {
           "name": "comp_def_acc",
           "writable": true,
           "pda": {
@@ -3422,12 +4659,6 @@
         {
           "name": "cu_amount",
           "type": "u64"
-        },
-        {
-          "name": "finalization_authority",
-          "type": {
-            "option": "pubkey"
-          }
         }
       ]
     },
@@ -3449,6 +4680,11 @@
         224
       ],
       "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
         {
           "name": "payer",
           "writable": true,
@@ -3510,10 +4746,6 @@
                   110,
                   116
                 ]
-              },
-              {
-                "kind": "account",
-                "path": "backup_mxe_program"
               },
               {
                 "kind": "account",
@@ -3692,10 +4924,6 @@
               },
               {
                 "kind": "account",
-                "path": "backup_mxe_program"
-              },
-              {
-                "kind": "account",
                 "path": "original_mxe_program"
               }
             ]
@@ -3759,6 +4987,46 @@
           }
         },
         {
+          "name": "key_recovery_finalize_computation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "backup_mxe.cluster",
+                "account": "MXEAccount"
+              },
+              {
+                "kind": "arg",
+                "path": "key_recovery_finalize_offset"
+              }
+            ]
+          }
+        },
+        {
           "name": "original_mxe_program"
         },
         {
@@ -3777,6 +5045,14 @@
         {
           "name": "backup_mxe_program",
           "type": "pubkey"
+        },
+        {
+          "name": "cluster_offset",
+          "type": "u32"
+        },
+        {
+          "name": "key_recovery_finalize_offset",
+          "type": "u64"
         }
       ]
     },
@@ -4176,9 +5452,6 @@
         },
         {
           "name": "program_data",
-          "docs": [
-            "The seeds constraint is only applied in non-testing builds."
-          ],
           "pda": {
             "seeds": [
               {
@@ -4246,6 +5519,17 @@
           }
         },
         {
+          "name": "address_lookup_table",
+          "docs": [
+            "Seeds are checked in the CPI to LUT program, so no need to check them here."
+          ],
+          "writable": true
+        },
+        {
+          "name": "lut_program",
+          "address": "AddressLookupTab1e1111111111111111111111111"
+        },
+        {
           "name": "clock",
           "writable": true,
           "pda": {
@@ -4299,6 +5583,10 @@
         },
         {
           "name": "key_recovery_init_offset",
+          "type": "u64"
+        },
+        {
+          "name": "recent_slot",
           "type": "u64"
         }
       ]
@@ -4361,6 +5649,160 @@
           }
         }
       ]
+    },
+    {
+      "name": "init_permissioned_recovery_peers_account",
+      "docs": [
+        "Initialize the permissioned recovery peers account"
+      ],
+      "discriminator": [
+        23,
+        147,
+        149,
+        121,
+        218,
+        173,
+        81,
+        117
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "permissioned_recovery_peers_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  80,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  101,
+                  100,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  115,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program_data",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  146,
+                  111,
+                  9,
+                  170,
+                  109,
+                  72,
+                  125,
+                  226,
+                  216,
+                  140,
+                  55,
+                  106,
+                  22,
+                  29,
+                  7,
+                  127,
+                  176,
+                  129,
+                  11,
+                  19,
+                  35,
+                  107,
+                  124,
+                  118,
+                  71,
+                  160,
+                  112,
+                  40,
+                  3,
+                  250,
+                  93,
+                  137
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
     },
     {
       "name": "init_raw_circuit_acc",
@@ -4494,6 +5936,129 @@
       ]
     },
     {
+      "name": "init_recovery_peer_account",
+      "discriminator": [
+        116,
+        29,
+        20,
+        126,
+        177,
+        149,
+        50,
+        147
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "recovery_peer_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "peer_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "permissioned_recovery_peers_acc",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  80,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  101,
+                  100,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  115,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "peer_offset",
+          "type": "u32"
+        },
+        {
+          "name": "signer",
+          "type": "pubkey"
+        },
+        {
+          "name": "x25519_pubkey",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "join_cluster",
       "discriminator": [
         150,
@@ -4601,91 +6166,6 @@
         {
           "name": "join",
           "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "leave_mxe",
-      "discriminator": [
-        225,
-        222,
-        68,
-        9,
-        96,
-        160,
-        126,
-        211
-      ],
-      "accounts": [
-        {
-          "name": "authority",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "cluster_acc",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  67,
-                  108,
-                  117,
-                  115,
-                  116,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "_id"
-              }
-            ]
-          }
-        },
-        {
-          "name": "mxe",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  77,
-                  88,
-                  69,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "_mxe_program"
-              }
-            ]
-          }
-        },
-        {
-          "name": "system_program",
-          "address": "11111111111111111111111111111111"
-        }
-      ],
-      "args": [
-        {
-          "name": "cluster_offset",
-          "type": "u32"
-        },
-        {
-          "name": "mxe_program",
-          "type": "pubkey"
         }
       ]
     },
@@ -4906,7 +6386,7 @@
       "name": "queue_computation",
       "docs": [
         "Queues a computation.",
-        "cu_price_micro: The priority price of a CU, in thousandths of lamports. Used",
+        "cu_price_micro: The priority price of a CU, in micro-lamports. Used",
         "to calculate the priority fee and rounded down."
       ],
       "discriminator": [
@@ -4993,8 +6473,9 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "cluster_index.map_or(mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? , | i |\nmxe.fallback_clusters [i as usize])"
+                "kind": "account",
+                "path": "mxe.cluster",
+                "account": "MXEAccount"
               },
               {
                 "kind": "arg",
@@ -5048,8 +6529,9 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "cluster_index.map_or(mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? , | i |\nmxe.fallback_clusters [i as usize])"
+                "kind": "account",
+                "path": "mxe.cluster",
+                "account": "MXEAccount"
               }
             ]
           }
@@ -5072,8 +6554,9 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "cluster_index.map_or(mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? , | i |\nmxe.fallback_clusters [i as usize])"
+                "kind": "account",
+                "path": "mxe.cluster",
+                "account": "MXEAccount"
               }
             ]
           }
@@ -5144,8 +6627,9 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "cluster_index.map_or(mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? , | i |\nmxe.fallback_clusters [i as usize])"
+                "kind": "account",
+                "path": "mxe.cluster",
+                "account": "MXEAccount"
               }
             ]
           }
@@ -5210,12 +6694,6 @@
           "type": "u32"
         },
         {
-          "name": "cluster_index",
-          "type": {
-            "option": "u16"
-          }
-        },
-        {
           "name": "args",
           "type": {
             "defined": {
@@ -5226,12 +6704,6 @@
         {
           "name": "mxe_program",
           "type": "pubkey"
-        },
-        {
-          "name": "callback_url",
-          "type": {
-            "option": "string"
-          }
         },
         {
           "name": "custom_callback_instructions",
@@ -5261,7 +6733,7 @@
       "name": "queue_key_recovery_init",
       "docs": [
         "Queues the key recovery init computation for the MXE.",
-        "Can only be called once after MXE keys are set."
+        "Can only be called after MXE keys are set."
       ],
       "discriminator": [
         76,
@@ -5548,6 +7020,32 @@
           "signer": true
         },
         {
+          "name": "mxe",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
           "name": "comp",
           "writable": true,
           "pda": {
@@ -5576,12 +7074,39 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "_mxe_program"
+                "kind": "account",
+                "path": "mxe.cluster",
+                "account": "MXEAccount"
               },
               {
                 "kind": "arg",
                 "path": "comp_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "executing_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  69,
+                  120,
+                  101,
+                  99,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe.cluster",
+                "account": "MXEAccount"
               }
             ]
           }
@@ -5623,16 +7148,16 @@
       ]
     },
     {
-      "name": "reclaim_failure_rent",
+      "name": "reclaim_failure_rent_idempotent",
       "discriminator": [
-        159,
-        99,
-        116,
-        180,
-        42,
-        9,
-        202,
-        219
+        138,
+        13,
+        253,
+        191,
+        226,
+        239,
+        246,
+        10
       ],
       "accounts": [
         {
@@ -5641,50 +7166,18 @@
           "signer": true
         },
         {
+          "name": "recipient",
+          "docs": [
+            "failure PDA"
+          ],
+          "writable": true
+        },
+        {
           "name": "failure_acc",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  70,
-                  97,
-                  105,
-                  108,
-                  117,
-                  114,
-                  101,
-                  67,
-                  108,
-                  97,
-                  105,
-                  109,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116,
-                  72,
-                  101,
-                  97,
-                  100,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "mxe_program"
-              },
-              {
-                "kind": "arg",
-                "path": "comp_offset"
-              }
-            ]
-          }
+          "docs": [
+            "the checks and close by hand in the instruction handler."
+          ],
+          "writable": true
         }
       ],
       "args": [
@@ -5701,7 +7194,7 @@
     {
       "name": "recover_mxe",
       "docs": [
-        "Sets an MXE to the Recovery state, enabling the recovery process to begin."
+        "Sets an MXE to the `Migration` state, enabling the recovery process to begin."
       ],
       "discriminator": [
         65,
@@ -5747,6 +7240,44 @@
           }
         },
         {
+          "name": "recovery_cluster_acc",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
           "name": "mxe_program"
         }
       ],
@@ -5758,33 +7289,25 @@
       ]
     },
     {
-      "name": "requeue_key_recovery_finalize",
-      "docs": [
-        "Re-queues the key_recovery_finalize computation after a failed execution."
-      ],
+      "name": "register_account_in_lut",
       "discriminator": [
-        131,
-        109,
-        226,
-        183,
-        90,
-        203,
-        17,
-        191
+        55,
+        38,
+        119,
+        20,
+        35,
+        231,
+        184,
+        236
       ],
       "accounts": [
         {
-          "name": "authority",
+          "name": "signer",
           "writable": true,
           "signer": true
         },
         {
-          "name": "payer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "original_mxe",
+          "name": "mxe",
           "pda": {
             "seeds": [
               {
@@ -5803,284 +7326,72 @@
                 ]
               },
               {
-                "kind": "arg",
-                "path": "_original_mxe_program"
+                "kind": "account",
+                "path": "mxe_program"
               }
             ]
           }
         },
         {
-          "name": "backup_mxe",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  77,
-                  88,
-                  69,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "_backup_mxe_program"
-              }
-            ]
-          }
+          "name": "mxe_program"
         },
         {
-          "name": "mxe_recovery_account",
+          "name": "address_lookup_table",
           "writable": true,
           "pda": {
             "seeds": [
               {
-                "kind": "const",
-                "value": [
-                  77,
-                  120,
-                  101,
-                  82,
-                  101,
-                  99,
-                  111,
-                  118,
-                  101,
-                  114,
-                  121,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
+                "kind": "account",
+                "path": "mxe"
               },
               {
                 "kind": "account",
-                "path": "backup_mxe_program"
-              },
-              {
-                "kind": "account",
-                "path": "original_mxe_program"
+                "path": "mxe.lut_offset_slot",
+                "account": "MXEAccount"
               }
-            ]
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                119,
+                166,
+                175,
+                151,
+                51,
+                155,
+                122,
+                200,
+                141,
+                24,
+                146,
+                201,
+                4,
+                70,
+                245,
+                0,
+                2,
+                48,
+                146,
+                102,
+                246,
+                46,
+                83,
+                193,
+                24,
+                36,
+                73,
+                130,
+                0,
+                0,
+                0
+              ]
+            }
           }
         },
         {
-          "name": "key_recovery_finalize_comp_def",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  67,
-                  111,
-                  109,
-                  112,
-                  117,
-                  116,
-                  97,
-                  116,
-                  105,
-                  111,
-                  110,
-                  68,
-                  101,
-                  102,
-                  105,
-                  110,
-                  105,
-                  116,
-                  105,
-                  111,
-                  110,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "backup_mxe_program"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  3,
-                  0,
-                  0,
-                  0
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "previous_computation",
-          "docs": [
-            "The previous failed computation account"
-          ],
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  67,
-                  111,
-                  109,
-                  112,
-                  117,
-                  116,
-                  97,
-                  116,
-                  105,
-                  111,
-                  110,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "cluster_offset"
-              },
-              {
-                "kind": "account",
-                "path": "mxe_recovery_account"
-              }
-            ]
-          }
-        },
-        {
-          "name": "new_computation",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  67,
-                  111,
-                  109,
-                  112,
-                  117,
-                  116,
-                  97,
-                  116,
-                  105,
-                  111,
-                  110,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "cluster_offset"
-              },
-              {
-                "kind": "arg",
-                "path": "new_key_recovery_finalize_offset"
-              }
-            ]
-          }
-        },
-        {
-          "name": "executing_pool",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  69,
-                  120,
-                  101,
-                  99,
-                  112,
-                  111,
-                  111,
-                  108
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "cluster_offset"
-              }
-            ]
-          }
-        },
-        {
-          "name": "mempool",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  77,
-                  101,
-                  109,
-                  112,
-                  111,
-                  111,
-                  108
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "cluster_offset"
-              }
-            ]
-          }
-        },
-        {
-          "name": "pool_account",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  70,
-                  101,
-                  101,
-                  80,
-                  111,
-                  111,
-                  108
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "name": "original_mxe_program"
-        },
-        {
-          "name": "backup_mxe_program"
+          "name": "lut_program",
+          "address": "AddressLookupTab1e1111111111111111111111111"
         },
         {
           "name": "system_program",
@@ -6089,20 +7400,169 @@
       ],
       "args": [
         {
-          "name": "original_mxe_program",
+          "name": "account",
           "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "remove_permissioned_recovery_peers",
+      "docs": [
+        "Remove permissioned recovery peers"
+      ],
+      "discriminator": [
+        246,
+        123,
+        224,
+        196,
+        110,
+        208,
+        85,
+        6
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
         },
         {
-          "name": "backup_mxe_program",
-          "type": "pubkey"
+          "name": "permissioned_recovery_peers_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  80,
+                  101,
+                  114,
+                  109,
+                  105,
+                  115,
+                  115,
+                  105,
+                  111,
+                  110,
+                  101,
+                  100,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  115,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
         },
         {
-          "name": "cluster_offset",
-          "type": "u32"
+          "name": "program_data",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  146,
+                  111,
+                  9,
+                  170,
+                  109,
+                  72,
+                  125,
+                  226,
+                  216,
+                  140,
+                  55,
+                  106,
+                  22,
+                  29,
+                  7,
+                  127,
+                  176,
+                  129,
+                  11,
+                  19,
+                  35,
+                  107,
+                  124,
+                  118,
+                  71,
+                  160,
+                  112,
+                  40,
+                  3,
+                  250,
+                  93,
+                  137
+                ]
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                2,
+                168,
+                246,
+                145,
+                78,
+                136,
+                161,
+                176,
+                226,
+                16,
+                21,
+                62,
+                247,
+                99,
+                174,
+                43,
+                0,
+                194,
+                185,
+                61,
+                22,
+                193,
+                36,
+                210,
+                192,
+                83,
+                122,
+                16,
+                4,
+                128,
+                0,
+                0
+              ]
+            }
+          }
         },
         {
-          "name": "new_key_recovery_finalize_offset",
-          "type": "u64"
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "peers",
+          "type": {
+            "vec": "pubkey"
+          }
         }
       ]
     },
@@ -6278,6 +7738,137 @@
       ]
     },
     {
+      "name": "set_active",
+      "docs": [
+        "Sets an MXE to `Active`."
+      ],
+      "discriminator": [
+        29,
+        16,
+        225,
+        132,
+        38,
+        216,
+        206,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "mxe",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "recovery_cluster_acc",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mxe_recovery_account",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  120,
+                  101,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mxe_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "mxe_program",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
       "name": "set_arx_node_config",
       "discriminator": [
         163,
@@ -6394,118 +7985,6 @@
       ]
     },
     {
-      "name": "set_cluster",
-      "discriminator": [
-        140,
-        96,
-        38,
-        83,
-        225,
-        128,
-        25,
-        176
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "docs": [
-            "Signer of the transaction."
-          ],
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "mxe",
-          "docs": [
-            "MXE account to set the cluster for."
-          ],
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  77,
-                  88,
-                  69,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "mxe_program"
-              }
-            ]
-          }
-        },
-        {
-          "name": "cluster",
-          "docs": [
-            "Cluster to set for the MXE."
-          ],
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  67,
-                  108,
-                  117,
-                  115,
-                  116,
-                  101,
-                  114
-                ]
-              },
-              {
-                "kind": "arg",
-                "path": "cluster_offset"
-              }
-            ]
-          }
-        },
-        {
-          "name": "mxe_program"
-        },
-        {
-          "name": "clock",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  67,
-                  108,
-                  111,
-                  99,
-                  107,
-                  65,
-                  99,
-                  99,
-                  111,
-                  117,
-                  110,
-                  116
-                ]
-              }
-            ]
-          }
-        }
-      ],
-      "args": [
-        {
-          "name": "cluster_offset",
-          "type": "u32"
-        }
-      ]
-    },
-    {
       "name": "set_cluster_authority",
       "discriminator": [
         94,
@@ -6557,6 +8036,66 @@
           "name": "new_authority",
           "type": {
             "option": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_cluster_td_info",
+      "discriminator": [
+        182,
+        126,
+        92,
+        101,
+        25,
+        252,
+        84,
+        180
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "cluster_acc",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  108,
+                  117,
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_id"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "cluster_id",
+          "type": "u32"
+        },
+        {
+          "name": "td_info",
+          "type": {
+            "option": {
+              "defined": {
+                "name": "NodeMetadata"
+              }
+            }
           }
         }
       ]
@@ -6648,7 +8187,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -6828,7 +8367,7 @@
               },
               {
                 "kind": "account",
-                "path": "mxe.cluster.ok_or(ArciumError :: ClusterNotSet) ? ",
+                "path": "mxe.cluster",
                 "account": "MXEAccount"
               }
             ]
@@ -6990,29 +8529,41 @@
       ],
       "accounts": [
         {
-          "name": "node_signer",
+          "name": "signer",
           "writable": true,
           "signer": true
         },
         {
-          "name": "node",
+          "name": "recovery_peer_account",
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  65,
-                  114,
-                  120,
-                  78,
+                  82,
+                  101,
+                  99,
                   111,
-                  100,
-                  101
+                  118,
+                  101,
+                  114,
+                  121,
+                  80,
+                  101,
+                  101,
+                  114,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
                 ]
               },
               {
                 "kind": "arg",
-                "path": "node_offset"
+                "path": "peer_offset"
               }
             ]
           }
@@ -7111,10 +8662,6 @@
               },
               {
                 "kind": "account",
-                "path": "backup_mxe_program"
-              },
-              {
-                "kind": "account",
                 "path": "original_mxe_program"
               }
             ]
@@ -7137,7 +8684,7 @@
           "type": "pubkey"
         },
         {
-          "name": "node_offset",
+          "name": "peer_offset",
           "type": "u32"
         },
         {
@@ -7450,6 +8997,252 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "z_close_aborted_key_recovery",
+      "docs": [
+        "Closes all recovery-related accounts in the cancel path.",
+        "Instruction name starts with 'Z' to append to the idls."
+      ],
+      "discriminator": [
+        28,
+        29,
+        32,
+        130,
+        111,
+        5,
+        244,
+        101
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "original_mxe",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_original_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "backup_mxe",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  88,
+                  69,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe_recovery_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mxe_recovery_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  77,
+                  120,
+                  101,
+                  82,
+                  101,
+                  99,
+                  111,
+                  118,
+                  101,
+                  114,
+                  121,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "_original_mxe_program"
+              }
+            ]
+          }
+        },
+        {
+          "name": "key_recovery_finalize_comp_def",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  68,
+                  101,
+                  102,
+                  105,
+                  110,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mxe_recovery_account"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  3,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "key_recovery_finalize_computation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  67,
+                  111,
+                  109,
+                  112,
+                  117,
+                  116,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  65,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "backup_cluster_offset"
+              },
+              {
+                "kind": "account",
+                "path": "mxe_recovery_account"
+              }
+            ]
+          }
+        },
+        {
+          "name": "executing_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  69,
+                  120,
+                  101,
+                  99,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "backup_cluster_offset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "original_mxe_program"
+        },
+        {
+          "name": "backup_mxe_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "original_mxe_program",
+          "type": "pubkey"
+        },
+        {
+          "name": "backup_cluster_offset",
+          "type": "u32"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -7649,6 +9442,19 @@
       ]
     },
     {
+      "name": "PermissionedRecoveryPeersAccount",
+      "discriminator": [
+        113,
+        236,
+        217,
+        203,
+        251,
+        98,
+        36,
+        240
+      ]
+    },
+    {
       "name": "RecoveryClusterAccount",
       "discriminator": [
         116,
@@ -7659,6 +9465,19 @@
         209,
         87,
         183
+      ]
+    },
+    {
+      "name": "RecoveryPeerAccount",
+      "discriminator": [
+        126,
+        243,
+        17,
+        238,
+        223,
+        222,
+        130,
+        120
       ]
     },
     {
@@ -7742,6 +9561,58 @@
       ]
     },
     {
+      "name": "CloseComputationDefinitionBuffersEvent",
+      "discriminator": [
+        24,
+        85,
+        55,
+        5,
+        223,
+        56,
+        125,
+        30
+      ]
+    },
+    {
+      "name": "CloseComputationDefinitionEvent",
+      "discriminator": [
+        157,
+        140,
+        179,
+        138,
+        201,
+        132,
+        108,
+        37
+      ]
+    },
+    {
+      "name": "CloseMxeEvent",
+      "discriminator": [
+        71,
+        207,
+        152,
+        87,
+        123,
+        254,
+        179,
+        226
+      ]
+    },
+    {
+      "name": "DeactivateComputationDefinitionEvent",
+      "discriminator": [
+        139,
+        142,
+        249,
+        251,
+        50,
+        65,
+        58,
+        168
+      ]
+    },
+    {
       "name": "FinalizeComputationEvent",
       "discriminator": [
         27,
@@ -7778,6 +9649,19 @@
         97,
         58,
         186
+      ]
+    },
+    {
+      "name": "KeyRecoveryEvent",
+      "discriminator": [
+        83,
+        147,
+        226,
+        153,
+        39,
+        242,
+        109,
+        254
       ]
     },
     {
@@ -7839,6 +9723,16 @@
       "code": 6008,
       "name": "CantFindMempoolID",
       "msg": "Couldn't find a mempool ID for the computation"
+    },
+    {
+      "code": 6009,
+      "name": "MxeHasComputationDefinitions",
+      "msg": "MXE has unclosed computation definitions"
+    },
+    {
+      "code": 6010,
+      "name": "MxeKeygenNotFinalized",
+      "msg": "MXE keygen is not finalized"
     },
     {
       "code": 6100,
@@ -7921,6 +9815,11 @@
       "msg": "Invalid callback transaction index"
     },
     {
+      "code": 6212,
+      "name": "MultiTxCallbacksDisabled",
+      "msg": "Multi-transaction callbacks disabled"
+    },
+    {
       "code": 6300,
       "name": "ComputationDefinitionNotCompleted",
       "msg": "Computation definition is not completed"
@@ -7949,6 +9848,31 @@
       "code": 6305,
       "name": "InvalidOffset",
       "msg": "Offset is invalid"
+    },
+    {
+      "code": 6306,
+      "name": "ComputationDefinitionDeactivated",
+      "msg": "Computation definition is deactivated"
+    },
+    {
+      "code": 6307,
+      "name": "ComputationDefinitionNotDeactivated",
+      "msg": "Computation definition is not deactivated"
+    },
+    {
+      "code": 6308,
+      "name": "ComputationDefinitionHasActiveComputations",
+      "msg": "Computation definition has active computations"
+    },
+    {
+      "code": 6309,
+      "name": "ComputationDefinitionTtlNotPassed",
+      "msg": "Computation definition TTL not passed"
+    },
+    {
+      "code": 6310,
+      "name": "CannotCloseReservedComputationDefinition",
+      "msg": "Cannot close a reserved computation definition"
     },
     {
       "code": 6400,
@@ -8044,6 +9968,11 @@
       "code": 6507,
       "name": "ClusterNotReady",
       "msg": "Cluster is not ready"
+    },
+    {
+      "code": 6508,
+      "name": "BlsPubkeyNotSet",
+      "msg": "Bls pubkey not set"
     },
     {
       "code": 6600,
@@ -8151,14 +10080,39 @@
       "msg": "This instruction must be called directly, not via CPI"
     },
     {
+      "code": 6621,
+      "name": "FeePriceExceedsMax",
+      "msg": "Fee price exceeds maximum allowed"
+    },
+    {
+      "code": 6622,
+      "name": "NoFeesToClaim",
+      "msg": "No fees available to claim"
+    },
+    {
+      "code": 6623,
+      "name": "RecoveryPeerOffsetZero",
+      "msg": "Recovery peer offset is zero"
+    },
+    {
+      "code": 6624,
+      "name": "InvalidDomainSeparator",
+      "msg": "Invalid domain separator"
+    },
+    {
+      "code": 6625,
+      "name": "RecoveryInitAlreadyInitialized",
+      "msg": "Recovery already initialized"
+    },
+    {
       "code": 6700,
-      "name": "MxeNotInRecoveryState",
-      "msg": "MXE is not in recovery state"
+      "name": "MxeNotInMigrationState",
+      "msg": "MXE is not in `Migration` state"
     },
     {
       "code": 6701,
-      "name": "MxeAlreadyInRecovery",
-      "msg": "MXE is already in recovery state"
+      "name": "MxeAlreadyInMigration",
+      "msg": "MXE is already in `Migration` state"
     },
     {
       "code": 6702,
@@ -8211,11 +10165,6 @@
       "msg": "Cannot close recovery with active computation"
     },
     {
-      "code": 6712,
-      "name": "RecoveryExecutionNotSuccess",
-      "msg": "Callback requires successful execution status"
-    },
-    {
       "code": 6713,
       "name": "BackupClusterNotSet",
       "msg": "Backup MXE cluster is not set"
@@ -8224,6 +10173,61 @@
       "code": 6714,
       "name": "ShareAlreadySubmitted",
       "msg": "Share already submitted"
+    },
+    {
+      "code": 6715,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6716,
+      "name": "MxeInMigrationState",
+      "msg": "MXE is in `Migration` state, cannot queue new computations"
+    },
+    {
+      "code": 6717,
+      "name": "PermissionedRecoveryPeersNotDistinct",
+      "msg": "Permissioned recovery peers to add must be distinct"
+    },
+    {
+      "code": 6718,
+      "name": "TooManyPermissionedRecoveryPeers",
+      "msg": "Too many permissioned recovery peers to add"
+    },
+    {
+      "code": 6719,
+      "name": "RemoveNonExistingPermissionedRecoveryPeers",
+      "msg": "Can only remove existing permissioned recovery peers"
+    },
+    {
+      "code": 6720,
+      "name": "UnauthorizedRecoveryPeerCreation",
+      "msg": "Unauthorized to create recovery peer on mainnet"
+    },
+    {
+      "code": 6721,
+      "name": "CompilationWithoutMainnetFeatureFlag",
+      "msg": "Program must be compiled with the \\mainnet\\ feature flag."
+    },
+    {
+      "code": 6722,
+      "name": "MxeInActiveState",
+      "msg": "MXE is in `Active` state"
+    },
+    {
+      "code": 6723,
+      "name": "MxeNotInActiveState",
+      "msg": "MXE is not in `Active` state"
+    },
+    {
+      "code": 6724,
+      "name": "MxeRecoveryAccountDataNotEmpty",
+      "msg": "Mxe recovery account data is not empty"
+    },
+    {
+      "code": 6725,
+      "name": "CannotCloseMxeDuringMigration",
+      "msg": "MXE is in migration state, cannot close MXE"
     }
   ],
   "types": [
@@ -8282,6 +10286,9 @@
           },
           {
             "name": "TimeoutElapsed"
+          },
+          {
+            "name": "KeyRecoveryError"
           }
         ]
       }
@@ -8594,7 +10601,7 @@
           {
             "name": "x25519_pubkey",
             "docs": [
-              "X25519 public key for usage when being a key recovery peer. MUST BE AT byte index 8 - 40"
+              "X25519 public key. MUST BE AT byte index 8 - 40"
             ],
             "type": {
               "array": [
@@ -8762,6 +10769,35 @@
       }
     },
     {
+      "name": "CircuitFailureReason",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "OnChainCircuitNotReady"
+          },
+          {
+            "name": "OffChainCircuitFetchFailed"
+          },
+          {
+            "name": "OffChainCircuitHashMismatch"
+          },
+          {
+            "name": "CircuitCUMismatch"
+          },
+          {
+            "name": "LocalCircuitFetchFailed"
+          },
+          {
+            "name": "CircuitSerialization"
+          },
+          {
+            "name": "OtherArxError"
+          }
+        ]
+      }
+    },
+    {
       "name": "CircuitSource",
       "type": {
         "kind": "enum",
@@ -8855,6 +10891,58 @@
       }
     },
     {
+      "name": "CloseComputationDefinitionBuffersEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "comp_def_offset",
+            "type": "u32"
+          },
+          {
+            "name": "mxe_program_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "raw_circuit_index",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CloseComputationDefinitionEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "comp_def_offset",
+            "type": "u32"
+          },
+          {
+            "name": "mxe_program_id",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CloseMxeEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mxe_program_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "cluster_offset",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
       "name": "Cluster",
       "type": {
         "kind": "struct",
@@ -8894,14 +10982,14 @@
           {
             "name": "cu_price",
             "docs": [
-              "The price of compute units in this cluster."
+              "The price of compute units in this cluster, in micro-lamports (millionths of a lamport)."
             ],
             "type": "u64"
           },
           {
             "name": "cu_price_proposals",
             "docs": [
-              "The proposals for the cu price proposals in the next epoch.",
+              "The proposals for the cu price proposals in the next epoch, in micro-lamports.",
               "Index 0 is always the current price, we allow `MAX_FEE_PROPS` at most."
             ],
             "type": {
@@ -9045,31 +11133,11 @@
             }
           },
           {
-            "name": "cluster_index",
-            "docs": [
-              "The MXE's cluster to be used for execution.",
-              "",
-              "# Notes",
-              "",
-              "- [None] represents the default cluster,",
-              "- [Some] specifies the index of the fallback cluster."
-            ],
-            "type": {
-              "option": "u16"
-            }
-          },
-          {
             "name": "arguments",
             "type": {
               "defined": {
                 "name": "ArgumentList"
               }
-            }
-          },
-          {
-            "name": "callback_url",
-            "type": {
-              "option": "string"
             }
           },
           {
@@ -9106,15 +11174,15 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "finalization_authority",
+            "name": "deactivation_slot",
             "docs": [
-              "The authority that is allowed to finalize a computation execution (callback).",
-              "This is distinct from `upload_auth` (in `OnChainCircuitSource`) which controls the",
-              "computation definition lifecycle (uploading/finalizing the definition itself).",
-              "If set to None, anyone can finalize the computation execution."
+              "Slot at which the computation definition was deactivated, or `None` while active.",
+              "An OnChain circuit with `OnChainCircuitSource.is_completed == false` is not yet",
+              "queueable even when `deactivation_slot == None`; use `is_ready_to_queue()` to combine",
+              "both conditions."
             ],
             "type": {
-              "option": "pubkey"
+              "option": "u64"
             }
           },
           {
@@ -9148,7 +11216,23 @@
           },
           {
             "name": "bump",
+            "docs": [
+              "We have to manually put the bump here instead of using the #[bump] for backwards",
+              "compatibility."
+            ],
             "type": "u8"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "Padding to avoid breaking change since the above used to be Option<Pubkey>"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                24
+              ]
+            }
           }
         ]
       }
@@ -9205,6 +11289,35 @@
       }
     },
     {
+      "name": "ComputationMeta",
+      "docs": [
+        "Metadata for each computation slot in the execpool."
+      ],
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "queued_slot",
+            "docs": [
+              "Slot at which the computation was originally queued (derived from mempool buffer",
+              "position at promotion time). Preserves the original queue time so lifecycle checks",
+              "like `all_computations_newer_than` compare against the real queue slot, not the",
+              "promotion slot."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "ComputationReference",
       "serialization": "bytemuck",
       "repr": {
@@ -9230,7 +11343,16 @@
                     "name": "AcccountAccessInfo"
                   }
                 },
-                12
+                15
+              ]
+            }
+          },
+          {
+            "name": "_padding",
+            "type": {
+              "array": [
+                "u8",
+                2
               ]
             }
           }
@@ -9289,6 +11411,26 @@
       }
     },
     {
+      "name": "DeactivateComputationDefinitionEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "comp_def_offset",
+            "type": "u32"
+          },
+          {
+            "name": "mxe_program_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "deactivation_slot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Epoch",
       "docs": [
         "The network epoch"
@@ -9334,10 +11476,14 @@
             "type": "u64"
           },
           {
-            "name": "execpool_index",
+            "name": "meta",
             "type": {
               "array": [
-                "u64",
+                {
+                  "defined": {
+                    "name": "ComputationMeta"
+                  }
+                },
                 {
                   "generic": "MAX_PARRALLEL_COMPUTATIONS"
                 }
@@ -9391,6 +11537,32 @@
               {
                 "defined": {
                   "name": "AbortReason"
+                }
+              }
+            ]
+          },
+          {
+            "name": "KeyRecoveryFailure",
+            "fields": [
+              {
+                "defined": {
+                  "name": "KeyRecoveryFailureReason"
+                }
+              }
+            ]
+          },
+          {
+            "name": "TrustedDealer"
+          },
+          {
+            "name": "OutputTooLarge"
+          },
+          {
+            "name": "CircuitFailure",
+            "fields": [
+              {
+                "defined": {
+                  "name": "CircuitFailureReason"
                 }
               }
             ]
@@ -9515,6 +11687,14 @@
           {
             "name": "mxe_program_id",
             "type": "pubkey"
+          },
+          {
+            "name": "execution_status",
+            "type": {
+              "defined": {
+                "name": "ExecutionStatus"
+              }
+            }
           }
         ]
       }
@@ -9547,6 +11727,55 @@
           {
             "name": "mxe_program_id",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KeyRecoveryEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "computation_offset",
+            "type": "u64"
+          },
+          {
+            "name": "mxe_program_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "backup_mxe_program_id",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "KeyRecoveryFailureReason",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "KeysDigestMismatch"
+          },
+          {
+            "name": "X25519PubkeyMismatch"
+          },
+          {
+            "name": "Ed25519VerifyingKeyMismatch"
+          },
+          {
+            "name": "ElGamalPubkeyMismatch"
+          },
+          {
+            "name": "TooManyCorruptPeers"
+          },
+          {
+            "name": "Serialization"
+          },
+          {
+            "name": "NoPubkeysSet"
           }
         ]
       }
@@ -9757,13 +11986,19 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "_padding",
+            "docs": [
+              "`cluster` used to be Option<u32>, so we need to add a padding byte for backwards",
+              "compatibility."
+            ],
+            "type": "u8"
+          },
+          {
             "name": "cluster",
             "docs": [
               "The cluster executing the MXE."
             ],
-            "type": {
-              "option": "u32"
-            }
+            "type": "u32"
           },
           {
             "name": "keygen_offset",
@@ -9824,24 +12059,8 @@
             }
           },
           {
-            "name": "fallback_clusters",
-            "docs": [
-              "Fallback clusters that can execute this MXE as an alternative to the",
-              "[MXEAccount::cluster]. There can be a maximum of [MAX_FALLBACK_CLUSTERS]",
-              "fallback clusters."
-            ],
-            "type": {
-              "vec": "u32"
-            }
-          },
-          {
-            "name": "rejected_clusters",
-            "docs": [
-              "The clusters that have rejected this MXE."
-            ],
-            "type": {
-              "vec": "u32"
-            }
+            "name": "lut_offset_slot",
+            "type": "u64"
           },
           {
             "name": "computation_definitions",
@@ -9855,7 +12074,7 @@
           {
             "name": "status",
             "docs": [
-              "The status of this MXE (Active or Recovery)."
+              "The status of this MXE (`Active` or `Migration`)."
             ],
             "type": {
               "defined": {
@@ -10074,7 +12293,7 @@
       "name": "MxeRecoveryAccount",
       "docs": [
         "Account for tracking key recovery execution state.",
-        "PDA seeds: [\"mxe_recovery\", backup_mxe_pubkey, original_mxe_pubkey]"
+        "PDA seeds: [MxeRecoveryAccount::SEED, original_mxe_pubkey]"
       ],
       "serialization": "bytemuck",
       "repr": {
@@ -10122,21 +12341,14 @@
             "type": "pubkey"
           },
           {
-            "name": "is_finalized",
+            "name": "_padding",
             "docs": [
-              "Whether the recovery has been finalized (threshold met and marked ready)."
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "_padding2",
-            "docs": [
-              "Padding to ensure struct size is u64 aligned (6 bytes)"
+              "Padding to ensure struct size is u64 aligned"
             ],
             "type": {
               "array": [
                 "u8",
-                6
+                7
               ]
             }
           },
@@ -10159,7 +12371,7 @@
             "name": "Active"
           },
           {
-            "name": "Recovery"
+            "name": "Migration"
           }
         ]
       }
@@ -10175,7 +12387,7 @@
           {
             "name": "ip",
             "docs": [
-              "[Ipv4Addr], represented by it's 4 octects"
+              "`Ipv4Addr`, represented by its 4 octets"
             ],
             "type": {
               "array": [
@@ -10453,6 +12665,38 @@
       }
     },
     {
+      "name": "PermissionedRecoveryPeersAccount",
+      "docs": [
+        "Account for tracking permissioned recovery peers - needed until we have staking."
+      ],
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "permissioned_peers",
+            "docs": [
+              "DO NOT PUT ANYTHING ELSE BEFORE THE PERMISSIONED_PEERS FIELD, IT'S EXPECTED TO BE AT",
+              "OFFSET 8."
+            ],
+            "type": {
+              "array": [
+                "pubkey",
+                25
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "QueueComputationEvent",
       "type": {
         "kind": "struct",
@@ -10585,6 +12829,50 @@
           },
           {
             "name": "status",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecoveryPeerAccount",
+      "serialization": "bytemuck",
+      "repr": {
+        "kind": "c"
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "x25519_pubkey",
+            "docs": [
+              "DO NOT PUT ANYTHING ELSE BEFORE THE X25519_PUBKEY FIELD, IT'S EXPECTED TO BE AT OFFSET 40."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "peer_offset",
+            "docs": [
+              "DO NOT PUT ANYTHING ELSE BEFORE THE PEER_OFFSET FIELD, IT'S EXPECTED TO BE AT OFFSET 72."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                4
+              ]
+            }
+          },
+          {
+            "name": "bump",
             "type": "u8"
           }
         ]

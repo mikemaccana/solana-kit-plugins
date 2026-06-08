@@ -15,9 +15,10 @@ export interface ClientSideKeys {
 /*
  * Fetches the MXE's x25519 public key by reading the MXEAccount onchain.
  *
- * MXEAccount binary layout:
+ * MXEAccount binary layout (Arcium IDL 0.10.4):
  * - discriminator: 8 bytes
- * - cluster: Option<u32> = 1 byte discriminator + optional 4 bytes
+ * - _padding: u8 = 1 byte
+ * - cluster: u32 = 4 bytes
  * - keygen_offset: u64 = 8 bytes
  * - key_recovery_init_offset: u64 = 8 bytes
  * - mxe_program_id: Pubkey = 32 bytes
@@ -48,11 +49,8 @@ export const getMXEPublicKeyWithRetry = async (
 
       let offset = 8;
 
-      offset += 1;
-      if (accountData[offset - 1] === 1) {
-        offset += 4;
-      }
-
+      offset += 1; // _padding
+      offset += 4; // cluster
       offset += 8; // keygen_offset
       offset += 8; // key_recovery_init_offset
       offset += 32; // mxe_program_id
