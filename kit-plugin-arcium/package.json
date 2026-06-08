@@ -1,0 +1,37 @@
+{
+  "name": "solana-kite-arcium",
+  "version": "0.1.0",
+  "description": "Arcium confidential computing plugin for Solana Kite",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc && cp src/arcium.json dist/",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["solana", "kite", "arcium", "confidential-computing", "mpc", "plugin"],
+  "license": "MIT",
+  "peerDependencies": {
+    "solana-kite": "^3.0.0",
+    "@solana/kit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@solana/kit": "^5.4.0",
+    "@types/node": "^22.0.0",
+    "solana-kite": "^3.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.9.7",
+    "@noble/hashes": "^1.7.1"
+  }
+}
