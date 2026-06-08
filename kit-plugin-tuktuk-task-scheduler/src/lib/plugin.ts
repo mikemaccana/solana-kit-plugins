@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, Instruction, KeyPairSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { TukTukClient } from "./tuktuk-client.js";
@@ -83,11 +84,14 @@ export type ConnectionWithTukTuk = Connection & TukTukMethods;
  *
  * @example
  * ```typescript
- * import { connect } from "solana-kite";
- * import { createKiteTukTukPlugin } from "solana-kite-tuktuk";
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { tuktukTaskScheduler } from "kit-plugin-tuktuk-task-scheduler";
  * import { getAddMemoInstruction } from "@solana-program/memo";
  *
- * const client = connect("devnet").use(createKiteTukTukPlugin());
+ * const client = createClient()
+ *   .use(kite({ clusterNameOrURL: "devnet" }))
+ *   .use(tuktukTaskScheduler());
  *
  * // Get or create a task queue
  * const taskQueue = await client.getOrCreateTaskQueue(wallet, "my-queue");
@@ -111,8 +115,8 @@ export type ConnectionWithTukTuk = Connection & TukTukMethods;
  * });
  * ```
  */
-export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
-  return <T extends Connection>(connection: T): T & TukTukMethods => {
+export const tuktukTaskScheduler = (config: TukTukConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const tukTukClient = new TukTukClient(connection, config.defaultTaskQueueName);
 
     const getOrCreateTaskQueue = async (
@@ -182,8 +186,7 @@ export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
       return tukTukClient.fundTaskQueue(user, taskQueue, amount);
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       tuktuk: tukTukClient,
       getOrCreateTaskQueue,
       queueTask,
@@ -195,6 +198,11 @@ export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
       listTasks,
       closeTask,
       fundTaskQueue,
-    };
+    });
   };
 };
+
+/**
+ * @deprecated Use {@link tuktukTaskScheduler} instead. Kept for backward compatibility.
+ */
+export const createKiteTukTukPlugin = tuktukTaskScheduler;

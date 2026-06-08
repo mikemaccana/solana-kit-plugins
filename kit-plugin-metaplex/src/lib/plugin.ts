@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner, Commitment } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { MetaplexClient } from "./metaplex-client.js";
@@ -75,10 +76,13 @@ export type ConnectionWithMetaplex = Connection & MetaplexMethods;
  *
  * @example
  * ```typescript
- * import { connect } from "solana-kite";
- * import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { metaplex } from "kit-plugin-metaplex";
  *
- * const client = connect("mainnet-beta").use(createKiteMetaplexPlugin());
+ * const client = createClient()
+ *   .use(kite({ clusterNameOrURL: "mainnet" }))
+ *   .use(metaplex());
  *
  * // Automatically checks both Metaplex and Token-2022
  * const metadata = await client.getTokenMetadata(mintAddress);
@@ -116,8 +120,8 @@ export type ConnectionWithMetaplex = Connection & MetaplexMethods;
  * const token2022Only = await client.getToken2022Metadata(mintAddress);
  * ```
  */
-export const createKiteMetaplexPlugin = (config: MetaplexConfig = {}) => {
-  return <T extends Connection>(connection: T): T & MetaplexMethods => {
+export const metaplex = (config: MetaplexConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const metaplexClient = new MetaplexClient(connection, config.cacheTime, config.preferMetaplex);
 
     const getTokenMetadata = async (
@@ -167,8 +171,7 @@ export const createKiteMetaplexPlugin = (config: MetaplexConfig = {}) => {
       return metaplexClient.updateTokenMetadata(params);
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       metaplex: metaplexClient,
       getTokenMetadata,
       getMetaplexMetadata,
@@ -178,6 +181,11 @@ export const createKiteMetaplexPlugin = (config: MetaplexConfig = {}) => {
       getBatchTokenMetadata,
       validateMetadataUri,
       updateTokenMetadata,
-    };
+    });
   };
 };
+
+/**
+ * @deprecated Use {@link metaplex} instead. Kept for backward compatibility.
+ */
+export const createKiteMetaplexPlugin = metaplex;

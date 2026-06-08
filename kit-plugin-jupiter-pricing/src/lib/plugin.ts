@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { SOL } from "solana-kite";
@@ -42,8 +43,8 @@ export interface PricingMethods {
 
 export type ConnectionWithPricing = Connection & PricingMethods;
 
-export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
-  return <T extends Connection>(connection: T): T & PricingMethods => {
+export const jupiterPricing = (config: KitePricingConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const jupiter = new JupiterClient(config.jupiterApiKey, config.cacheTimeMs, config.vsToken);
 
     const getTokenPrice = async (mint: Address): Promise<TokenPriceInfo | null> => {
@@ -279,8 +280,7 @@ export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
       };
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       jupiter,
       getTokenPrice,
       getTokenPrices,
@@ -293,6 +293,11 @@ export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
       formatUsdValue,
       watchPortfolioValue,
       watchTokenPrice,
-    };
+    });
   };
 };
+
+/**
+ * @deprecated Use {@link jupiterPricing} instead. Kept for backward compatibility.
+ */
+export const createKitePricingPlugin = jupiterPricing;

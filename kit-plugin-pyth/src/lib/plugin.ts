@@ -1,12 +1,32 @@
+import { extendClient } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { PythClient } from "./pyth-client.js";
-import type { PythConfig, PythMethods, ConnectionWithPyth } from "./types.js";
+import type { PythConfig, PythMethods } from "./types.js";
 
-export function createKitePythPlugin(config: PythConfig = {}) {
-  return function pythPlugin(connection: Connection): ConnectionWithPyth {
+/**
+ * Solana Kit plugin that adds Pyth Network oracle helpers (under `client.pyth`) to a client.
+ *
+ * Requires the Solana Kite capability (apply `kite()` from `kit-plugin-kite` first), as the
+ * Pyth client uses Kite's RPC and transaction helpers.
+ *
+ * @example
+ * ```typescript
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { pyth } from "kit-plugin-pyth";
+ *
+ * const client = createClient()
+ *   .use(kite({ clusterNameOrURL: "mainnet" }))
+ *   .use(pyth());
+ *
+ * const feed = await client.pyth.getPythPrice("...");
+ * ```
+ */
+export function pyth(config: PythConfig = {}) {
+  return <T extends Connection>(connection: T) => {
     const client = new PythClient(connection, config);
 
-    const pyth: PythMethods = {
+    const pythMethods: PythMethods = {
       getPythPrice: client.getPythPrice.bind(client),
       getPythPrices: client.getPythPrices.bind(client),
       getPythOnchainPrice: client.getPythOnchainPrice.bind(client),
@@ -18,6 +38,11 @@ export function createKitePythPlugin(config: PythConfig = {}) {
       reclaimPythPriceUpdateRent: client.reclaimPythPriceUpdateRent.bind(client),
     };
 
-    return { pyth };
+    return extendClient(connection, { pyth: pythMethods });
   };
 }
+
+/**
+ * @deprecated Use {@link pyth} instead. Kept for backward compatibility.
+ */
+export const createKitePythPlugin = pyth;

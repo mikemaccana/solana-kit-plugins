@@ -1,7 +1,7 @@
 {
-  "name": "solana-kite-metaplex",
+  "name": "kit-plugin-metaplex",
   "version": "0.1.0",
-  "description": "Metaplex token metadata plugin for Solana Kite supporting both Metaplex Token Metadata and Token-2022 metadata extension",
+  "description": "Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token-2022 metadata extension (layers on the Kite capability)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,6 +21,7 @@
   },
   "keywords": [
     "solana",
+    "kit",
     "kite",
     "metaplex",
     "nft",
@@ -32,13 +33,13 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "solana-kite": "^3.0.0",
-    "@solana/kit": "^5.0.0"
+    "solana-kite": "^3.2.0",
+    "@solana/kit": "^6.0.0"
   },
   "devDependencies": {
-    "@solana/kit": "^5.4.0",
+    "@solana/kit": "^6.9.0",
     "@types/node": "^22.10.5",
-    "solana-kite": "^3.1.0",
+    "solana-kite": "^3.2.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   },

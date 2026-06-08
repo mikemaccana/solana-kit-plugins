@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import { type Connection } from "solana-kite";
 import { ArciumClient, type ArciumPluginConfig } from "./arcium-client.js";
 
@@ -9,12 +10,33 @@ export interface ArciumMethods {
 
 export type ConnectionWithArcium = Connection & ArciumMethods;
 
-export const createKiteArciumPlugin = (config: ArciumPluginConfig = {}) => {
-  return async <T extends Connection>(connection: T): Promise<T & ArciumMethods> => {
+/**
+ * Solana Kit plugin that adds Arcium confidential-computing helpers to a client.
+ *
+ * Requires the Solana Kite capability (apply `kite()` from `kit-plugin-kite` first), as the
+ * Arcium client builds on Kite's RPC, PDA and transaction helpers.
+ *
+ * @example
+ * ```typescript
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { arcium } from "kit-plugin-arcium";
+ *
+ * const client = await createClient()
+ *   .use(kite({ clusterNameOrURL: "localnet" }))
+ *   .use(arcium({ artifactsDir: "./artifacts" }));
+ *
+ * const mxeAccount = await client.arcium.getMXEAccountAddress(mxeProgramId);
+ * ```
+ */
+export function arcium(config: ArciumPluginConfig = {}) {
+  return async <T extends Connection>(connection: T) => {
     const arciumClient = await ArciumClient.create(connection, config);
-    return {
-      ...connection,
-      arcium: arciumClient,
-    };
+    return extendClient(connection, { arcium: arciumClient });
   };
-};
+}
+
+/**
+ * @deprecated Use {@link arcium} instead. Kept for backward compatibility.
+ */
+export const createKiteArciumPlugin = arcium;

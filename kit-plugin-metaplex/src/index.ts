@@ -1,4 +1,4 @@
-export { createKiteMetaplexPlugin, MetaplexClient, METADATA_PROGRAM_ID, MetadataSource } from "./lib/index.js";
+export { metaplex, createKiteMetaplexPlugin, MetaplexClient, METADATA_PROGRAM_ID, MetadataSource } from "./lib/index.js";
 export type {
   MetaplexConfig,
   TokenMetadata,

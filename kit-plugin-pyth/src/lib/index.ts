@@ -1,4 +1,4 @@
-export { createKitePythPlugin } from "./plugin.js";
+export { pyth, createKitePythPlugin } from "./plugin.js";
 export { PythClient } from "./pyth-client.js";
 export * from "./constants.js";
 export type {

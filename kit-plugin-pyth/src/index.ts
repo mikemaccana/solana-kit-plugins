@@ -1,4 +1,5 @@
 export {
+  pyth,
   createKitePythPlugin,
   PythClient,
   HERMES_URL,

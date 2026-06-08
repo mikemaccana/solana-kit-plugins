@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { ANSClient } from "./ans.js";
@@ -11,8 +12,8 @@ export interface ANSMethods {
 
 export type ConnectionWithANS = Connection & ANSMethods;
 
-export const createKiteANSNameServicePlugin = (config: ANSConfig = {}) => {
-  return <T extends Connection>(connection: T): T & ANSMethods => {
+export const ansNameService = (config: ANSConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const ansClient = new ANSClient(config.cacheTime, config.cluster);
 
     const getAddressForANSName = async (nameOrAddress: string): Promise<Address> => {
@@ -109,8 +110,7 @@ export const createKiteANSNameServicePlugin = (config: ANSConfig = {}) => {
       };
     }
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       ans: ansClient,
       getAddressForANSName,
       getANSNamesForAddress,
@@ -122,6 +122,11 @@ export const createKiteANSNameServicePlugin = (config: ANSConfig = {}) => {
       ...(enhancedGetPortfolioBreakdown && { getPortfolioBreakdown: enhancedGetPortfolioBreakdown }),
       ...(enhancedGetTopHoldings && { getTopHoldings: enhancedGetTopHoldings }),
       ...(enhancedWatchPortfolioValue && { watchPortfolioValue: enhancedWatchPortfolioValue }),
-    };
+    });
   };
 };
+
+/**
+ * @deprecated Use {@link ansNameService} instead. Kept for backward compatibility.
+ */
+export const createKiteANSNameServicePlugin = ansNameService;

@@ -1,4 +1,4 @@
-export { createKiteArciumPlugin } from "./lib/plugin.js";
+export { arcium, createKiteArciumPlugin } from "./lib/plugin.js";
 export type {
   ArciumMethods,
   ConnectionWithArcium,

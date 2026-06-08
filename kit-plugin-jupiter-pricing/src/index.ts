@@ -1,4 +1,4 @@
-export { createKitePricingPlugin } from "./lib/plugin.js";
+export { jupiterPricing, createKitePricingPlugin } from "./lib/plugin.js";
 export type { ConnectionWithPricing, PricingMethods } from "./lib/plugin.js";
 export type {
   JupiterPriceData,

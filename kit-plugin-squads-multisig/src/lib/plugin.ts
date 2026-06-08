@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner, Commitment, Instruction } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { SquadsClient } from "./squads-client.js";
@@ -121,8 +122,8 @@ export type ConnectionWithSquads = Connection & SquadsMethods;
  * await client.executeProposal({ multisig, transactionIndex, member: member1 });
  * ```
  */
-export const createKiteSquadsPlugin = (config: SquadsConfig = {}) => {
-  return <T extends Connection>(connection: T): T & SquadsMethods => {
+export const squadsMultisig = (config: SquadsConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const squadsClient = new SquadsClient(connection);
 
     const createMultisig = async (params: {
@@ -189,8 +190,7 @@ export const createKiteSquadsPlugin = (config: SquadsConfig = {}) => {
       return squadsClient.getVaultAddress(multisig, vaultIndex);
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       squads: squadsClient,
       createMultisig,
       createProposal,
@@ -202,6 +202,11 @@ export const createKiteSquadsPlugin = (config: SquadsConfig = {}) => {
       getMultisigAddress,
       getProposalAddress,
       getVaultAddress,
-    };
+    });
   };
 };
+
+/**
+ * @deprecated Use {@link squadsMultisig} instead. Kept for backward compatibility.
+ */
+export const createKiteSquadsPlugin = squadsMultisig;

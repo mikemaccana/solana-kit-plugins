@@ -1,4 +1,5 @@
 import type { Address, TransactionSendingSigner } from "@solana/kit";
+import type { Connection } from "solana-kite";
 
 export interface PythPrice {
   /** The price as a floating-point number (raw_price * 10^exponent) */
@@ -86,6 +87,6 @@ export interface PythMethods {
   reclaimPythPriceUpdateRent(priceUpdateAccount: Address, payer: TransactionSendingSigner): Promise<string>;
 }
 
-export type ConnectionWithPyth = {
+export type ConnectionWithPyth = Connection & {
   pyth: PythMethods;
 };
