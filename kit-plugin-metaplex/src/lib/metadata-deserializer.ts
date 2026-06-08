@@ -1,7 +1,9 @@
 import type { Address } from "@solana/kit";
-import { address } from "@solana/kit";
+import { getAddressDecoder } from "@solana/kit";
 import type { TokenMetadata, Creator, Collection } from "./types.js";
 import { MetadataSource } from "./constants.js";
+
+const addressDecoder = getAddressDecoder();
 
 /**
  * Deserializes a Metaplex Token Metadata account.
@@ -21,7 +23,7 @@ export function deserializeMetaplexMetadata(data: Uint8Array, mintAddress: Addre
   const readPublicKey = (): Address => {
     const bytes = data.slice(offset, offset + 32);
     offset += 32;
-    return address(Buffer.from(bytes).toString("base64"));
+    return addressDecoder.decode(bytes);
   };
 
   const readString = (): string => {

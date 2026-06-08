@@ -1,7 +1,7 @@
 {
-  "name": "kit-plugin-jupiter-pricing",
+  "name": "kit-plugin-switchboard",
   "version": "0.1.0",
-  "description": "Jupiter Price API plugin for Solana Kit providing price-aware token operations (layers on the Kite capability)",
+  "description": "Switchboard On-Demand oracle plugin for Solana Kit - read-only price/feed values from on-chain pull feed accounts (layers on the Kite capability)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,11 +24,12 @@
   },
   "keywords": [
     "solana",
+    "kit",
     "kite",
-    "jupiter",
-    "pricing",
-    "defi",
-    "plugin"
+    "switchboard",
+    "oracle",
+    "price-feed",
+    "defi"
   ],
   "author": "",
   "license": "MIT",

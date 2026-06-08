@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc",
     "test": "tsx --test src/**/*.test.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:ci": "tsx --test src/**/*.unit.test.ts"
   },
   "keywords": [
     "solana",
