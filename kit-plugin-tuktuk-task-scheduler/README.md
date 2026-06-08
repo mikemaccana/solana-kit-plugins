@@ -16,7 +16,7 @@ This plugin extends Solana Kite with TukTuk integration, allowing you to schedul
 ## Installation
 
 ```bash
-npm install solana-kite-tuktuk solana-kite @solana/kit
+npm install kit-plugin-tuktuk-task-scheduler solana-kite @solana/kit
 ```
 
 ## Important Notes
@@ -30,11 +30,12 @@ npm install solana-kite-tuktuk solana-kite @solana/kit
 ### One-Time Task
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteTukTukPlugin } from "solana-kite-tuktuk";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { tuktukTaskScheduler } from "kit-plugin-tuktuk-task-scheduler";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
-const connection = connect("devnet").addPlugin(createKiteTukTukPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "devnet" })).use(tuktukTaskScheduler());
 const wallet = await connection.loadWalletFromEnvironment("WALLET_SECRET_KEY");
 
 // Get or create a task queue

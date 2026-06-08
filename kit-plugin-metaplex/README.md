@@ -18,7 +18,7 @@ This plugin intelligently handles BOTH metadata standards, automatically detecti
 ## Installation
 
 ```bash
-npm install solana-kite-metaplex solana-kite @solana/kit
+npm install kit-plugin-metaplex solana-kite @solana/kit
 ```
 
 ## Quick Start
@@ -26,11 +26,12 @@ npm install solana-kite-metaplex solana-kite @solana/kit
 ### Basic Usage
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { metaplex } from "kit-plugin-metaplex";
 import { address } from "@solana/kit";
 
-const connection = connect("mainnet-beta").addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(metaplex());
 
 const mintAddress = address("YourTokenMintAddress...");
 
@@ -377,8 +378,8 @@ Token metadata changes infrequently, so aggressive caching is appropriate.
 
 ```typescript
 // Check Token-2022 first, then fall back to Metaplex
-const connection = connect("mainnet-beta").addPlugin(
-  createKiteMetaplexPlugin({ preferMetaplex: false })
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(
+  metaplex({ preferMetaplex: false })
 );
 ```
 
@@ -386,21 +387,22 @@ const connection = connect("mainnet-beta").addPlugin(
 
 ```typescript
 // Cache for 30 minutes
-const connection = connect("mainnet-beta").addPlugin(
-  createKiteMetaplexPlugin({ cacheTime: 1800000 })
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(
+  metaplex({ cacheTime: 1800000 })
 );
 ```
 
 ## Composing with Other Plugins
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiterPricing } from "kit-plugin-jupiter-pricing";
+import { metaplex } from "kit-plugin-metaplex";
 
-const connection = connect("mainnet-beta")
-  .addPlugin(createKitePricingPlugin({ jupiterApiKey: process.env.JUPITER_API_KEY }))
-  .addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiterPricing({ jupiterApiKey: process.env.JUPITER_API_KEY }))
+  .use(metaplex());
 
 // Use both pricing and metadata features
 const metadata = await connection.getTokenMetadata(mintAddress);

@@ -13,17 +13,18 @@ AllDomains Name Service (ANS) plugin for Solana Kite enabling `.abc` and custom 
 ## Installation
 
 ```bash
-npm install solana-kite-ans-name-service solana-kite @solana/kit
+npm install kit-plugin-ans-name-service solana-kite @solana/kit
 ```
 
 ## Quick Start
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteANSNameServicePlugin } from "solana-kite-ans-name-service";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { ansNameService } from "kit-plugin-ans-name-service";
 
-// Using .addPlugin() method (recommended)
-const connection = connect("mainnet-beta").addPlugin(createKiteANSNameServicePlugin());
+// Using .use() method (recommended)
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(ansNameService());
 
 const address = await connection.getAddressForANSName("example.abc");
 console.log(`Resolved address: ${address}`);
@@ -32,8 +33,8 @@ console.log(`Resolved address: ${address}`);
 **Alternative: Manual composition**
 
 ```typescript
-const ansPlugin = createKiteANSNameServicePlugin();
-const connection = ansPlugin(connect("mainnet-beta"));
+const ansPlugin = ansNameService();
+const connection = ansPlugin(createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })));
 ```
 
 ## API
@@ -53,8 +54,8 @@ Get ANS domains for an address (returns empty array - full implementation coming
 ## Configuration
 
 ```typescript
-const connection = connect("mainnet-beta").addPlugin(
-  createKiteANSNameServicePlugin({
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(
+  ansNameService({
     cacheTime: 3600000, // 1 hour (default)
     cluster: "mainnet-beta", // ANS cluster (default)
   })
@@ -64,9 +65,9 @@ const connection = connect("mainnet-beta").addPlugin(
 ## Composing with Other Plugins
 
 ```typescript
-const connection = connect("mainnet-beta")
-  .addPlugin(createKiteJupiterPricingPlugin({ jupiterApiKey }))
-  .addPlugin(createKiteANSNameServicePlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiterPricing({ jupiterApiKey }))
+  .use(ansNameService());
 
 await connection.transferTokens({
   sender,

@@ -16,7 +16,7 @@ This plugin extends Solana Kite with price data from Jupiter, enabling you to wo
 ## Installation
 
 ```bash
-npm install solana-kite-pricing solana-kite @solana/kit
+npm install kit-plugin-jupiter-pricing solana-kite @solana/kit
 ```
 
 ## Setup
@@ -29,37 +29,33 @@ export JUPITER_API_KEY="your-api-key-here"
 
 ## Quick Start
 
-### Basic Usage with connect()
+### Basic Usage with createClient().use(kite())
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiterPricing } from "kit-plugin-jupiter-pricing";
 
-const connection = createKitePricingPlugin({
-  jupiterApiKey: process.env.JUPITER_API_KEY,
-})(connect("mainnet-beta"));
+const connection = createClient()
+  .use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiterPricing({ jupiterApiKey: process.env.JUPITER_API_KEY }));
 
 const solPrice = await connection.getTokenPrice("So11111111111111111111111111111111111111112");
 console.log(`SOL price: $${solPrice.priceUsd}`);
 ```
 
-### Advanced Usage with Solana Kit Plugin Pattern
+### Configuration options
 
 ```typescript
-import { createSolanaRpc, createDefaultRpcTransport } from "@solana/kit";
-import { createKitePlugin } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiterPricing } from "kit-plugin-jupiter-pricing";
 
-const transport = createDefaultRpcTransport({
-  url: "https://api.mainnet-beta.solana.com"
-});
-const rpc = createSolanaRpc(transport);
-
-const connection = rpc
-  .use(createKitePlugin({ clusterNameOrURL: "mainnet-beta" }))
-  .use(createKitePricingPlugin({
+const connection = createClient()
+  .use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiterPricing({
     jupiterApiKey: process.env.JUPITER_API_KEY,
-    cacheTimeMs: 60000
+    cacheTimeMs: 60000,
   }));
 
 const portfolioValue = await connection.getPortfolioValue(someAddress);
@@ -323,12 +319,13 @@ interface PortfolioBreakdown {
 
 ```typescript
 import { address } from "@solana/kit";
-import { connect } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiterPricing } from "kit-plugin-jupiter-pricing";
 
-const connection = createKitePricingPlugin({
-  jupiterApiKey: process.env.JUPITER_API_KEY,
-})(connect("mainnet-beta"));
+const connection = createClient()
+  .use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiterPricing({ jupiterApiKey: process.env.JUPITER_API_KEY }));
 
 const walletAddress = address("dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
 

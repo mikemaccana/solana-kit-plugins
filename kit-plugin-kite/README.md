@@ -45,7 +45,7 @@ const client = createClient()
   .use(pyth());
 
 const metadata = await client.getTokenMetadata(someMint);
-const price = await client.pyth.getPythPrice("...");
+const price = await client.pyth.getPythPriceFeed("...");
 ```
 
 > **Note:** `kite()` establishes the RPC and RPC-subscriptions transports from the supplied cluster

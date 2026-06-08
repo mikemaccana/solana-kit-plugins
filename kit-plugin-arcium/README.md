@@ -15,20 +15,21 @@ Arcium confidential computing plugin for Solana Kite. Provides onchain helpers f
 ## Installation
 
 ```bash
-npm install solana-kite-arcium solana-kite @solana/kit
+npm install kit-plugin-arcium solana-kite @solana/kit
 ```
 
 ## Quick Start
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteArciumPlugin } from "solana-kite-arcium";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { arcium } from "kit-plugin-arcium";
 import { address } from "@solana/kit";
 
 const mxeProgramId = address("YourMXEProgramId...");
 
-const connection = connect("localnet").addPlugin(
-  createKiteArciumPlugin({ artifactsDir: "./artifacts" })
+const connection = createClient().use(kite({ clusterNameOrURL: "localnet" })).use(
+  arcium({ artifactsDir: "./artifacts" })
 );
 
 // Derive an MXE account address
@@ -68,8 +69,8 @@ interface ArciumPluginConfig {
 `clusterOffset` overrides the cluster offset used for PDA derivation. Defaults to reading `ARCIUM_CLUSTER_OFFSET` from the environment. Available as `connection.arcium.clusterOffset`.
 
 ```typescript
-const connection = connect("localnet").addPlugin(
-  createKiteArciumPlugin({ artifactsDir: "./artifacts" })
+const connection = createClient().use(kite({ clusterNameOrURL: "localnet" })).use(
+  arcium({ artifactsDir: "./artifacts" })
 );
 ```
 
@@ -134,7 +135,7 @@ const clusterAccount = await connection.arcium.clusterAccount;
 `offset` is a 4-byte `Uint8Array` from `getComputationDefinitionAccountOffset(circuitName)`.
 
 ```typescript
-import { getComputationDefinitionAccountOffset } from "solana-kite-arcium";
+import { getComputationDefinitionAccountOffset } from "kit-plugin-arcium";
 
 const offset = getComputationDefinitionAccountOffset("my_circuit");
 const compDefAccount = await connection.arcium.getComputationDefinitionAccountAddress(
@@ -239,7 +240,7 @@ These are pure functions exported directly — no connection needed.
 Reads `ARCIUM_CLUSTER_OFFSET` from the environment and returns it as a number. The `ArciumClient` calls this automatically, so you only need this standalone utility if you require the offset value directly (e.g. for logging). It is also accessible as `connection.arcium.clusterOffset`.
 
 ```typescript
-import { getArciumClusterOffset } from "solana-kite-arcium";
+import { getArciumClusterOffset } from "kit-plugin-arcium";
 
 const clusterOffset = getArciumClusterOffset();
 ```
@@ -249,7 +250,7 @@ const clusterOffset = getArciumClusterOffset();
 Returns the first 4 bytes of `SHA256(circuitName)`. Used as the seed when deriving computation definition account PDAs.
 
 ```typescript
-import { getComputationDefinitionAccountOffset } from "solana-kite-arcium";
+import { getComputationDefinitionAccountOffset } from "kit-plugin-arcium";
 
 const offset = getComputationDefinitionAccountOffset("my_circuit");
 ```
@@ -259,7 +260,7 @@ const offset = getComputationDefinitionAccountOffset("my_circuit");
 Returns 12 random bytes suitable for use as an encryption nonce.
 
 ```typescript
-import { getRandomNonce } from "solana-kite-arcium";
+import { getRandomNonce } from "kit-plugin-arcium";
 
 const nonce = getRandomNonce();
 ```
@@ -269,7 +270,7 @@ const nonce = getRandomNonce();
 Little-endian serialization helpers for encoding bigint values for Arcium instructions.
 
 ```typescript
-import { serializeLE, deserializeLE } from "solana-kite-arcium";
+import { serializeLE, deserializeLE } from "kit-plugin-arcium";
 
 const encoded = serializeLE(12345n, 8);
 const decoded = deserializeLE(encoded); // 12345n
@@ -284,7 +285,7 @@ Returns a random bigint from 8 random bytes.
 Parses Anchor events from transaction log messages. Useful when handling program callbacks.
 
 ```typescript
-import { parseAnchorEventFromLogs } from "solana-kite-arcium";
+import { parseAnchorEventFromLogs } from "kit-plugin-arcium";
 
 const eventData = parseAnchorEventFromLogs(transaction.meta.logMessages, myDiscriminator);
 if (eventData) {
@@ -307,7 +308,7 @@ Crypto primitives extracted from `@arcium-hq/client` v0.8.5 to remove the web3.j
 | `arcisEd25519` | — | Ed25519 with SHA3-512 (lower MPC depth) |
 
 ```typescript
-import { RescueCipher, getRandomNonce } from "solana-kite-arcium";
+import { RescueCipher, getRandomNonce } from "kit-plugin-arcium";
 
 const { cipher } = await connection.arcium.makeClientSideKeys(mxeProgramId);
 const nonce = getRandomNonce();
@@ -321,7 +322,7 @@ const decrypted = cipher.decrypt(encrypted, nonce);
 The Arcium program address as an `Address`.
 
 ```typescript
-import { ARCIUM_PROGRAM_ID } from "solana-kite-arcium";
+import { ARCIUM_PROGRAM_ID } from "kit-plugin-arcium";
 ```
 
 ---
@@ -329,13 +330,14 @@ import { ARCIUM_PROGRAM_ID } from "solana-kite-arcium";
 ## Composing with Other Plugins
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteArciumPlugin } from "solana-kite-arcium";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { arcium } from "kit-plugin-arcium";
+import { metaplex } from "kit-plugin-metaplex";
 
-const connection = connect("localnet")
-  .addPlugin(createKiteArciumPlugin({ artifactsDir: "./artifacts" }))
-  .addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "localnet" }))
+  .use(arcium({ artifactsDir: "./artifacts" }))
+  .use(metaplex());
 ```
 
 ## Environment Variables

@@ -23,7 +23,7 @@ The official `@sqds/multisig` uses web3.js v1. This plugin provides a modern alt
 ## Installation
 
 ```bash
-npm install solana-kite-squads-multisig solana-kite @solana/kit
+npm install kit-plugin-squads-multisig solana-kite @solana/kit
 ```
 
 ## Quick Start
@@ -31,11 +31,12 @@ npm install solana-kite-squads-multisig solana-kite @solana/kit
 ### Create a Multisig
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteSquadsPlugin } from "solana-kite-squads-multisig";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { squadsMultisig } from "kit-plugin-squads-multisig";
 import { loadWalletFromEnvironment } from "solana-kite";
 
-const connection = connect("devnet").addPlugin(createKiteSquadsPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "devnet" })).use(squadsMultisig());
 const creator = await loadWalletFromEnvironment("CREATOR_SECRET_KEY");
 
 // Create a 2-of-3 multisig
@@ -258,13 +259,14 @@ await connection.executeProposal({ multisig, transactionIndex, member: member1 }
 ### Composing with Other Plugins
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteSquadsPlugin } from "solana-kite-squads-multisig";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { squadsMultisig } from "kit-plugin-squads-multisig";
+import { metaplex } from "kit-plugin-metaplex";
 
-const connection = connect("mainnet-beta")
-  .addPlugin(createKiteSquadsPlugin())
-  .addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(squadsMultisig())
+  .use(metaplex());
 
 // Use multisig to update NFT metadata
 const vault = await connection.getVaultAddress(multisig);
