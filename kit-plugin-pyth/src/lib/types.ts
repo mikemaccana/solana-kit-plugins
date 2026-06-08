@@ -58,9 +58,9 @@ export type PythPriceCallback = (error: Error | null, feed: PythPriceFeed | null
 
 export interface PythMethods {
   /** Fetch the latest price for a single feed from the Hermes API */
-  getPythPrice(feedId: string): Promise<PythPriceFeed | null>;
+  getPythPriceFeed(feedId: string): Promise<PythPriceFeed | null>;
   /** Fetch the latest prices for multiple feeds in one request */
-  getPythPrices(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>>;
+  getPythPriceFeeds(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>>;
   /** Read a legacy push-oracle Pyth price account directly from on-chain state */
   getPythOnchainPrice(priceAccountAddress: Address): Promise<PythOnchainPriceData | null>;
   /** Returns true if the feed's last publish time exceeds maxAgeSeconds */
@@ -68,7 +68,7 @@ export interface PythMethods {
   /** Search Pyth's feed catalogue by name or symbol */
   searchPythFeeds(query: string, assetType?: string): Promise<Array<PythFeedInfo>>;
   /** Subscribe to price updates, calling callback on each poll */
-  watchPythPrice(feedId: string, callback: PythPriceCallback, intervalMs?: number): () => void;
+  watchPythPriceFeed(feedId: string, callback: PythPriceCallback, intervalMs?: number): () => void;
   /**
    * Post a single Pyth pull-oracle price update on-chain via the Pyth Receiver program.
    * Returns the address of the temporary PriceUpdateV2 account that was created.

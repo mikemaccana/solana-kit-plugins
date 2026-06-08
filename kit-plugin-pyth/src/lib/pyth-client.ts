@@ -246,13 +246,13 @@ export class PythClient {
     this.hermesUrl = config.hermesUrl ?? HERMES_URL;
   }
 
-  async getPythPrice(feedId: string): Promise<PythPriceFeed | null> {
+  async getPythPriceFeed(feedId: string): Promise<PythPriceFeed | null> {
     const normalizedId = normalizeFeedId(feedId);
     const { feeds } = await this.fetchHermesLatest([normalizedId]);
     return feeds.get(normalizedId) ?? null;
   }
 
-  async getPythPrices(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>> {
+  async getPythPriceFeeds(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>> {
     const normalizedIds = feedIds.map(normalizeFeedId);
     const { feeds } = await this.fetchHermesLatest(normalizedIds);
     return feeds;
@@ -307,7 +307,7 @@ export class PythClient {
   }
 
   async isPythPriceStale(feedId: string, maxAgeSeconds: number): Promise<boolean> {
-    const feed = await this.getPythPrice(feedId);
+    const feed = await this.getPythPriceFeed(feedId);
     if (!feed) return true;
     const ageSeconds = Date.now() / 1000 - feed.price.publishTime;
     return ageSeconds > maxAgeSeconds;
@@ -329,10 +329,10 @@ export class PythClient {
     }));
   }
 
-  watchPythPrice(feedId: string, callback: PythPriceCallback, intervalMs: number = 1000): () => void {
+  watchPythPriceFeed(feedId: string, callback: PythPriceCallback, intervalMs: number = 1000): () => void {
     const poll = async () => {
       try {
-        const feed = await this.getPythPrice(feedId);
+        const feed = await this.getPythPriceFeed(feedId);
         if (feed) {
           callback(null, feed);
         } else {

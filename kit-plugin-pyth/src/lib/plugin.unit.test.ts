@@ -13,7 +13,7 @@ describe("pyth() plugin", () => {
     const client = pyth()(connect("devnet"));
 
     assert.ok(client.pyth, "exposes the pyth namespace");
-    assert.strictEqual(typeof client.pyth.getPythPrice, "function");
+    assert.strictEqual(typeof client.pyth.getPythPriceFeed, "function");
     assert.strictEqual(typeof client.pyth.getPythOnchainPrice, "function");
     assert.strictEqual(typeof client.pyth.postPythPriceUpdate, "function");
     // Regression test: the plugin must preserve the underlying Kite connection

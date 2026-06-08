@@ -19,7 +19,7 @@ import type { PythConfig, PythMethods } from "./types.js";
  *   .use(kite({ clusterNameOrURL: "mainnet" }))
  *   .use(pyth());
  *
- * const feed = await client.pyth.getPythPrice("...");
+ * const feed = await client.pyth.getPythPriceFeed("...");
  * ```
  */
 export function pyth(config: PythConfig = {}) {
@@ -27,12 +27,12 @@ export function pyth(config: PythConfig = {}) {
     const client = new PythClient(connection, config);
 
     const pythMethods: PythMethods = {
-      getPythPrice: client.getPythPrice.bind(client),
-      getPythPrices: client.getPythPrices.bind(client),
+      getPythPriceFeed: client.getPythPriceFeed.bind(client),
+      getPythPriceFeeds: client.getPythPriceFeeds.bind(client),
       getPythOnchainPrice: client.getPythOnchainPrice.bind(client),
       isPythPriceStale: client.isPythPriceStale.bind(client),
       searchPythFeeds: client.searchPythFeeds.bind(client),
-      watchPythPrice: client.watchPythPrice.bind(client),
+      watchPythPriceFeed: client.watchPythPriceFeed.bind(client),
       postPythPriceUpdate: client.postPythPriceUpdate.bind(client),
       postPythPriceUpdates: client.postPythPriceUpdates.bind(client),
       reclaimPythPriceUpdateRent: client.reclaimPythPriceUpdateRent.bind(client),
