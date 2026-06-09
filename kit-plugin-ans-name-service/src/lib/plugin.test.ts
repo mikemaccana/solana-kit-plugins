@@ -1,12 +1,12 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { connect } from "solana-kite";
-import { createKiteANSNameServicePlugin } from "./plugin.js";
+import { ans } from "./plugin.js";
 
-describe("createKiteANSNameServicePlugin", () => {
+describe("ans", () => {
   test("plugin extends connection with ANS methods", () => {
     const connection = connect("mainnet-beta");
-    const ansPlugin = createKiteANSNameServicePlugin();
+    const ansPlugin = ans();
     const connectionWithANS = ansPlugin(connection);
 
     assert.ok(typeof connectionWithANS.getAddressForANSName === "function");
@@ -16,7 +16,7 @@ describe("createKiteANSNameServicePlugin", () => {
 
   test("plugin preserves original connection methods", () => {
     const connection = connect("mainnet-beta");
-    const ansPlugin = createKiteANSNameServicePlugin();
+    const ansPlugin = ans();
     const connectionWithANS = ansPlugin(connection);
 
     assert.ok(typeof connectionWithANS.getLamportBalance === "function");
@@ -28,7 +28,7 @@ describe("createKiteANSNameServicePlugin", () => {
 describe("getAddressForANSName integration", () => {
   test("returns address when given an address", async () => {
     const connection = connect("mainnet-beta");
-    const ansPlugin = createKiteANSNameServicePlugin();
+    const ansPlugin = ans();
     const client = ansPlugin(connection);
 
     const testAddress = "dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8";
@@ -39,7 +39,7 @@ describe("getAddressForANSName integration", () => {
 
   test("throws error for invalid domain format", async () => {
     const connection = connect("mainnet-beta");
-    const ansPlugin = createKiteANSNameServicePlugin();
+    const ansPlugin = ans();
     const client = ansPlugin(connection);
 
     await assert.rejects(
@@ -56,7 +56,7 @@ describe("getAddressForANSName integration", () => {
 describe("caching", () => {
   test("clearCache removes cached entries", () => {
     const connection = connect("mainnet-beta");
-    const ansPlugin = createKiteANSNameServicePlugin();
+    const ansPlugin = ans();
     const client = ansPlugin(connection);
 
     client.ans.clearCache();

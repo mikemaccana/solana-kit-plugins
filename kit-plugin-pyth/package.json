@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-pyth",
   "version": "0.1.0",
-  "description": "Pyth Network oracle plugin for Solana Kit - price feeds via Hermes API and on-chain price accounts (layers on the Kite capability)",
+  "description": "Pyth Network oracle plugin for Solana Kit - price feeds via Hermes API and on-chain price accounts",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

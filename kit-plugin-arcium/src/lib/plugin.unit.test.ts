@@ -3,15 +3,13 @@
 // state, so it is exercised by network/integration tests, not here.)
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { arcium, createKiteArciumPlugin } from "./plugin.js";
+import { arcium } from "./plugin.js";
 import { serializeLE, deserializeLE, getRandomNonce } from "./serialization.js";
 
 describe("arcium() plugin", () => {
   test("is a factory returning a client plugin function", () => {
     const plugin = arcium();
     assert.strictEqual(typeof plugin, "function");
-    // Backward-compatible alias points at the same factory.
-    assert.strictEqual(createKiteArciumPlugin, arcium);
   });
 });
 

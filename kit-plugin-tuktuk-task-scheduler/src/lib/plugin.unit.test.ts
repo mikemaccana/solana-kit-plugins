@@ -2,11 +2,11 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { connect } from "solana-kite";
-import { tuktukTaskScheduler } from "./plugin.js";
+import { tuktuk } from "./plugin.js";
 
-describe("tuktukTaskScheduler() plugin", () => {
+describe("tuktuk() plugin", () => {
   test("extends a Kite client with tuktuk methods (offline construction)", () => {
-    const client = tuktukTaskScheduler()(connect("devnet"));
+    const client = tuktuk()(connect("devnet"));
 
     assert.ok(client.tuktuk, "exposes the tuktuk client");
     assert.strictEqual(typeof client.getOrCreateTaskQueue, "function");

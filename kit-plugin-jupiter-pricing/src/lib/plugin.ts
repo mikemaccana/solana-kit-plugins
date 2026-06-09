@@ -43,7 +43,7 @@ export interface PricingMethods {
 
 export type ConnectionWithPricing = Connection & PricingMethods;
 
-export const jupiterPricing = (config: KitePricingConfig = {}) => {
+export const jupiter = (config: KitePricingConfig = {}) => {
   return <T extends Connection>(connection: T) => {
     const jupiter = new JupiterClient(config.jupiterApiKey, config.cacheTimeMs, config.vsToken);
 
@@ -297,7 +297,3 @@ export const jupiterPricing = (config: KitePricingConfig = {}) => {
   };
 };
 
-/**
- * @deprecated Use {@link jupiterPricing} instead. Kept for backward compatibility.
- */
-export const createKitePricingPlugin = jupiterPricing;

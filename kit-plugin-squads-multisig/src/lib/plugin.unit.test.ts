@@ -2,11 +2,11 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { connect } from "solana-kite";
-import { squadsMultisig } from "./plugin.js";
+import { squads } from "./plugin.js";
 
-describe("squadsMultisig() plugin", () => {
+describe("squads() plugin", () => {
   test("extends a Kite client with squads methods (offline construction)", () => {
-    const client = squadsMultisig()(connect("devnet"));
+    const client = squads()(connect("devnet"));
 
     assert.ok(client.squads, "exposes the squads client");
     assert.strictEqual(typeof client.createMultisig, "function");

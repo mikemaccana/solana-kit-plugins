@@ -63,7 +63,7 @@ export interface MetaplexMethods {
 export type ConnectionWithMetaplex = Connection & MetaplexMethods;
 
 /**
- * Creates a Metaplex token metadata plugin for Solana Kite.
+ * Creates a Metaplex token metadata plugin for Solana Kit.
  *
  * This plugin intelligently handles both Metaplex Token Metadata and Token-2022
  * metadata extension, checking which one exists and returning the appropriate metadata.
@@ -185,7 +185,3 @@ export const metaplex = (config: MetaplexConfig = {}) => {
   };
 };
 
-/**
- * @deprecated Use {@link metaplex} instead. Kept for backward compatibility.
- */
-export const createKiteMetaplexPlugin = metaplex;

@@ -1,6 +1,6 @@
 # Solana Kite Pricing
 
-Jupiter Price API plugin for Solana Kite providing price-aware token operations.
+Jupiter Price API plugin for Solana Kit providing price-aware token operations.
 
 This plugin extends Solana Kite with price data from Jupiter, enabling you to work with USD values, calculate portfolio values, monitor prices, and convert between tokens.
 
@@ -34,11 +34,11 @@ export JUPITER_API_KEY="your-api-key-here"
 ```typescript
 import { createClient } from "@solana/kit";
 import { kite } from "kit-plugin-kite";
-import { jupiterPricing } from "kit-plugin-jupiter-pricing";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 
 const connection = createClient()
   .use(kite({ clusterNameOrURL: "mainnet-beta" }))
-  .use(jupiterPricing({ jupiterApiKey: process.env.JUPITER_API_KEY }));
+  .use(jupiter({ jupiterApiKey: process.env.JUPITER_API_KEY }));
 
 const solPrice = await connection.getTokenPrice("So11111111111111111111111111111111111111112");
 console.log(`SOL price: $${solPrice.priceUsd}`);
@@ -49,11 +49,11 @@ console.log(`SOL price: $${solPrice.priceUsd}`);
 ```typescript
 import { createClient } from "@solana/kit";
 import { kite } from "kit-plugin-kite";
-import { jupiterPricing } from "kit-plugin-jupiter-pricing";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 
 const connection = createClient()
   .use(kite({ clusterNameOrURL: "mainnet-beta" }))
-  .use(jupiterPricing({
+  .use(jupiter({
     jupiterApiKey: process.env.JUPITER_API_KEY,
     cacheTimeMs: 60000,
   }));
@@ -321,11 +321,11 @@ interface PortfolioBreakdown {
 import { address } from "@solana/kit";
 import { createClient } from "@solana/kit";
 import { kite } from "kit-plugin-kite";
-import { jupiterPricing } from "kit-plugin-jupiter-pricing";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 
 const connection = createClient()
   .use(kite({ clusterNameOrURL: "mainnet-beta" }))
-  .use(jupiterPricing({ jupiterApiKey: process.env.JUPITER_API_KEY }));
+  .use(jupiter({ jupiterApiKey: process.env.JUPITER_API_KEY }));
 
 const walletAddress = address("dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
 
@@ -467,4 +467,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite by the Kite community. Uses Jupiter's Price API v3.
+Built for Solana Kit. Uses Jupiter's Price API v3.

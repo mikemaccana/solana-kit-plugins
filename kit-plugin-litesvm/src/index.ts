@@ -77,7 +77,7 @@ function liteSvmTransport(svm: LiteSVM) {
 
 /**
  * Creates a Solana Kite {@link Connection} backed by an in-process LiteSVM, for fast,
- * network-free integration tests of Kite plugins.
+ * network-free integration tests of Kit plugins.
  *
  * @param svm - An existing LiteSVM instance (e.g. one you've already loaded programs into). A
  *   fresh instance is created if omitted.

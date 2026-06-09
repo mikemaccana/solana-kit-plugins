@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-tuktuk-task-scheduler",
   "version": "0.1.0",
-  "description": "TukTuk task scheduler plugin for Solana Kit enabling scheduled and recurring transactions (layers on the Kite capability)",
+  "description": "TukTuk task scheduler plugin for Solana Kit enabling scheduled and recurring transactions",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

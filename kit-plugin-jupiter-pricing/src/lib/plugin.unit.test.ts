@@ -3,11 +3,11 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { connect } from "solana-kite";
-import { jupiterPricing } from "./plugin.js";
+import { jupiter } from "./plugin.js";
 
-describe("jupiterPricing() plugin", () => {
+describe("jupiter() plugin", () => {
   test("extends a Kite client with pricing methods (offline construction)", () => {
-    const client = jupiterPricing()(connect("devnet"));
+    const client = jupiter()(connect("devnet"));
 
     assert.ok(client.jupiter, "exposes the jupiter client");
     assert.strictEqual(typeof client.getTokenPrice, "function");

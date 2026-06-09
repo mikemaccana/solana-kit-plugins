@@ -12,7 +12,7 @@ export interface ANSMethods {
 
 export type ConnectionWithANS = Connection & ANSMethods;
 
-export const ansNameService = (config: ANSConfig = {}) => {
+export const ans = (config: ANSConfig = {}) => {
   return <T extends Connection>(connection: T) => {
     const ansClient = new ANSClient(config.cacheTime, config.cluster);
 
@@ -126,7 +126,3 @@ export const ansNameService = (config: ANSConfig = {}) => {
   };
 };
 
-/**
- * @deprecated Use {@link ansNameService} instead. Kept for backward compatibility.
- */
-export const createKiteANSNameServicePlugin = ansNameService;

@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-squads-multisig",
   "version": "0.1.0",
-  "description": "Squads multisig plugin for Solana Kit - web3.js-free multisig wallet management (layers on the Kite capability)",
+  "description": "Squads multisig plugin for Solana Kit - web3.js-free multisig wallet management",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

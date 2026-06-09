@@ -13,7 +13,7 @@ export type ConnectionWithArcium = Connection & ArciumMethods;
 /**
  * Solana Kit plugin that adds Arcium confidential-computing helpers to a client.
  *
- * Requires the Solana Kite capability (apply `kite()` from `kit-plugin-kite` first), as the
+ * Requires the kite() capability (apply `kite()` from `kit-plugin-kite` first), as the
  * Arcium client builds on Kite's RPC, PDA and transaction helpers.
  *
  * @example
@@ -36,7 +36,3 @@ export function arcium(config: ArciumPluginConfig = {}) {
   };
 }
 
-/**
- * @deprecated Use {@link arcium} instead. Kept for backward compatibility.
- */
-export const createKiteArciumPlugin = arcium;

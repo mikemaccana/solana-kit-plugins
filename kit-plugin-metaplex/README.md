@@ -1,6 +1,6 @@
 # Solana Kite Metaplex
 
-Metaplex token metadata plugin for Solana Kite supporting both Metaplex Token Metadata and Token-2022 metadata extension.
+Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token-2022 metadata extension.
 
 This plugin intelligently handles BOTH metadata standards, automatically detecting which system a token uses and returning the appropriate metadata.
 
@@ -397,11 +397,11 @@ const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })
 ```typescript
 import { createClient } from "@solana/kit";
 import { kite } from "kit-plugin-kite";
-import { jupiterPricing } from "kit-plugin-jupiter-pricing";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 import { metaplex } from "kit-plugin-metaplex";
 
 const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
-  .use(jupiterPricing({ jupiterApiKey: process.env.JUPITER_API_KEY }))
+  .use(jupiter({ jupiterApiKey: process.env.JUPITER_API_KEY }))
   .use(metaplex());
 
 // Use both pricing and metadata features
@@ -446,4 +446,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite. Compatible with both Metaplex Token Metadata and SPL Token-2022 metadata standards.
+Built for Solana Kit. Compatible with both Metaplex Token Metadata and SPL Token-2022 metadata standards.

@@ -511,20 +511,6 @@ export class TukTukClient {
   }
 
   /**
-   * Lists all tasks in a queue with optional filtering by description prefix.
-   */
-  async listTasks(taskQueue: Address, descriptionPrefix?: string): Promise<Array<any>> {
-    throw new Error("List tasks not yet implemented");
-  }
-
-  /**
-   * Closes a task and reclaims rent.
-   */
-  async closeTask(user: KeyPairSigner, taskQueue: Address, taskId: number): Promise<string> {
-    throw new Error("Close task not yet implemented");
-  }
-
-  /**
    * Funds a task queue with additional SOL.
    */
   async fundTaskQueue(user: KeyPairSigner, taskQueue: Address, amount: bigint): Promise<string> {

@@ -1,6 +1,6 @@
 # Solana Kite Arcium
 
-Arcium confidential computing plugin for Solana Kite. Provides onchain helpers for working with the Arcium MXE (Masked Execution Environment) — PDA derivation, encryption key generation, circuit uploading, and computation event listening — all using the provided Kite connection rather than creating internal connections.
+Arcium confidential computing plugin for Solana Kit. Provides onchain helpers for working with the Arcium MXE (Masked Execution Environment) — PDA derivation, encryption key generation, circuit uploading, and computation event listening — all using the provided Kite connection rather than creating internal connections.
 
 ## Features
 

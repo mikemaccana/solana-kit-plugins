@@ -1,15 +1,15 @@
 // LiteSVM integration test: encodes a Squads Multisig account with the Codama-generated encoder,
-// injects it into an in-process LiteSVM, and reads it back through the squadsMultisig() plugin
+// injects it into an in-process LiteSVM, and reads it back through the squads() plugin
 // over a LiteSVM-backed Kite connection. Exercises the plugin's read + decode path, no network.
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { generateKeyPairSigner, none } from "@solana/kit";
 import { connectLiteSvm } from "kit-plugin-litesvm";
-import { squadsMultisig } from "./plugin.js";
+import { squads } from "./plugin.js";
 import { SQUADS_PROGRAM_ID } from "./constants.js";
 import { getMultisigEncoder } from "../generated/squads_multisig_program-client/accounts/multisig.js";
 
-describe("squadsMultisig() over LiteSVM", () => {
+describe("squads() over LiteSVM", () => {
   test("reads a multisig account through the plugin", async () => {
     const { svm, connection } = connectLiteSvm();
     const [multisig, createKey, m1, m2, m3] = await Promise.all([
@@ -45,7 +45,7 @@ describe("squadsMultisig() over LiteSVM", () => {
       space: BigInt(data.length),
     });
 
-    const client = squadsMultisig()(connection);
+    const client = squads()(connection);
     const account = await client.getMultisigAccount(multisig.address);
 
     assert.strictEqual(account.threshold, 2);

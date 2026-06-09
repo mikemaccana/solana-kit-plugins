@@ -1,9 +1,9 @@
 # kit-plugin-litesvm
 
-Run Solana Kite plugins against an in-process [LiteSVM](https://github.com/LiteSVM/litesvm) for
+Run Solana Kit plugins against an in-process [LiteSVM](https://github.com/LiteSVM/litesvm) for
 fast, network-free integration tests.
 
-The Kite plugins in this repo reach the chain through a Kite `Connection` (a JSON-RPC client).
+The Kit plugins in this repo reach the chain through a Kite `Connection` (a JSON-RPC client).
 LiteSVM is an in-process SVM with no JSON-RPC server, so this package provides a small RPC→LiteSVM
 transport and exposes the result as a Kite `Connection`. You get the real SVM for test setup
 (loading programs, injecting accounts) and a Kite connection the plugins can read through.

@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-ans-name-service",
   "version": "0.1.0",
-  "description": "AllDomains Name Service plugin for Solana Kit enabling .abc and custom TLD resolution (layers on the Kite capability)",
+  "description": "AllDomains Name Service plugin for Solana Kit enabling .abc and custom TLD resolution",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

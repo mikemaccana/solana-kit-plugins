@@ -2,14 +2,14 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import { connect } from "solana-kite";
 import { address } from "@solana/kit";
-import { createKitePythPlugin } from "./plugin.js";
+import { pyth as pythPlugin } from "./plugin.js";
 import { parsePythPriceAccountData } from "./pyth-client.js";
 import { PYTH_FEED_IDS, PYTH_PRICE_ACCOUNT_MAGIC, PYTH_ACCOUNT_TYPE_PRICE } from "./constants.js";
 
-describe("createKitePythPlugin", () => {
+describe("pythPlugin", () => {
   test("plugin returns object with all pyth methods", () => {
     const connection = connect("devnet");
-    const result = createKitePythPlugin()(connection);
+    const result = pythPlugin()(connection);
 
     assert.ok(typeof result.pyth.getPythPriceFeed === "function");
     assert.ok(typeof result.pyth.getPythPriceFeeds === "function");
@@ -26,7 +26,7 @@ describe("createKitePythPlugin", () => {
 describe("getPythPriceFeed integration", () => {
   test("fetches SOL/USD price from Hermes", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     const feed = await pyth.getPythPriceFeed(PYTH_FEED_IDS.SOL_USD);
 
@@ -41,7 +41,7 @@ describe("getPythPriceFeed integration", () => {
 
   test("accepts feed IDs with 0x prefix", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     const feedWithPrefix = await pyth.getPythPriceFeed(`0x${PYTH_FEED_IDS.SOL_USD}`);
     const feedWithout = await pyth.getPythPriceFeed(PYTH_FEED_IDS.SOL_USD);
@@ -55,7 +55,7 @@ describe("getPythPriceFeed integration", () => {
 describe("getPythPriceFeeds integration", () => {
   test("fetches multiple prices in a single request", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     const feeds = await pyth.getPythPriceFeeds([PYTH_FEED_IDS.SOL_USD, PYTH_FEED_IDS.BTC_USD]);
 
@@ -172,7 +172,7 @@ describe("parsePythPriceAccountData", () => {
 describe("isPythPriceStale integration", () => {
   test("SOL/USD price is not stale with 60-second max age", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     // Pyth publishes every ~400ms so 60 seconds is very generous
     const isStale = await pyth.isPythPriceStale(PYTH_FEED_IDS.SOL_USD, 60);
@@ -182,7 +182,7 @@ describe("isPythPriceStale integration", () => {
 
   test("price is considered stale with 0-second max age", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     const isStale = await pyth.isPythPriceStale(PYTH_FEED_IDS.SOL_USD, 0);
 
@@ -193,7 +193,7 @@ describe("isPythPriceStale integration", () => {
 describe("searchPythFeeds integration", () => {
   test("finds BTC crypto feeds by query", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     const feeds = await pyth.searchPythFeeds("BTC/USD", "crypto");
 
@@ -205,7 +205,7 @@ describe("searchPythFeeds integration", () => {
 
   test("returned feed objects have id and attributes", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     const feeds = await pyth.searchPythFeeds("SOL/USD");
 
@@ -220,7 +220,7 @@ describe("searchPythFeeds integration", () => {
 describe("watchPythPriceFeed", () => {
   test("polls price and invokes callback with feed data", async () => {
     const connection = connect("mainnet-beta");
-    const { pyth } = createKitePythPlugin()(connection);
+    const { pyth } = pythPlugin()(connection);
 
     let callbackCount = 0;
     let lastFeed: unknown = null;

@@ -1,6 +1,6 @@
 # Solana Kite ANS
 
-AllDomains Name Service (ANS) plugin for Solana Kite enabling `.abc` and custom TLD domain name resolution.
+AllDomains Name Service (ANS) plugin for Solana Kit enabling `.abc` and custom TLD domain name resolution.
 
 ## Features
 
@@ -21,10 +21,10 @@ npm install kit-plugin-ans-name-service solana-kite @solana/kit
 ```typescript
 import { createClient } from "@solana/kit";
 import { kite } from "kit-plugin-kite";
-import { ansNameService } from "kit-plugin-ans-name-service";
+import { ans } from "kit-plugin-ans-name-service";
 
 // Using .use() method (recommended)
-const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(ansNameService());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(ans());
 
 const address = await connection.getAddressForANSName("example.abc");
 console.log(`Resolved address: ${address}`);
@@ -33,7 +33,7 @@ console.log(`Resolved address: ${address}`);
 **Alternative: Manual composition**
 
 ```typescript
-const ansPlugin = ansNameService();
+const ansPlugin = ans();
 const connection = ansPlugin(createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })));
 ```
 
@@ -55,7 +55,7 @@ Get ANS domains for an address (returns empty array - full implementation coming
 
 ```typescript
 const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(
-  ansNameService({
+  ans({
     cacheTime: 3600000, // 1 hour (default)
     cluster: "mainnet-beta", // ANS cluster (default)
   })
@@ -66,8 +66,8 @@ const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })
 
 ```typescript
 const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
-  .use(jupiterPricing({ jupiterApiKey }))
-  .use(ansNameService());
+  .use(jupiter({ jupiterApiKey }))
+  .use(ans());
 
 await connection.transferTokens({
   sender,

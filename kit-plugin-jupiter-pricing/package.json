@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-jupiter-pricing",
   "version": "0.1.0",
-  "description": "Jupiter Price API plugin for Solana Kit providing price-aware token operations (layers on the Kite capability)",
+  "description": "Jupiter Price API plugin for Solana Kit providing price-aware token operations",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -1,7 +1,6 @@
 export {
   pyth,
-  createKitePythPlugin,
-  PythClient,
+    PythClient,
   HERMES_URL,
   PYTH_RECEIVER_PROGRAM_ID,
   WORMHOLE_PROGRAM_ID,

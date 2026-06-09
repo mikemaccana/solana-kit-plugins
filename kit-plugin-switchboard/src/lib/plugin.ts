@@ -7,7 +7,7 @@ import type { SwitchboardConfig, SwitchboardMethods } from "./types.js";
  * Solana Kit plugin that adds read-only Switchboard On-Demand oracle helpers
  * (under `client.switchboard`) to a client.
  *
- * Requires the Solana Kite capability (apply `kite()` from `kit-plugin-kite` first), as the
+ * Requires the kite() capability (apply `kite()` from `kit-plugin-kite` first), as the
  * Switchboard client uses Kite's RPC to read on-chain pull feed accounts.
  *
  * This plugin is READ-ONLY: it decodes feed values from chain and never sends transactions.

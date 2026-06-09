@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-switchboard",
   "version": "0.1.0",
-  "description": "Switchboard On-Demand oracle plugin for Solana Kit - read-only price/feed values from on-chain pull feed accounts (layers on the Kite capability)",
+  "description": "Switchboard On-Demand oracle plugin for Solana Kit - read-only price/feed values from on-chain pull feed accounts",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

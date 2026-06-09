@@ -1,6 +1,6 @@
 # Solana Kite TukTuk Task Scheduler
 
-TukTuk task scheduler plugin for Solana Kite enabling scheduled and recurring transactions.
+TukTuk task scheduler plugin for Solana Kit enabling scheduled and recurring transactions.
 
 This plugin extends Solana Kite with TukTuk integration, allowing you to schedule transactions to run at specific times or on recurring schedules.
 
@@ -32,10 +32,10 @@ npm install kit-plugin-tuktuk-task-scheduler solana-kite @solana/kit
 ```typescript
 import { createClient } from "@solana/kit";
 import { kite } from "kit-plugin-kite";
-import { tuktukTaskScheduler } from "kit-plugin-tuktuk-task-scheduler";
+import { tuktuk } from "kit-plugin-tuktuk-task-scheduler";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
-const connection = createClient().use(kite({ clusterNameOrURL: "devnet" })).use(tuktukTaskScheduler());
+const connection = createClient().use(kite({ clusterNameOrURL: "devnet" })).use(tuktuk());
 const wallet = await connection.loadWalletFromEnvironment("WALLET_SECRET_KEY");
 
 // Get or create a task queue
@@ -184,22 +184,6 @@ Compiles instructions into TukTuk transaction format.
 const compiledTx = connection.compileTukTukTransaction([instruction1, instruction2]);
 ```
 
-#### `listTasks(taskQueue, descriptionPrefix?): Promise<Array<any>>`
-
-Lists all pending tasks in a queue, optionally filtered by description prefix.
-
-```typescript
-const tasks = await connection.listTasks(taskQueue, "memo:");
-```
-
-#### `closeTask(user, taskQueue, taskId): Promise<string>`
-
-Closes a task and reclaims rent. Use this to remove failed tasks that won't execute.
-
-```typescript
-await connection.closeTask(wallet, taskQueue, 123);
-```
-
 #### `fundTaskQueue(user, taskQueue, amount): Promise<string>`
 
 Funds a task queue with additional SOL. Needed for queues that create recursive tasks (like cron jobs).
@@ -330,4 +314,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite. Based on [TukTuk](https://github.com/helium/tuktuk) by the Helium Foundation.
+Built for Solana Kit. Based on [TukTuk](https://github.com/helium/tuktuk) by the Helium Foundation.
