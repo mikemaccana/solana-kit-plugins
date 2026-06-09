@@ -44,8 +44,9 @@ export const PYTH_FEED_IDS = {
   BNB_USD: "2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f",
 } as const;
 
-// On-chain Pyth price account addresses for mainnet-beta (legacy push oracle)
-// Source: https://pyth.network/developers/price-feed-ids
+// Addresses of the legacy Pyth push-oracle price accounts. NOTE: Pyth migrated to the pull
+// oracle, and these push-oracle accounts are no longer published or updated on mainnet. They
+// are retained only as decoding references and for tests; do not expect live data from them.
 export const SOL_USD_PRICE_ACCOUNT: Address = address("H6ARHf6YXhGYeQfUzQNGFVe4yXUNsQhAAqaFxMbD1GRs");
 export const BTC_USD_PRICE_ACCOUNT: Address = address("GVXRSBjFk6e931ingegDtaKZ2dYkK7sRoRZTYJTrEkKZ");
 export const ETH_USD_PRICE_ACCOUNT: Address = address("JBu1AL4obBcCMqKBBxhpWCNUt136ijcuMZLFvTP7iWdB");

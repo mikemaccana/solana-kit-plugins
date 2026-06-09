@@ -292,18 +292,16 @@ export class PythClient {
   }
 
   async getPythOnchainPrice(priceAccountAddress: Address): Promise<PythOnchainPriceData | null> {
-    try {
-      const accountInfo = await this.connection.rpc
-        .getAccountInfo(priceAccountAddress, { encoding: "base64" })
-        .send();
-      if (!accountInfo.value) return null;
+    // Returns null when the account does not exist. RPC and decode errors are allowed to
+    // propagate rather than being silently swallowed into an indistinguishable null.
+    const accountInfo = await this.connection.rpc
+      .getAccountInfo(priceAccountAddress, { encoding: "base64" })
+      .send();
+    if (!accountInfo.value) return null;
 
-      const [encodedData] = accountInfo.value.data as readonly [string, string];
-      const rawBytes = new Uint8Array(Buffer.from(encodedData, "base64"));
-      return parsePythPriceAccountData(rawBytes);
-    } catch {
-      return null;
-    }
+    const [encodedData] = accountInfo.value.data as readonly [string, string];
+    const rawBytes = new Uint8Array(Buffer.from(encodedData, "base64"));
+    return parsePythPriceAccountData(rawBytes);
   }
 
   async isPythPriceStale(feedId: string, maxAgeSeconds: number): Promise<boolean> {

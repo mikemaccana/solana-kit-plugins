@@ -61,7 +61,11 @@ export interface PythMethods {
   getPythPriceFeed(feedId: string): Promise<PythPriceFeed | null>;
   /** Fetch the latest prices for multiple feeds in one request */
   getPythPriceFeeds(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>>;
-  /** Read a legacy push-oracle Pyth price account directly from on-chain state */
+  /**
+   * Decode a legacy push-oracle Pyth price account from onchain state. NOTE: these push-oracle
+   * accounts are no longer published on mainnet (Pyth uses the pull oracle); this is for
+   * decoding existing/snapshotted accounts. Returns null if the account does not exist.
+   */
   getPythOnchainPrice(priceAccountAddress: Address): Promise<PythOnchainPriceData | null>;
   /** Returns true if the feed's last publish time exceeds maxAgeSeconds */
   isPythPriceStale(feedId: string, maxAgeSeconds: number): Promise<boolean>;
