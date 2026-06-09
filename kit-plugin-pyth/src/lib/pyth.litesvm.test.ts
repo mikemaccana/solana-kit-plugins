@@ -1,8 +1,8 @@
 // LiteSVM integration test: injects a Pyth price account into an in-process LiteSVM and reads it
-// back through the pyth() plugin's on-chain reader, over a LiteSVM-backed connection.
+// back through the pyth() plugin's onchain reader, over a LiteSVM-backed connection.
 //
 // This exercises the plugin's read + decode path against the LiteSVM RPC adapter without any
-// network. (Pyth's legacy on-chain push-oracle accounts are no longer published on mainnet, so a
+// network. (Pyth's legacy onchain push-oracle accounts are no longer published on mainnet, so a
 // synthetic-but-correctly-encoded account is used; the byte layout matches parsePythPriceAccountData.)
 import { describe, test } from "node:test";
 import assert from "node:assert";
@@ -26,7 +26,7 @@ function buildPriceAccount(): Uint8Array {
 }
 
 describe("pyth() over LiteSVM", () => {
-  test("reads an on-chain price account through the plugin", async () => {
+  test("reads an onchain price account through the plugin", async () => {
     const { svm, connection } = connectLiteSvm();
     const priceAccount = await generateKeyPairSigner();
     const data = buildPriceAccount();

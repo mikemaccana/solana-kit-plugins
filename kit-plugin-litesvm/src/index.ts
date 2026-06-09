@@ -37,7 +37,7 @@ function encodeAccount(account: { data: Uint8Array; executable: boolean; lamport
  * through the returned connection.
  */
 function liteSvmTransport(svm: LiteSVM) {
-  return async <T>(request: { payload: { method: string; params: readonly unknown[] } }): Promise<T> => {
+  return async <T>(request: { payload: { method: string; params: ReadonlyArray<unknown> } }): Promise<T> => {
     const { method, params } = request.payload;
     const envelope = (result: unknown) => ({ jsonrpc: "2.0", id: 1, result }) as T;
 
@@ -48,7 +48,7 @@ function liteSvmTransport(svm: LiteSVM) {
         return envelope({ context: { slot: 0n }, value });
       }
       case "getMultipleAccounts": {
-        const addresses = params[0] as Address[];
+        const addresses = params[0] as Array<Address>;
         const value = addresses.map((address) => {
           const account = svm.getAccount(address);
           return !account || (account as { exists?: boolean }).exists === false ? null : encodeAccount(account as never);

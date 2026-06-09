@@ -1,7 +1,7 @@
 {
   "name": "kit-plugin-metaplex",
   "version": "0.1.0",
-  "description": "Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token-2022 metadata extension",
+  "description": "Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token Extensions metadata extension",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,7 +32,7 @@
     "nft",
     "metadata",
     "token",
-    "token-2022",
+    "token-extensions",
     "web3"
   ],
   "author": "",

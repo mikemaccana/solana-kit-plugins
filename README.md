@@ -61,7 +61,7 @@ npm test            # full suite, including network/integration tests
 
 ### Generated clients (Codama)
 
-Plugins that wrap an on-chain program (`metaplex`, `squads-multisig`,
+Plugins that wrap an onchain program (`metaplex`, `squads-multisig`,
 `tuktuk-task-scheduler`) keep the program IDL under `idls/` and generate their typed client
 into `src/generated` with [Codama](https://github.com/codama-idl/codama):
 

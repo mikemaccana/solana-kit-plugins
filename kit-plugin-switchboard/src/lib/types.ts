@@ -4,7 +4,7 @@ import type { Connection } from "solana-kite";
 /**
  * The decoded aggregated result of a Switchboard On-Demand pull feed account.
  *
- * All `*Raw` fields are the on-chain fixed-point i128 values scaled by 10^18.
+ * All `*Raw` fields are the onchain fixed-point i128 values scaled by 10^18.
  * The non-raw fields are those values converted to JavaScript numbers (which may
  * lose precision for very large magnitudes - use the raw bigints when exactness matters).
  */
@@ -13,7 +13,7 @@ export interface SwitchboardFeedValue {
   address: Address;
   /** The aggregated result value as a floating-point number (rawValue / 10^18) */
   value: number;
-  /** The aggregated result value as the raw on-chain i128 (scaled by 10^18) */
+  /** The aggregated result value as the raw onchain i128 (scaled by 10^18) */
   valueRaw: bigint;
   /** Standard deviation across oracle submissions, as a float */
   standardDeviation: number;

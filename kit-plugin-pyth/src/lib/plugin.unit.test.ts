@@ -1,4 +1,4 @@
-// Offline tests: plugin construction and the pure on-chain price-account
+// Offline tests: plugin construction and the pure onchain price-account
 // decoder. Run in CI without network access. (Network/Hermes integration
 // tests live in plugin.test.ts and run via `npm test`.)
 import { describe, test } from "node:test";

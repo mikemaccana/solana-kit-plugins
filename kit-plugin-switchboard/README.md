@@ -3,13 +3,13 @@
 Read-only [Switchboard On-Demand](https://docs.switchboard.xyz/) oracle plugin for Solana Kit.
 
 This plugin extends a Solana Kit client (layered on the [`kite()`](../kit-plugin-kite) capability)
-with helpers to read Switchboard On-Demand price/feed values directly from on-chain `PullFeedAccountData` accounts.
+with helpers to read Switchboard On-Demand price/feed values directly from onchain `PullFeedAccountData` accounts.
 
 It is **read-only**: it decodes the aggregated feed result from chain and never sends transactions.
 
 ## Features
 
-- **On-chain feed reads**: Decode the aggregated `CurrentResult` of any Switchboard On-Demand pull feed account
+- **Onchain feed reads**: Decode the aggregated `CurrentResult` of any Switchboard On-Demand pull feed account
 - **Batch reads**: Fetch and decode multiple feed accounts at once
 - **Pure decoder**: `parseSwitchboardFeedAccountData()` is a network-free function you can unit-test against captured bytes
 - **Type-safe**: Full TypeScript support, no web3.js dependency (uses `@solana/kit` address/codec utilities)
@@ -40,7 +40,7 @@ const feed = await client.switchboard.getFeedValue(feedAddress);
 
 if (feed) {
   console.log(`Value: ${feed.value}`);            // float (rawValue / 10^18)
-  console.log(`Raw:   ${feed.valueRaw}`);          // exact on-chain i128 (scaled by 10^18)
+  console.log(`Raw:   ${feed.valueRaw}`);          // exact onchain i128 (scaled by 10^18)
   console.log(`Slot:  ${feed.slot}`);
   console.log(`Updated at: ${feed.lastUpdatedAt}`);
 }

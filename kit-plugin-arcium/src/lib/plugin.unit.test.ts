@@ -1,5 +1,5 @@
 // Offline tests: the factory shape and the pure serialization helpers.
-// Run in CI without network access. (ArciumClient.create reads on-chain MXE
+// Run in CI without network access. (ArciumClient.create reads onchain MXE
 // state, so it is exercised by network/integration tests, not here.)
 import { describe, test } from "node:test";
 import assert from "node:assert";

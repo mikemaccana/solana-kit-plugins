@@ -12,7 +12,7 @@ export const SWITCHBOARD_ON_DEMAND_PROGRAM_ID_DEVNET: Address = address(
 // Source: switchboard-xyz/solana-sdk src/on_demand/accounts/pull_feed.rs
 export const PULL_FEED_DISCRIMINATOR = new Uint8Array([196, 27, 108, 196, 10, 215, 219, 40]);
 
-// All Switchboard On-Demand on-chain values are scaled fixed-point i128 with 18 decimals of precision.
+// All Switchboard On-Demand onchain values are scaled fixed-point i128 with 18 decimals of precision.
 // Source: switchboard-xyz/solana-sdk `PRECISION` constant (10^18) used by Decimal/CurrentResult.
 export const SWITCHBOARD_DECIMAL_PRECISION = 18;
 export const SWITCHBOARD_DECIMAL_SCALE = 10n ** 18n;
@@ -85,7 +85,7 @@ export const RESULT_OFFSET_MAX_SLOT = 120;
 export const PULL_FEED_ACCOUNT_MIN_SIZE = OFFSET_RESULT + RESULT_OFFSET_MAX_SLOT + 8; // 2392
 
 // Well-known Switchboard On-Demand feed hashes (the SHA-256 of the job schema).
-// NOTE: On Switchboard On-Demand, the on-chain *feed account address* is created by whoever
+// NOTE: On Switchboard On-Demand, the onchain *feed account address* is created by whoever
 // deploys the feed and is NOT a fixed protocol constant (unlike Pyth's push-oracle accounts).
 // You must look up the feed account address for the pair you want in the Switchboard Explorer
 // (https://explorer.switchboard.xyz) and pass it to getFeedValue().

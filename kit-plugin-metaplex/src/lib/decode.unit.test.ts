@@ -57,7 +57,7 @@ describe("metaplex() plugin", () => {
     assert.ok(client.metaplex, "exposes the metaplex client");
     assert.strictEqual(typeof client.getTokenMetadata, "function");
     assert.strictEqual(typeof client.getMetaplexMetadata, "function");
-    assert.strictEqual(typeof client.getToken2022Metadata, "function");
+    assert.strictEqual(typeof client.getTokenExtensionsMetadata, "function");
     assert.strictEqual(typeof client.getCompleteMetadata, "function");
     assert.strictEqual(typeof client.updateTokenMetadata, "function");
     // The underlying connection is preserved.

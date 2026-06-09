@@ -74,13 +74,13 @@ export interface PythMethods {
   /** Subscribe to price updates, calling callback on each poll */
   watchPythPriceFeed(feedId: string, callback: PythPriceCallback, intervalMs?: number): () => void;
   /**
-   * Post a single Pyth pull-oracle price update on-chain via the Pyth Receiver program.
+   * Post a single Pyth pull-oracle price update onchain via the Pyth Receiver program.
    * Returns the address of the temporary PriceUpdateV2 account that was created.
    * Call reclaimPythPriceUpdateRent() to close the account and recover rent when done.
    */
   postPythPriceUpdate(feedId: string, payer: TransactionSendingSigner): Promise<Address>;
   /**
-   * Post multiple Pyth pull-oracle price updates on-chain in parallel (one transaction per feed).
+   * Post multiple Pyth pull-oracle price updates onchain in parallel (one transaction per feed).
    * Returns the addresses of the temporary PriceUpdateV2 accounts in the same order as feedIds.
    */
   postPythPriceUpdates(feedIds: Array<string>, payer: TransactionSendingSigner): Promise<Array<Address>>;

@@ -3,13 +3,37 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { createHash } from "crypto";
 
+// Minimal shape of the Arcium IDL covering only the fields we read.
+interface IdlArgType {
+  array?: [unknown, number];
+}
+
+interface IdlArg {
+  name: string;
+  type?: IdlArgType;
+}
+
+interface IdlInstruction {
+  name: string;
+  discriminator: Array<number>;
+  args: Array<IdlArg>;
+}
+
+interface IdlEvent {
+  name: string;
+  discriminator: Array<number>;
+}
+
+interface ArciumIdl {
+  instructions: Array<IdlInstruction>;
+  events: Array<IdlEvent>;
+}
+
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const arciumIdl = JSON.parse(await readFile(join(currentDir, "../arcium.json"), "utf-8"));
+const arciumIdl: ArciumIdl = JSON.parse(await readFile(join(currentDir, "../arcium.json"), "utf-8"));
 
 export const getInstructionDiscriminator = (instructionName: string): Uint8Array => {
-  const instruction = (arciumIdl as any).instructions.find(
-    (ix: any) => ix.name === instructionName,
-  );
+  const instruction = arciumIdl.instructions.find((ix) => ix.name === instructionName);
   if (!instruction) {
     throw new Error(`Instruction "${instructionName}" not found in Arcium IDL`);
   }
@@ -17,7 +41,7 @@ export const getInstructionDiscriminator = (instructionName: string): Uint8Array
 };
 
 export const getEventDiscriminator = (eventName: string): Uint8Array => {
-  const event = (arciumIdl as any).events.find((ev: any) => ev.name === eventName);
+  const event = arciumIdl.events.find((ev) => ev.name === eventName);
   if (!event) {
     throw new Error(`Event "${eventName}" not found in Arcium IDL`);
   }
@@ -28,17 +52,15 @@ export const getInstructionArgMaxArrayLength = (
   instructionName: string,
   argName: string,
 ): number => {
-  const instruction = (arciumIdl as any).instructions.find(
-    (ix: any) => ix.name === instructionName,
-  );
+  const instruction = arciumIdl.instructions.find((ix) => ix.name === instructionName);
   if (!instruction) {
     throw new Error(`Instruction "${instructionName}" not found in Arcium IDL`);
   }
-  const arg = instruction.args.find((a: any) => a.name === argName);
+  const arg = instruction.args.find((a) => a.name === argName);
   if (!arg || !arg.type?.array || !Array.isArray(arg.type.array)) {
     throw new Error(`Arg "${argName}" not found or not an array type in instruction "${instructionName}"`);
   }
-  return arg.type.array[1] as number;
+  return arg.type.array[1];
 };
 
 export const MAX_UPLOAD_PER_TX_BYTES = getInstructionArgMaxArrayLength(

@@ -2,7 +2,13 @@ import { extendClient } from "@solana/kit";
 import type { Address, Instruction, KeyPairSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { TukTukClient } from "./tuktuk-client.js";
-import type { TukTukConfig, QueueTaskParams, CronJobParams, CompiledTransaction } from "./types.js";
+import type {
+  TukTukConfig,
+  QueueTaskParams,
+  CronJobParams,
+  CompiledTransaction,
+  AddressLookupTable,
+} from "./types.js";
 
 export interface TukTukMethods {
   tuktuk: TukTukClient;
@@ -46,7 +52,7 @@ export interface TukTukMethods {
    */
   compileTukTukTransaction: (
     instructions: Array<Instruction>,
-    addressLookupTables?: Array<any>,
+    addressLookupTables?: Array<AddressLookupTable>,
   ) => CompiledTransaction;
 
   /**
@@ -147,7 +153,7 @@ export const tuktuk = (config: TukTukConfig = {}) => {
 
     const compileTukTukTransaction = (
       instructions: Array<Instruction>,
-      addressLookupTables: Array<any> = [],
+      addressLookupTables: Array<AddressLookupTable> = [],
     ): CompiledTransaction => {
       return tukTukClient.compileTukTukTransaction(instructions, addressLookupTables);
     };

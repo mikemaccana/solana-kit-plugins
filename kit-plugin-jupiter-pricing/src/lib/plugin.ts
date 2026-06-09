@@ -26,6 +26,23 @@ type EnhancedTransferTokensParams = {
   | { usdValue: number; amount?: never }
 );
 
+// Minimal shape of a parsed SPL token account as returned by getTokenAccounts.
+interface ParsedTokenAccountInfo {
+  account: {
+    data: {
+      parsed: {
+        info: {
+          mint: Address;
+          tokenAmount: {
+            amount: string;
+            decimals: number;
+          };
+        };
+      };
+    };
+  };
+}
+
 export interface PricingMethods {
   jupiter: JupiterClient;
   getTokenPrice: (mint: Address) => Promise<TokenPriceInfo | null>;
@@ -79,7 +96,7 @@ export const jupiter = (config: JupiterPricingConfig = {}) => {
 
       const rawTokenAccounts = await connection.getTokenAccounts(address, true);
 
-      const tokenAccountsWithBalance = rawTokenAccounts.map((accountInfo: any) => {
+      const tokenAccountsWithBalance = rawTokenAccounts.map((accountInfo: ParsedTokenAccountInfo) => {
         const parsedInfo = accountInfo.account.data.parsed.info;
         return {
           mint: parsedInfo.mint,

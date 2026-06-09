@@ -112,7 +112,7 @@ describe("metaplex() create+read over LiteSVM (executes the loaded program)", ()
     const client = metaplex()(connection);
     const tokenMetadata = await client.getMetaplexMetadata(mint.address);
 
-    assert.ok(tokenMetadata, "should read the metadata created on-chain");
+    assert.ok(tokenMetadata, "should read the metadata created onchain");
     assert.strictEqual(tokenMetadata.name.replace(/\0+$/, "").trim(), "LiteSVM Token");
     assert.strictEqual(tokenMetadata.symbol.replace(/\0+$/, "").trim(), "LSVM");
     assert.strictEqual(tokenMetadata.uri.replace(/\0+$/, "").trim(), "https://example.com/lsvm.json");

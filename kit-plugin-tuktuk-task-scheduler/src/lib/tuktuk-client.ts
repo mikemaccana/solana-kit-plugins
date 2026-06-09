@@ -1,3 +1,4 @@
+import { isSignerRole, isWritableRole } from "@solana/kit";
 import type { Address, Instruction, KeyPairSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import type {
@@ -6,6 +7,7 @@ import type {
   TaskQueueParams,
   QueueTaskParams,
   CronJobParams,
+  AddressLookupTable,
 } from "./types.js";
 import {
   getAddQueueAuthorityV0Instruction,
@@ -167,7 +169,7 @@ export class TukTukClient {
       const STALE_TASK_AGE_SECONDS = 48 * HOURS_IN_SECONDS;
 
       const createTaskQueueInstruction = getInitializeTaskQueueV0Instruction({
-        payer: user as any,
+        payer: user,
         tuktukConfig,
         updateAuthority: user.address,
         taskQueue,
@@ -180,7 +182,7 @@ export class TukTukClient {
       });
 
       await this.connection.sendTransactionFromInstructions({
-        feePayer: user as any,
+        feePayer: user,
         instructions: [createTaskQueueInstruction],
       });
 
@@ -197,15 +199,15 @@ export class TukTukClient {
       console.log("Adding queue authority...");
 
       const addAuthorityInstruction = getAddQueueAuthorityV0Instruction({
-        payer: user as any,
-        updateAuthority: user as any,
+        payer: user,
+        updateAuthority: user,
         queueAuthority: user.address,
         taskQueueAuthority,
         taskQueue,
       });
 
       await this.connection.sendTransactionFromInstructions({
-        feePayer: user as any,
+        feePayer: user,
         instructions: [addAuthorityInstruction],
       });
       console.log("✅ Queue authority added");
@@ -239,7 +241,7 @@ export class TukTukClient {
     } else if (typeof taskQueueAccount.value.data === "string") {
       accountData = new Uint8Array(Buffer.from(taskQueueAccount.value.data, "base64"));
     } else {
-      accountData = new Uint8Array(taskQueueAccount.value.data as any);
+      accountData = new Uint8Array(taskQueueAccount.value.data as unknown as ArrayLike<number>);
     }
 
     const { taskBitmap } = this.parseTaskQueueV0(accountData);
@@ -253,12 +255,14 @@ export class TukTukClient {
     const taskAddress = taskPda.pda;
 
     const instruction = await getQueueTaskV0InstructionAsync({
-      payer: user as any,
-      queueAuthority: user as any,
+      payer: user,
+      queueAuthority: user,
       taskQueue,
       task: taskAddress,
       id: taskId,
-      trigger: params.trigger as any,
+      trigger: params.trigger,
+      // The hand-written CompiledTransaction domain type does not structurally match
+      // the Codama-generated TransactionSourceV0Args; reconciling them needs a larger refactor.
       transaction: params.transaction as any,
       crankReward: params.crankReward || null,
       freeTasks: params.freeTasks || 0,
@@ -266,7 +270,7 @@ export class TukTukClient {
     });
 
     const signature = await this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [instruction],
     });
 
@@ -323,9 +327,9 @@ export class TukTukClient {
     const task = taskPda.pda;
 
     const initInstruction = await getInitializeCronJobV0InstructionAsync({
-      payer: user as any,
-      queueAuthority: user as any,
-      authority: user as any,
+      payer: user,
+      queueAuthority: user,
+      authority: user,
       cronJob,
       cronJobNameMapping: cronJobNameMappingPda.pda,
       taskQueue,
@@ -337,7 +341,7 @@ export class TukTukClient {
     });
 
     await this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [initInstruction],
     });
 
@@ -365,19 +369,21 @@ export class TukTukClient {
     ]);
 
     const addTransactionInstruction = getAddCronTransactionV0Instruction({
-      payer: user as any,
-      authority: user as any,
+      payer: user,
+      authority: user,
       cronJob,
       cronJobTransaction: cronJobTransactionPda.pda,
       index: transactionId,
       transactionSource: {
         __kind: "CompiledV0" as const,
+        // CompiledTransaction does not match the Codama-generated CompiledTransactionV0Args
+        // shape; reconciling them needs a larger refactor.
         fields: [compiledTransaction as any],
       },
     });
 
     const signature = await this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [addTransactionInstruction],
     });
 
@@ -424,7 +430,7 @@ export class TukTukClient {
    */
   compileTukTukTransaction(
     instructions: Array<Instruction>,
-    addressLookupTables: Array<any> = [],
+    addressLookupTables: Array<AddressLookupTable> = [],
   ): CompiledTransaction {
     const accountSet = new Set<string>();
     const accountMetas: Array<{ address: string; isSigner: boolean; isWritable: boolean }> = [];
@@ -436,9 +442,8 @@ export class TukTukClient {
             accountSet.add(account.address);
             accountMetas.push({
               address: account.address,
-              isSigner:
-                (account.role as any) === "ReadonlySigner" || (account.role as any) === "WritableSigner",
-              isWritable: (account.role as any) === "Writable" || (account.role as any) === "WritableSigner",
+              isSigner: isSignerRole(account.role),
+              isWritable: isWritableRole(account.role),
             });
           }
         }
@@ -484,6 +489,8 @@ export class TukTukClient {
       accounts,
       instructions: compiledInstructions,
       signerSeeds: [],
+      // This wire-format compiled transaction shape does not match the declared
+      // CompiledTransaction return type; reconciling them needs a larger refactor.
     } as any;
   }
 
@@ -523,7 +530,7 @@ export class TukTukClient {
     });
 
     return this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [transferInstruction],
     });
   }

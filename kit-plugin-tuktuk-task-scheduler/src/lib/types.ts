@@ -9,9 +9,17 @@ export type TaskTrigger =
   | { __kind: "Now" }
   | { __kind: "Timestamp"; fields: [bigint] };
 
+/**
+ * An address lookup table: its account address plus the addresses it stores.
+ */
+export interface AddressLookupTable {
+  address: Address;
+  addresses: Array<Address>;
+}
+
 export interface CompiledTransaction {
   instructions: Array<Instruction>;
-  addressLookupTables: Array<any>;
+  addressLookupTables: Array<AddressLookupTable>;
 }
 
 export interface TaskQueueParams {

@@ -8,7 +8,7 @@ import type { SwitchboardConfig, SwitchboardMethods } from "./types.js";
  * (under `client.switchboard`) to a client.
  *
  * Requires the kite() capability (apply `kite()` from `kit-plugin-kite` first), as the
- * Switchboard client uses the connection's RPC to read on-chain pull feed accounts.
+ * Switchboard client uses the connection's RPC to read onchain pull feed accounts.
  *
  * This plugin is READ-ONLY: it decodes feed values from chain and never sends transactions.
  *
