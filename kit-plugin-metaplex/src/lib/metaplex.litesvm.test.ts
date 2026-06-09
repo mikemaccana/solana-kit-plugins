@@ -1,6 +1,6 @@
 // LiteSVM integration test: loads the real Metaplex Token Metadata program (fetched from
 // mainnet, see scripts/fetch-program.mjs) into an in-process LiteSVM, injects a real metadata
-// account, and reads it back through the metaplex() plugin over a LiteSVM-backed Kite connection.
+// account, and reads it back through the metaplex() plugin over a LiteSVM-backed connection.
 //
 // Not part of test:ci (no network), but runs offline once tests/fixtures/mpl_token_metadata.so
 // exists. The CI job fetches that .so first.
@@ -56,7 +56,7 @@ describe("metaplex() over LiteSVM (real mainnet program)", () => {
       space: BigInt(data.length),
     });
 
-    // Read it back through the plugin, over the LiteSVM-backed Kite connection.
+    // Read it back through the plugin, over the LiteSVM-backed connection.
     const client = metaplex()(connection);
     const tokenMetadata = await client.getMetaplexMetadata(fixture.mint as Address);
 

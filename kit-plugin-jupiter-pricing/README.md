@@ -1,8 +1,8 @@
-# Solana Kite Pricing
+# kit-plugin-jupiter-pricing
 
 Jupiter Price API plugin for Solana Kit providing price-aware token operations.
 
-This plugin extends Solana Kite with price data from Jupiter, enabling you to work with USD values, calculate portfolio values, monitor prices, and convert between tokens.
+This plugin extends Solana Kit with price data from Jupiter, enabling you to work with USD values, calculate portfolio values, monitor prices, and convert between tokens.
 
 ## Features
 
@@ -67,7 +67,7 @@ console.log(`Portfolio value: $${portfolioValue.toFixed(2)}`);
 ### Configuration
 
 ```typescript
-interface KitePricingConfig {
+interface JupiterPricingConfig {
   jupiterApiKey?: string;
   cacheTimeMs?: number;
   vsToken?: string;
@@ -175,7 +175,7 @@ console.log(`1 SOL = ${Number(usdcAmount) / 1e6} USDC`);
 
 #### `transferTokens(params): Promise<string>`
 
-Enhanced version of Kite's `transferTokens` that supports token symbols and USD values. When the pricing plugin is applied, you can send tokens by symbol name (like "SOL", "USDC") and specify amounts in USD instead of base units.
+Enhanced version of the connection's `transferTokens` that supports token symbols and USD values. When the pricing plugin is applied, you can send tokens by symbol name (like "SOL", "USDC") and specify amounts in USD instead of base units.
 
 ```typescript
 import { address } from "@solana/kit";
@@ -400,7 +400,7 @@ async function calculateSwap(fromMint: string, toMint: string, amount: bigint) {
 
 ### Send USD-Valued Transfers
 
-The pricing plugin enhances Kite's `transferTokens` to support token symbols and USD values - perfect for "send $100 worth of X" operations.
+The pricing plugin enhances the connection's `transferTokens` to support token symbols and USD values - perfect for "send $100 worth of X" operations.
 
 ```typescript
 import { address } from "@solana/kit";

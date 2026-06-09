@@ -7,7 +7,7 @@ import type { PythConfig, PythMethods } from "./types.js";
  * Solana Kit plugin that adds Pyth Network oracle helpers (under `client.pyth`) to a client.
  *
  * Requires the kite() capability (apply `kite()` from `kit-plugin-kite` first), as the
- * Pyth client uses Kite's RPC and transaction helpers.
+ * Pyth client uses the connection's RPC and transaction helpers.
  *
  * @example
  * ```typescript

@@ -53,7 +53,7 @@ export interface PortfolioWatchCallback {
   (error: Error | null, value: number | null): void;
 }
 
-export interface KitePricingConfig {
+export interface JupiterPricingConfig {
   jupiterApiKey?: string;
   cacheTimeMs?: number;
   vsToken?: string;

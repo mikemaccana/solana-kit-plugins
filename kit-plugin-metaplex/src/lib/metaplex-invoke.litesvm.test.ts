@@ -108,7 +108,7 @@ describe("metaplex() create+read over LiteSVM (executes the loaded program)", ()
       assert.fail(`transaction failed: ${result.err()}\n${result.meta().logs().join("\n")}`);
     }
 
-    // Read the metadata back through the plugin, over the LiteSVM-backed Kite connection.
+    // Read the metadata back through the plugin, over the LiteSVM-backed connection.
     const client = metaplex()(connection);
     const tokenMetadata = await client.getMetaplexMetadata(mint.address);
 

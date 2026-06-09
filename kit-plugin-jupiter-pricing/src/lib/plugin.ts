@@ -5,7 +5,7 @@ import { SOL } from "solana-kite";
 import { JupiterClient } from "./jupiter.js";
 import { WRAPPED_SOL_MINT } from "./constants.js";
 import type {
-  KitePricingConfig,
+  JupiterPricingConfig,
   TokenPriceInfo,
   PortfolioBreakdown,
   PortfolioToken,
@@ -43,7 +43,7 @@ export interface PricingMethods {
 
 export type ConnectionWithPricing = Connection & PricingMethods;
 
-export const jupiter = (config: KitePricingConfig = {}) => {
+export const jupiter = (config: JupiterPricingConfig = {}) => {
   return <T extends Connection>(connection: T) => {
     const jupiter = new JupiterClient(config.jupiterApiKey, config.cacheTimeMs, config.vsToken);
 

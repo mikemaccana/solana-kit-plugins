@@ -2,7 +2,7 @@
 
 Read-only [Switchboard On-Demand](https://docs.switchboard.xyz/) oracle plugin for Solana Kit.
 
-This plugin extends a Solana Kit client (layered on the [Solana Kite](https://github.com/helius-labs/kite) capability)
+This plugin extends a Solana Kit client (layered on the [`kite()`](../kit-plugin-kite) capability)
 with helpers to read Switchboard On-Demand price/feed values directly from on-chain `PullFeedAccountData` accounts.
 
 It is **read-only**: it decodes the aggregated feed result from chain and never sends transactions.

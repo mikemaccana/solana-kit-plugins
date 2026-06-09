@@ -6,14 +6,14 @@ import { connect, type Connection } from "solana-kite";
 export { LiteSVM, FailedTransactionMetadata, TransactionMetadata } from "litesvm";
 
 /**
- * A Solana Kite {@link Connection} backed by an in-process {@link LiteSVM}, plus the underlying
+ * A {@link Connection} (from solana-kite) backed by an in-process {@link LiteSVM}, plus the underlying
  * `svm` instance for test setup (loading programs, injecting accounts, airdrops, sending
  * transactions directly).
  */
 export interface LiteSvmConnection {
   /** The in-process SVM. Use it to `addProgramFromFile`, `setAccount`, `airdrop`, etc. */
   svm: LiteSVM;
-  /** A Kite Connection whose reads are served by `svm`. Pass this to plugins under test. */
+  /** A Connection whose reads are served by `svm`. Pass this to plugins under test. */
   connection: Connection;
 }
 
@@ -31,7 +31,7 @@ function encodeAccount(account: { data: Uint8Array; executable: boolean; lamport
 }
 
 /**
- * Builds a Solana RPC transport that answers the read methods Kite/plugins use from a LiteSVM
+ * Builds a Solana RPC transport that answers the read methods the connection/plugins use from a LiteSVM
  * instance. Write methods are intentionally not implemented — set up state with the `svm` handle
  * directly (`setAccount`, `sendTransaction`, `airdrop`) and exercise the plugin's read paths
  * through the returned connection.
@@ -76,7 +76,7 @@ function liteSvmTransport(svm: LiteSVM) {
 }
 
 /**
- * Creates a Solana Kite {@link Connection} backed by an in-process LiteSVM, for fast,
+ * Creates a {@link Connection} (from solana-kite) backed by an in-process LiteSVM, for fast,
  * network-free integration tests of Kit plugins.
  *
  * @param svm - An existing LiteSVM instance (e.g. one you've already loaded programs into). A
@@ -97,7 +97,7 @@ function liteSvmTransport(svm: LiteSVM) {
  */
 export function connectLiteSvm(svm: LiteSVM = new LiteSVM()): LiteSvmConnection {
   const rpc = createSolanaRpcFromTransport(liteSvmTransport(svm) as never);
-  // Kite only touches rpcSubscriptions when sending+confirming; reads don't need it.
+  // The connection only touches rpcSubscriptions when sending+confirming; reads don't need it.
   const connection = connect(rpc as never, {} as never);
   return { svm, connection };
 }

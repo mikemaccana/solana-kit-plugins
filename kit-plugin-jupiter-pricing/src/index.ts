@@ -9,7 +9,7 @@ export type {
   PortfolioBreakdown,
   PriceWatchCallback,
   PortfolioWatchCallback,
-  KitePricingConfig,
+  JupiterPricingConfig,
 } from "./lib/types.js";
 export { JupiterClient } from "./lib/jupiter.js";
 export { formatUsdValue, tokenAmountToUiAmount, uiAmountToTokenAmount, ensureError } from "./lib/utils.js";

@@ -1,11 +1,11 @@
-// Offline test: a LiteSVM-backed Kite connection serves reads from the in-process SVM.
+// Offline test: a LiteSVM-backed connection serves reads from the in-process SVM.
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { generateKeyPairSigner, lamports } from "@solana/kit";
 import { connectLiteSvm } from "./index.js";
 
 describe("connectLiteSvm()", () => {
-  test("serves Kite reads from the in-process LiteSVM", async () => {
+  test("serves reads from the in-process LiteSVM", async () => {
     const { svm, connection } = connectLiteSvm();
     const signer = await generateKeyPairSigner();
 

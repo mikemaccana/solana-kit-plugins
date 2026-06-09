@@ -1,4 +1,4 @@
-# Solana Kite Squads Multisig
+# kit-plugin-squads-multisig
 
 A production-ready Kit plugin for Squads Protocol v4 multisig operations, built with Codama-generated clients and zero web3.js dependencies.
 
@@ -7,7 +7,7 @@ A production-ready Kit plugin for Squads Protocol v4 multisig operations, built 
 ✅ **Zero web3.js dependency** - Pure Solana Kit implementation
 ✅ **Type-safe** - Full TypeScript support via Codama-generated client
 ✅ **Modern tooling** - Codama types instead of legacy Beet
-✅ **Kite consistency** - Same patterns as other Kite operations
+✅ **Consistency** - Same patterns as other connection operations
 ✅ **Plugin composability** - Works seamlessly with other Kit plugins
 ✅ **Squads v4** - Supports latest Squads Protocol with roles, permissions, and spending limits
 
@@ -290,7 +290,7 @@ npm test
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 5.0+
 
 ## Implementation Status

@@ -1,4 +1,4 @@
-# Solana Kite ANS
+# kit-plugin-ans-name-service
 
 AllDomains Name Service (ANS) plugin for Solana Kit enabling `.abc` and custom TLD domain name resolution.
 
@@ -6,7 +6,7 @@ AllDomains Name Service (ANS) plugin for Solana Kit enabling `.abc` and custom T
 
 - **Domain Resolution**: Resolve ANS domains (`.abc`, `.bonk`, `.poor`, etc.) to Solana addresses
 - **Pure Solana Kit**: Zero web3.js dependencies - built entirely with @solana/kit
-- **Transparent Enhancement**: Works with existing Kite methods
+- **Transparent Enhancement**: Works with existing connection methods
 - **Intelligent Caching**: Built-in caching (default: 1 hour)
 - **Type-Safe**: Full TypeScript support
 

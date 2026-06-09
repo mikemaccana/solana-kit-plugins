@@ -216,7 +216,7 @@ export class MetaplexClient {
 
   /**
    * Updates token metadata, intelligently handling both Metaplex and Token-2022 sources.
-   * For Token-2022, delegates to the base Kite updateTokenMetadata function.
+   * For Token-2022, delegates to the base updateTokenMetadata function.
    * For Metaplex, uses the Codama-generated UpdateMetadataAccountV2 instruction.
    *
    * NOTE: Metaplex updates replace all metadata fields. This method fetches existing metadata
@@ -247,7 +247,7 @@ export class MetaplexClient {
     }
 
     if (metadata.source === MetadataSource.TOKEN_2022) {
-      // Delegate to the base Kite updateTokenMetadata for Token-2022
+      // Delegate to the base updateTokenMetadata for Token-2022
       return await this.connection.updateTokenMetadata({
         mintAddress,
         updateAuthority,

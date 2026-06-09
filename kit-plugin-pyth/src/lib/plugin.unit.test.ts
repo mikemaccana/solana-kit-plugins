@@ -9,17 +9,17 @@ import { parsePythPriceAccountData } from "./pyth-client.js";
 import { PYTH_PRICE_ACCOUNT_MAGIC, PYTH_ACCOUNT_TYPE_PRICE } from "./constants.js";
 
 describe("pyth() plugin", () => {
-  test("extends a Kite client with the pyth namespace (offline construction)", () => {
+  test("extends a client with the pyth namespace (offline construction)", () => {
     const client = pyth()(connect("devnet"));
 
     assert.ok(client.pyth, "exposes the pyth namespace");
     assert.strictEqual(typeof client.pyth.getPythPriceFeed, "function");
     assert.strictEqual(typeof client.pyth.getPythOnchainPrice, "function");
     assert.strictEqual(typeof client.pyth.postPythPriceUpdate, "function");
-    // Regression test: the plugin must preserve the underlying Kite connection
+    // Regression test: the plugin must preserve the underlying connection
     // (a previous version returned only `{ pyth }`).
     assert.strictEqual(typeof client.getLamportBalance, "function");
-    assert.ok(client.rpc, "preserves the Kite rpc");
+    assert.ok(client.rpc, "preserves the rpc");
   });
 });
 

@@ -1,6 +1,6 @@
-# Solana Kite Arcium
+# kit-plugin-arcium
 
-Arcium confidential computing plugin for Solana Kit. Provides onchain helpers for working with the Arcium MXE (Masked Execution Environment) — PDA derivation, encryption key generation, circuit uploading, and computation event listening — all using the provided Kite connection rather than creating internal connections.
+Arcium confidential computing plugin for Solana Kit. Provides onchain helpers for working with the Arcium MXE (Masked Execution Environment) — PDA derivation, encryption key generation, circuit uploading, and computation event listening — all using the provided connection rather than creating internal connections.
 
 ## Features
 
@@ -349,7 +349,7 @@ const connection = createClient().use(kite({ clusterNameOrURL: "localnet" }))
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 5.0+
 
 ## License

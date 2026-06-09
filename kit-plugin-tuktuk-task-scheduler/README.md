@@ -1,8 +1,8 @@
-# Solana Kite TukTuk Task Scheduler
+# kit-plugin-tuktuk-task-scheduler
 
 TukTuk task scheduler plugin for Solana Kit enabling scheduled and recurring transactions.
 
-This plugin extends Solana Kite with TukTuk integration, allowing you to schedule transactions to run at specific times or on recurring schedules.
+This plugin extends Solana Kit with TukTuk integration, allowing you to schedule transactions to run at specific times or on recurring schedules.
 
 ## Features
 
@@ -299,7 +299,7 @@ npm test
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 2.0+
 
 ## Implementation Status

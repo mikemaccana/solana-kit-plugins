@@ -6,7 +6,7 @@ import { connect } from "solana-kite";
 import { jupiter } from "./plugin.js";
 
 describe("jupiter() plugin", () => {
-  test("extends a Kite client with pricing methods (offline construction)", () => {
+  test("extends a client with pricing methods (offline construction)", () => {
     const client = jupiter()(connect("devnet"));
 
     assert.ok(client.jupiter, "exposes the jupiter client");
@@ -16,8 +16,8 @@ describe("jupiter() plugin", () => {
     assert.strictEqual(typeof client.formatUsdValue, "function");
     // transferTokens is enhanced but must remain callable.
     assert.strictEqual(typeof client.transferTokens, "function");
-    // The underlying Kite connection is preserved.
+    // The underlying connection is preserved.
     assert.strictEqual(typeof client.getLamportBalance, "function");
-    assert.ok(client.rpc, "preserves the Kite rpc");
+    assert.ok(client.rpc, "preserves the rpc");
   });
 });

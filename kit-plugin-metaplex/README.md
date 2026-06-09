@@ -1,4 +1,4 @@
-# Solana Kite Metaplex
+# kit-plugin-metaplex
 
 Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token-2022 metadata extension.
 
@@ -420,14 +420,14 @@ npm test
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 5.0+
 
 ## Implementation Status
 
 ✅ **Metaplex Metadata Reading**: Full support for Metaplex Token Metadata V1
 ✅ **Metaplex Metadata Updating**: Full support using Codama-generated client
-✅ **Token-2022 Reading**: Full support via Kite's existing functionality
+✅ **Token-2022 Reading**: Full support via the connection's existing functionality
 ✅ **Token-2022 Updating**: Full support for updating Token-2022 metadata fields
 ✅ **Intelligent Detection**: Automatically detects and uses correct metadata source
 ✅ **Off-Chain JSON**: Full support for fetching and parsing NFT metadata JSON

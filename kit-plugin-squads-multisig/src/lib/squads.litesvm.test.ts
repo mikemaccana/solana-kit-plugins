@@ -1,6 +1,6 @@
 // LiteSVM integration test: encodes a Squads Multisig account with the Codama-generated encoder,
 // injects it into an in-process LiteSVM, and reads it back through the squads() plugin
-// over a LiteSVM-backed Kite connection. Exercises the plugin's read + decode path, no network.
+// over a LiteSVM-backed connection. Exercises the plugin's read + decode path, no network.
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import { generateKeyPairSigner, none } from "@solana/kit";

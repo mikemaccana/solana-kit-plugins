@@ -4,7 +4,7 @@ Pyth Network oracle plugin for [Solana Kit](https://www.solanakit.com). Adds a `
 namespace to the client for reading Pyth price feeds via the Hermes API and on-chain price
 accounts, and for posting pull-oracle price updates.
 
-Layers on the [Solana Kite](https://solanakite.com) capability, so apply
+Layers on the [`kite()`](../kit-plugin-kite) capability, so apply
 [`kite()`](../kit-plugin-kite) first.
 
 ## Installation

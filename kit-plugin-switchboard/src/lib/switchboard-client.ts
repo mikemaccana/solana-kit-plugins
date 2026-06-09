@@ -86,7 +86,7 @@ export function parseSwitchboardFeedAccountData(
 /**
  * Read-only client for Switchboard On-Demand price/feed values on Solana.
  *
- * Reads pull feed account data directly from chain via the Kite connection's RPC and decodes
+ * Reads pull feed account data directly from chain via the connection's RPC and decodes
  * the aggregated `CurrentResult`. This client never sends transactions.
  */
 export class SwitchboardClient {

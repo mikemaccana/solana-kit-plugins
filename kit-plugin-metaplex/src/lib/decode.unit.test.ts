@@ -51,7 +51,7 @@ describe("deserializeMetaplexMetadata (mainnet fixtures)", () => {
 });
 
 describe("metaplex() plugin", () => {
-  test("extends a Kite client with metaplex methods (offline construction)", () => {
+  test("extends a client with metaplex methods (offline construction)", () => {
     const client = metaplex()(connect("devnet"));
 
     assert.ok(client.metaplex, "exposes the metaplex client");
@@ -60,8 +60,8 @@ describe("metaplex() plugin", () => {
     assert.strictEqual(typeof client.getToken2022Metadata, "function");
     assert.strictEqual(typeof client.getCompleteMetadata, "function");
     assert.strictEqual(typeof client.updateTokenMetadata, "function");
-    // The underlying Kite connection is preserved.
+    // The underlying connection is preserved.
     assert.strictEqual(typeof client.getLamportBalance, "function");
-    assert.ok(client.rpc, "preserves the Kite rpc");
+    assert.ok(client.rpc, "preserves the rpc");
   });
 });

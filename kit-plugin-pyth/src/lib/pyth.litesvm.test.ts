@@ -1,5 +1,5 @@
 // LiteSVM integration test: injects a Pyth price account into an in-process LiteSVM and reads it
-// back through the pyth() plugin's on-chain reader, over a LiteSVM-backed Kite connection.
+// back through the pyth() plugin's on-chain reader, over a LiteSVM-backed connection.
 //
 // This exercises the plugin's read + decode path against the LiteSVM RPC adapter without any
 // network. (Pyth's legacy on-chain push-oracle accounts are no longer published on mainnet, so a
