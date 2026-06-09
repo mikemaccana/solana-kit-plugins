@@ -1,0 +1,84 @@
+name: litesvm-integration
+
+# Runs the LiteSVM-backed integration tests (kit-plugin-litesvm exposes an in-process LiteSVM as a
+# Kite Connection). Triggered when a covered plugin or the adapter changes. Each job builds the
+# adapter, installs the plugin (which links the adapter via a file: dependency), and runs the
+# plugin's `test:litesvm`. The metaplex job additionally fetches the real Token Metadata program
+# from mainnet (cached) and loads it into LiteSVM.
+on:
+  push:
+    paths:
+      - 'kit-plugin-litesvm/**'
+      - 'kit-plugin-metaplex/**'
+      - 'kit-plugin-pyth/**'
+      - 'kit-plugin-squads-multisig/**'
+      - '.github/workflows/litesvm-integration.yml'
+  pull_request:
+    paths:
+      - 'kit-plugin-litesvm/**'
+      - 'kit-plugin-metaplex/**'
+      - 'kit-plugin-pyth/**'
+      - 'kit-plugin-squads-multisig/**'
+      - '.github/workflows/litesvm-integration.yml'
+
+jobs:
+  metaplex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build kit-plugin-litesvm
+        working-directory: kit-plugin-litesvm
+        run: npm ci && npm run build
+      - name: Install kit-plugin-metaplex
+        working-directory: kit-plugin-metaplex
+        run: npm ci
+      - name: Cache Token Metadata program
+        id: cache-program
+        uses: actions/cache@v4
+        with:
+          path: kit-plugin-metaplex/tests/fixtures/mpl_token_metadata.so
+          key: mpl-token-metadata-so-v1
+      - name: Fetch Token Metadata program from mainnet
+        if: steps.cache-program.outputs.cache-hit != 'true'
+        working-directory: kit-plugin-metaplex
+        run: node scripts/fetch-program.mjs metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s tests/fixtures/mpl_token_metadata.so mainnet
+      - name: Run LiteSVM tests
+        working-directory: kit-plugin-metaplex
+        run: npm run test:litesvm
+
+  pyth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build kit-plugin-litesvm
+        working-directory: kit-plugin-litesvm
+        run: npm ci && npm run build
+      - name: Install kit-plugin-pyth
+        working-directory: kit-plugin-pyth
+        run: npm ci
+      - name: Run LiteSVM tests
+        working-directory: kit-plugin-pyth
+        run: npm run test:litesvm
+
+  squads:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build kit-plugin-litesvm
+        working-directory: kit-plugin-litesvm
+        run: npm ci && npm run build
+      - name: Install kit-plugin-squads-multisig
+        working-directory: kit-plugin-squads-multisig
+        run: npm ci
+      - name: Run LiteSVM tests
+        working-directory: kit-plugin-squads-multisig
+        run: npm run test:litesvm
