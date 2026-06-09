@@ -2,6 +2,9 @@ import { LiteSVM } from "litesvm";
 import { createSolanaRpcFromTransport, getBase64Decoder, type Address } from "@solana/kit";
 import { connect, type Connection } from "solana-kite";
 
+// Re-export the LiteSVM essentials so consumers depend only on this package.
+export { LiteSVM, FailedTransactionMetadata, TransactionMetadata } from "litesvm";
+
 /**
  * A Solana Kite {@link Connection} backed by an in-process {@link LiteSVM}, plus the underlying
  * `svm` instance for test setup (loading programs, injecting accounts, airdrops, sending
