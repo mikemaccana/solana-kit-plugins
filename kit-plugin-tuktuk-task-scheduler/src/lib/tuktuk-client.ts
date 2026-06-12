@@ -19,6 +19,7 @@ import {
   getInitializeTaskQueueV0Instruction,
   fetchMaybeTuktukConfigV0,
   fetchTaskQueueV0,
+  type TransactionSourceV0Args,
 } from "../generated/tuktuk-client/index.js";
 import {
   CRON_PROGRAM_ADDRESS,
@@ -254,6 +255,13 @@ export class TukTukClient {
     const taskPda = await this.connection.getPDAAndBump(TUKTUK_PROGRAM_ADDRESS, ["task", taskQueue, taskIdBuffer]);
     const taskAddress = taskPda.pda;
 
+    // The on-chain instruction takes a TransactionSourceV0 enum: a compiled transaction
+    // inline (CompiledV0) or a URL to fetch the transaction from at run time (RemoteV0).
+    const transactionSource: TransactionSourceV0Args =
+      "url" in params.transaction
+        ? { __kind: "RemoteV0", url: params.transaction.url, signer: user.address }
+        : { __kind: "CompiledV0", fields: [params.transaction] };
+
     const instruction = await getQueueTaskV0InstructionAsync({
       payer: user,
       queueAuthority: user,
@@ -261,9 +269,7 @@ export class TukTukClient {
       task: taskAddress,
       id: taskId,
       trigger: params.trigger,
-      // The hand-written CompiledTransaction domain type does not structurally match
-      // the Codama-generated TransactionSourceV0Args; reconciling them needs a larger refactor.
-      transaction: params.transaction as any,
+      transaction: transactionSource,
       crankReward: params.crankReward || null,
       freeTasks: params.freeTasks || 0,
       description: params.description || "",
@@ -376,9 +382,7 @@ export class TukTukClient {
       index: transactionId,
       transactionSource: {
         __kind: "CompiledV0" as const,
-        // CompiledTransaction does not match the Codama-generated CompiledTransactionV0Args
-        // shape; reconciling them needs a larger refactor.
-        fields: [compiledTransaction as any],
+        fields: [compiledTransaction],
       },
     });
 
@@ -489,9 +493,7 @@ export class TukTukClient {
       accounts,
       instructions: compiledInstructions,
       signerSeeds: [],
-      // This wire-format compiled transaction shape does not match the declared
-      // CompiledTransaction return type; reconciling them needs a larger refactor.
-    } as any;
+    };
   }
 
   /**

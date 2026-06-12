@@ -1,4 +1,5 @@
-import type { Address, Instruction } from "@solana/kit";
+import type { Address } from "@solana/kit";
+import type { CompiledTransactionV0Args } from "../generated/tuktuk-client/index.js";
 
 export interface TukTukConfig {
   defaultTaskQueueName?: string;
@@ -17,10 +18,9 @@ export interface AddressLookupTable {
   addresses: Array<Address>;
 }
 
-export interface CompiledTransaction {
-  instructions: Array<Instruction>;
-  addressLookupTables: Array<AddressLookupTable>;
-}
+// A TukTuk-compiled transaction is exactly the Codama-generated wire shape produced by
+// compileTukTukTransaction() and consumed by queueTask()/addCronTransaction().
+export type CompiledTransaction = CompiledTransactionV0Args;
 
 export interface TaskQueueParams {
   name: string;
