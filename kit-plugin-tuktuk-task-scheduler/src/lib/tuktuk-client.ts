@@ -19,6 +19,7 @@ import {
   getInitializeTaskQueueV0Instruction,
   fetchMaybeTuktukConfigV0,
   fetchTaskQueueV0,
+  getTaskQueueV0Decoder,
   type TransactionSourceV0Args,
 } from "../generated/tuktuk-client/index.js";
 import {
@@ -92,26 +93,8 @@ export class TukTukClient {
    * Parses TaskQueueV0 account data to extract task bitmap.
    */
   private parseTaskQueueV0(accountData: Uint8Array) {
-    const TASK_QUEUE_V0_OFFSETS = {
-      CAPACITY: 124,
-      TASK_BITMAP_LEN: 143,
-      TASK_BITMAP: 147,
-    };
-
-    const capacity = new DataView(accountData.buffer, accountData.byteOffset).getUint16(
-      TASK_QUEUE_V0_OFFSETS.CAPACITY,
-      true,
-    );
-    const bitmapLen = new DataView(accountData.buffer, accountData.byteOffset).getUint32(
-      TASK_QUEUE_V0_OFFSETS.TASK_BITMAP_LEN,
-      true,
-    );
-    const taskBitmap = accountData.slice(
-      TASK_QUEUE_V0_OFFSETS.TASK_BITMAP,
-      TASK_QUEUE_V0_OFFSETS.TASK_BITMAP + bitmapLen,
-    );
-
-    return { capacity, taskBitmap };
+    const taskQueue = getTaskQueueV0Decoder().decode(accountData);
+    return { capacity: taskQueue.capacity, taskBitmap: new Uint8Array(taskQueue.taskBitmap) };
   }
 
   /**
