@@ -1,100 +1,75 @@
 import type { Address } from "@solana/kit";
-import { getAddressDecoder } from "@solana/kit";
-import type { TokenMetadata, Creator, Collection } from "./types.js";
+import { unwrapOption } from "@solana/kit";
+import type { TokenMetadata, Creator, Collection, Uses } from "./types.js";
 import { MetadataSource } from "./constants.js";
+import { getMetadataDecoder } from "../generated/mpl_token_metadata-client/accounts/metadata.js";
+import type { Metadata } from "../generated/mpl_token_metadata-client/accounts/metadata.js";
+import { UseMethod } from "../generated/mpl_token_metadata-client/types/useMethod.js";
 
-const addressDecoder = getAddressDecoder();
+const metadataDecoder = getMetadataDecoder();
+
+/** Trims trailing NUL padding from a fixed-length on-chain string. */
+function trimNuls(value: string): string {
+  return value.replace(/\0+$/, "");
+}
+
+const USE_METHOD_NAMES: Record<UseMethod, Uses["useMethod"]> = {
+  [UseMethod.Burn]: "Burn",
+  [UseMethod.Multiple]: "Multiple",
+  [UseMethod.Single]: "Single",
+};
 
 /**
- * Deserializes a Metaplex Token Metadata account.
- * This is a simplified deserializer that handles the most common Metadata V1 format.
- *
- * Note: For production use with all metadata variations, consider using a
- * proper Codama-generated client from the Metaplex Token Metadata IDL.
+ * Maps a Codama-generated Metaplex {@link Metadata} struct to the plugin's
+ * domain {@link TokenMetadata} type. The on-chain `mint` is used in preference
+ * to the supplied `mintAddress`, but the argument is kept to preserve the
+ * existing public behavior.
  */
-export function deserializeMetaplexMetadata(data: Uint8Array, mintAddress: Address): TokenMetadata {
-  let offset = 0;
+export function mapMetadataToTokenMetadata(metadata: Metadata, mintAddress: Address): TokenMetadata {
+  const creatorsOption = unwrapOption(metadata.data.creators);
+  const creators: Array<Creator> | undefined = creatorsOption
+    ? creatorsOption.map((creator) => ({
+        address: creator.address,
+        verified: creator.verified,
+        share: creator.share,
+      }))
+    : undefined;
 
-  const readU8 = (): number => data[offset++];
-  const readU16 = (): number => data[offset++] | (data[offset++] << 8);
-  const readU32 = (): number =>
-    data[offset++] | (data[offset++] << 8) | (data[offset++] << 16) | (data[offset++] << 24);
+  const collectionValue = unwrapOption(metadata.collection);
+  const collection: Collection | undefined = collectionValue
+    ? { verified: collectionValue.verified, key: collectionValue.key }
+    : undefined;
 
-  const readPublicKey = (): Address => {
-    const bytes = data.slice(offset, offset + 32);
-    offset += 32;
-    return addressDecoder.decode(bytes);
-  };
-
-  const readString = (): string => {
-    const length = readU32();
-    const bytes = data.slice(offset, offset + length);
-    offset += length;
-    return new TextDecoder().decode(bytes).replace(/\0+$/, "");
-  };
-
-  const readOption = <T>(reader: () => T): T | undefined => {
-    const hasValue = readU8();
-    return hasValue ? reader() : undefined;
-  };
-
-  // Skip discriminator (1 byte) and account type (1 byte)
-  offset = 1;
-
-  const updateAuthority = readPublicKey();
-  const mint = readPublicKey();
-  const name = readString();
-  const symbol = readString();
-  const uri = readString();
-  const sellerFeeBasisPoints = readU16();
-
-  // Read creators (Option<Vec<Creator>>)
-  const hasCreators = readU8();
-  let creators: Array<Creator> | undefined;
-  if (hasCreators) {
-    const creatorsLength = readU32();
-    creators = [];
-    for (let i = 0; i < creatorsLength; i++) {
-      const creatorAddress = readPublicKey();
-      const verified = readU8() === 1;
-      const share = readU8();
-      creators.push({
-        address: creatorAddress,
-        verified,
-        share,
-      });
-    }
-  }
-
-  const primarySaleHappened = readU8() === 1;
-  const isMutable = readU8() === 1;
-
-  // Read edition nonce (Option<u8>)
-  readOption(() => readU8());
-
-  // Read token standard (Option<TokenStandard>)
-  readOption(() => readU8());
-
-  // Read collection (Option<Collection>)
-  let collection: Collection | undefined;
-  const hasCollection = readU8();
-  if (hasCollection) {
-    const verified = readU8() === 1;
-    const key = readPublicKey();
-    collection = { verified, key };
-  }
+  const usesValue = unwrapOption(metadata.uses);
+  const uses: Uses | undefined = usesValue
+    ? {
+        useMethod: USE_METHOD_NAMES[usesValue.useMethod],
+        remaining: usesValue.remaining,
+        total: usesValue.total,
+      }
+    : undefined;
 
   return {
     source: MetadataSource.METAPLEX,
     mint: mintAddress,
-    updateAuthority,
-    name,
-    symbol,
-    uri,
-    sellerFeeBasisPoints,
+    updateAuthority: metadata.updateAuthority,
+    name: trimNuls(metadata.data.name),
+    symbol: trimNuls(metadata.data.symbol),
+    uri: trimNuls(metadata.data.uri),
+    sellerFeeBasisPoints: metadata.data.sellerFeeBasisPoints,
     creators,
     collection,
-    primarySaleHappened,
-    isMutable,
+    uses,
+    primarySaleHappened: metadata.primarySaleHappened,
+    isMutable: metadata.isMutable,
   };
+}
+
+/**
+ * Deserializes a Metaplex Token Metadata account using the Codama-generated
+ * decoder, then maps the result to the plugin's domain {@link TokenMetadata}.
+ */
+export function deserializeMetaplexMetadata(data: Uint8Array, mintAddress: Address): TokenMetadata {
+  const metadata = metadataDecoder.decode(data);
+  return mapMetadataToTokenMetadata(metadata, mintAddress);
 }
