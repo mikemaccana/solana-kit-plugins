@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "tsx --test src/**/*.test.ts",
-    "test:ci": "tsx --test src/**/*.unit.test.ts",
+    "test": "tsx --test src/*.test.ts",
+    "test:ci": "tsx --test src/*.unit.test.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
