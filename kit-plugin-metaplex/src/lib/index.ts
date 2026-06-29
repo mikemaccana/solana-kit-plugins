@@ -1,4 +1,4 @@
-export { createKiteMetaplexPlugin } from "./plugin.js";
+export { metaplex } from "./plugin.js";
 export { MetaplexClient } from "./metaplex-client.js";
 export { METADATA_PROGRAM_ID, MetadataSource } from "./constants.js";
 export type {

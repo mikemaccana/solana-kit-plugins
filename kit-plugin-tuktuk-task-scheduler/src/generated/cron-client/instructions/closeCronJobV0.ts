@@ -10,12 +10,12 @@ import {
   combineCodec,
   fixDecoderSize,
   fixEncoderSize,
-  getAddressEncoder,
   getBytesDecoder,
   getBytesEncoder,
-  getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -32,18 +32,18 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
-import { CRON_PROGRAM_ADDRESS } from "../programs";
 import {
-  expectAddress,
   getAccountMetaFactory,
-  type ResolvedAccount,
-} from "../shared";
+  getAddressFromResolvedInstructionAccount,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
+import { findTaskReturnAccount1Pda, findTaskReturnAccount2Pda } from "../pdas";
+import { CRON_PROGRAM_ADDRESS } from "../programs";
 
-export const CLOSE_CRON_JOB_V0_DISCRIMINATOR = new Uint8Array([
-  114, 152, 214, 24, 97, 36, 231, 102,
-]);
+export const CLOSE_CRON_JOB_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([114, 152, 214, 24, 97, 36, 231, 102]);
 
-export function getCloseCronJobV0DiscriminatorBytes() {
+export function getCloseCronJobV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     CLOSE_CRON_JOB_V0_DISCRIMINATOR,
   );
@@ -203,7 +203,7 @@ export async function getCloseCronJobV0InstructionAsync<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -212,45 +212,33 @@ export async function getCloseCronJobV0InstructionAsync<
       "11111111111111111111111111111111" as Address<"11111111111111111111111111111111">;
   }
   if (!accounts.taskReturnAccount1.value) {
-    accounts.taskReturnAccount1.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([
-            116, 97, 115, 107, 95, 114, 101, 116, 117, 114, 110, 95, 97, 99, 99,
-            111, 117, 110, 116, 95, 49,
-          ]),
-        ),
-        getAddressEncoder().encode(expectAddress(accounts.cronJob.value)),
-      ],
+    accounts.taskReturnAccount1.value = await findTaskReturnAccount1Pda({
+      cronJob: getAddressFromResolvedInstructionAccount(
+        "cronJob",
+        accounts.cronJob.value,
+      ),
     });
   }
   if (!accounts.taskReturnAccount2.value) {
-    accounts.taskReturnAccount2.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([
-            116, 97, 115, 107, 95, 114, 101, 116, 117, 114, 110, 95, 97, 99, 99,
-            111, 117, 110, 116, 95, 50,
-          ]),
-        ),
-        getAddressEncoder().encode(expectAddress(accounts.cronJob.value)),
-      ],
+    accounts.taskReturnAccount2.value = await findTaskReturnAccount2Pda({
+      cronJob: getAddressFromResolvedInstructionAccount(
+        "cronJob",
+        accounts.cronJob.value,
+      ),
     });
   }
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.rentRefund),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.userCronJobs),
-      getAccountMeta(accounts.cronJob),
-      getAccountMeta(accounts.cronJobNameMapping),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.taskReturnAccount1),
-      getAccountMeta(accounts.taskReturnAccount2),
+      getAccountMeta("rentRefund", accounts.rentRefund),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("userCronJobs", accounts.userCronJobs),
+      getAccountMeta("cronJob", accounts.cronJob),
+      getAccountMeta("cronJobNameMapping", accounts.cronJobNameMapping),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("taskReturnAccount1", accounts.taskReturnAccount1),
+      getAccountMeta("taskReturnAccount2", accounts.taskReturnAccount2),
     ],
     data: getCloseCronJobV0InstructionDataEncoder().encode({}),
     programAddress,
@@ -345,7 +333,7 @@ export function getCloseCronJobV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -357,14 +345,14 @@ export function getCloseCronJobV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.rentRefund),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.userCronJobs),
-      getAccountMeta(accounts.cronJob),
-      getAccountMeta(accounts.cronJobNameMapping),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.taskReturnAccount1),
-      getAccountMeta(accounts.taskReturnAccount2),
+      getAccountMeta("rentRefund", accounts.rentRefund),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("userCronJobs", accounts.userCronJobs),
+      getAccountMeta("cronJob", accounts.cronJob),
+      getAccountMeta("cronJobNameMapping", accounts.cronJobNameMapping),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("taskReturnAccount1", accounts.taskReturnAccount1),
+      getAccountMeta("taskReturnAccount2", accounts.taskReturnAccount2),
     ],
     data: getCloseCronJobV0InstructionDataEncoder().encode({}),
     programAddress,
@@ -408,8 +396,13 @@ export function parseCloseCronJobV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedCloseCronJobV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 8) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 8,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

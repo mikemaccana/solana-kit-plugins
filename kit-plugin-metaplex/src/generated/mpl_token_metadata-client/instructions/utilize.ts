@@ -14,6 +14,8 @@ import {
   getU64Encoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -30,12 +32,15 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const UTILIZE_DISCRIMINATOR = 19;
 
-export function getUtilizeDiscriminatorBytes() {
+export function getUtilizeDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(UTILIZE_DISCRIMINATOR);
 }
 
@@ -236,7 +241,7 @@ export function getUtilizeInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -263,17 +268,17 @@ export function getUtilizeInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.tokenAccount),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.useAuthority),
-      getAccountMeta(accounts.owner),
-      getAccountMeta(accounts.tokenProgram),
-      getAccountMeta(accounts.ataProgram),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.rent),
-      getAccountMeta(accounts.useAuthorityRecord),
-      getAccountMeta(accounts.burner),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("tokenAccount", accounts.tokenAccount),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("useAuthority", accounts.useAuthority),
+      getAccountMeta("owner", accounts.owner),
+      getAccountMeta("tokenProgram", accounts.tokenProgram),
+      getAccountMeta("ataProgram", accounts.ataProgram),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("rent", accounts.rent),
+      getAccountMeta("useAuthorityRecord", accounts.useAuthorityRecord),
+      getAccountMeta("burner", accounts.burner),
     ],
     data: getUtilizeInstructionDataEncoder().encode(
       args as UtilizeInstructionDataArgs,
@@ -336,8 +341,13 @@ export function parseUtilizeInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedUtilizeInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 11) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 11,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

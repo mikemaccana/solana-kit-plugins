@@ -1,7 +1,7 @@
 {
-  "name": "solana-kite-metaplex",
+  "name": "kit-plugin-metaplex",
   "version": "0.1.0",
-  "description": "Metaplex token metadata plugin for Solana Kite supporting both Metaplex Token Metadata and Token-2022 metadata extension",
+  "description": "Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token Extensions metadata extension",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,35 +12,47 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
     "test": "tsx --test src/**/*.test.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:ci": "tsx --test src/**/*.unit.test.ts",
+    "generate": "node codama.js",
+    "test:litesvm": "tsx --test src/**/*.litesvm.test.ts"
   },
   "keywords": [
     "solana",
+    "kit",
     "kite",
     "metaplex",
     "nft",
     "metadata",
     "token",
-    "token-2022",
+    "token-extensions",
     "web3"
   ],
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "solana-kite": "^3.0.0",
-    "@solana/kit": "^5.0.0"
+    "solana-kite": "^3.2.0",
+    "@solana/kit": "^6.0.0"
   },
   "devDependencies": {
-    "@solana/kit": "^5.4.0",
+    "@solana/kit": "^6.9.0",
     "@types/node": "^22.10.5",
-    "solana-kite": "^3.1.0",
+    "solana-kite": "^3.2.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "codama": "^1.7.0",
+    "@codama/nodes-from-anchor": "^1.5.0",
+    "@codama/renderers-js": "^2.2.0",
+    "kit-plugin-litesvm": "file:../kit-plugin-litesvm",
+    "@solana-program/token": "^0.11.0",
+    "@solana-program/system": "^0.12.0"
   },
   "dependencies": {}
 }

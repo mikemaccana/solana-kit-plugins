@@ -49,11 +49,11 @@ import {
   type PeriodArgs,
 } from "../types";
 
-export const SPENDING_LIMIT_DISCRIMINATOR = new Uint8Array([
+export const SPENDING_LIMIT_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   10, 201, 27, 160, 218, 195, 222, 152,
 ]);
 
-export function getSpendingLimitDiscriminatorBytes() {
+export function getSpendingLimitDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     SPENDING_LIMIT_DISCRIMINATOR,
   );

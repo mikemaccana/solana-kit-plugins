@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,12 +30,15 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const REVOKE_COLLECTION_AUTHORITY_DISCRIMINATOR = 24;
 
-export function getRevokeCollectionAuthorityDiscriminatorBytes() {
+export function getRevokeCollectionAuthorityDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(REVOKE_COLLECTION_AUTHORITY_DISCRIMINATOR);
 }
 
@@ -163,17 +168,20 @@ export function getRevokeCollectionAuthorityInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.collectionAuthorityRecord),
-      getAccountMeta(accounts.delegateAuthority),
-      getAccountMeta(accounts.revokeAuthority),
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.mint),
+      getAccountMeta(
+        "collectionAuthorityRecord",
+        accounts.collectionAuthorityRecord,
+      ),
+      getAccountMeta("delegateAuthority", accounts.delegateAuthority),
+      getAccountMeta("revokeAuthority", accounts.revokeAuthority),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("mint", accounts.mint),
     ],
     data: getRevokeCollectionAuthorityInstructionDataEncoder().encode({}),
     programAddress,
@@ -216,8 +224,13 @@ export function parseRevokeCollectionAuthorityInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedRevokeCollectionAuthorityInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

@@ -12,12 +12,10 @@ import {
   combineCodec,
   fixDecoderSize,
   fixEncoderSize,
-  getAddressEncoder,
   getBytesDecoder,
   getBytesEncoder,
   getOptionDecoder,
   getOptionEncoder,
-  getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
   getU16Decoder,
@@ -30,6 +28,8 @@ import {
   getU8Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -49,12 +49,13 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
-import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
 import {
-  expectAddress,
   getAccountMetaFactory,
-  type ResolvedAccount,
-} from "../shared";
+  getAddressFromResolvedInstructionAccount,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
+import { findTaskQueueAuthorityPda } from "../pdas";
+import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
 import {
   getTransactionSourceV0Decoder,
   getTransactionSourceV0Encoder,
@@ -66,11 +67,11 @@ import {
   type TriggerV0Args,
 } from "../types";
 
-export const QUEUE_TASK_V0_DISCRIMINATOR = new Uint8Array([
+export const QUEUE_TASK_V0_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   177, 95, 195, 252, 241, 2, 178, 88,
 ]);
 
-export function getQueueTaskV0DiscriminatorBytes() {
+export function getQueueTaskV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     QUEUE_TASK_V0_DISCRIMINATOR,
   );
@@ -238,7 +239,7 @@ export async function getQueueTaskV0InstructionAsync<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -246,20 +247,15 @@ export async function getQueueTaskV0InstructionAsync<
 
   // Resolve default values.
   if (!accounts.taskQueueAuthority.value) {
-    accounts.taskQueueAuthority.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([
-            116, 97, 115, 107, 95, 113, 117, 101, 117, 101, 95, 97, 117, 116,
-            104, 111, 114, 105, 116, 121,
-          ]),
-        ),
-        getAddressEncoder().encode(expectAddress(accounts.taskQueue.value)),
-        getAddressEncoder().encode(
-          expectAddress(accounts.queueAuthority.value),
-        ),
-      ],
+    accounts.taskQueueAuthority.value = await findTaskQueueAuthorityPda({
+      taskQueue: getAddressFromResolvedInstructionAccount(
+        "taskQueue",
+        accounts.taskQueue.value,
+      ),
+      queueAuthority: getAddressFromResolvedInstructionAccount(
+        "queueAuthority",
+        accounts.queueAuthority.value,
+      ),
     });
   }
   if (!accounts.systemProgram.value) {
@@ -270,12 +266,12 @@ export async function getQueueTaskV0InstructionAsync<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.queueAuthority),
-      getAccountMeta(accounts.taskQueueAuthority),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.task),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("queueAuthority", accounts.queueAuthority),
+      getAccountMeta("taskQueueAuthority", accounts.taskQueueAuthority),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("task", accounts.task),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getQueueTaskV0InstructionDataEncoder().encode(
       args as QueueTaskV0InstructionDataArgs,
@@ -358,7 +354,7 @@ export function getQueueTaskV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -373,12 +369,12 @@ export function getQueueTaskV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.queueAuthority),
-      getAccountMeta(accounts.taskQueueAuthority),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.task),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("queueAuthority", accounts.queueAuthority),
+      getAccountMeta("taskQueueAuthority", accounts.taskQueueAuthority),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("task", accounts.task),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getQueueTaskV0InstructionDataEncoder().encode(
       args as QueueTaskV0InstructionDataArgs,
@@ -420,8 +416,13 @@ export function parseQueueTaskV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedQueueTaskV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 6) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 6,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

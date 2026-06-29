@@ -43,11 +43,10 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR = new Uint8Array([
-  112, 41, 174, 94, 48, 84, 56, 217,
-]);
+export const TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([112, 41, 174, 94, 48, 84, 56, 217]);
 
-export function getTaskQueueNameMappingV0DiscriminatorBytes() {
+export function getTaskQueueNameMappingV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR,
   );

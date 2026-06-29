@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -27,12 +29,15 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const DEPRECATED_SET_RESERVATION_LIST_DISCRIMINATOR = 5;
 
-export function getDeprecatedSetReservationListDiscriminatorBytes() {
+export function getDeprecatedSetReservationListDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(DEPRECATED_SET_RESERVATION_LIST_DISCRIMINATOR);
 }
 
@@ -133,15 +138,15 @@ export function getDeprecatedSetReservationListInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.masterEdition),
-      getAccountMeta(accounts.reservationList),
-      getAccountMeta(accounts.resource),
+      getAccountMeta("masterEdition", accounts.masterEdition),
+      getAccountMeta("reservationList", accounts.reservationList),
+      getAccountMeta("resource", accounts.resource),
     ],
     data: getDeprecatedSetReservationListInstructionDataEncoder().encode({}),
     programAddress,
@@ -178,8 +183,13 @@ export function parseDeprecatedSetReservationListInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedDeprecatedSetReservationListInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 3,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

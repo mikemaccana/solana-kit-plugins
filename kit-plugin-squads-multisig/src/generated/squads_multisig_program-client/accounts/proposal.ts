@@ -47,11 +47,11 @@ import {
   type ProposalStatusArgs,
 } from "../types";
 
-export const PROPOSAL_DISCRIMINATOR = new Uint8Array([
+export const PROPOSAL_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   26, 94, 189, 187, 116, 136, 53, 33,
 ]);
 
-export function getProposalDiscriminatorBytes() {
+export function getProposalDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(PROPOSAL_DISCRIMINATOR);
 }
 

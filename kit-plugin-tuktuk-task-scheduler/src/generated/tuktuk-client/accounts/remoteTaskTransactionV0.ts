@@ -39,11 +39,10 @@ import {
   type CompiledTransactionV0Args,
 } from "../types";
 
-export const REMOTE_TASK_TRANSACTION_V0_DISCRIMINATOR = new Uint8Array([
-  244, 225, 238, 116, 199, 12, 9, 191,
-]);
+export const REMOTE_TASK_TRANSACTION_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([244, 225, 238, 116, 199, 12, 9, 191]);
 
-export function getRemoteTaskTransactionV0DiscriminatorBytes() {
+export function getRemoteTaskTransactionV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     REMOTE_TASK_TRANSACTION_V0_DISCRIMINATOR,
   );

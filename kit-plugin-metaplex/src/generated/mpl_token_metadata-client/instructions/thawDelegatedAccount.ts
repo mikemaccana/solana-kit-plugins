@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,12 +30,15 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const THAW_DELEGATED_ACCOUNT_DISCRIMINATOR = 27;
 
-export function getThawDelegatedAccountDiscriminatorBytes() {
+export function getThawDelegatedAccountDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(THAW_DELEGATED_ACCOUNT_DISCRIMINATOR);
 }
 
@@ -155,7 +160,7 @@ export function getThawDelegatedAccountInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -167,11 +172,11 @@ export function getThawDelegatedAccountInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.delegate),
-      getAccountMeta(accounts.tokenAccount),
-      getAccountMeta(accounts.edition),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.tokenProgram),
+      getAccountMeta("delegate", accounts.delegate),
+      getAccountMeta("tokenAccount", accounts.tokenAccount),
+      getAccountMeta("edition", accounts.edition),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("tokenProgram", accounts.tokenProgram),
     ],
     data: getThawDelegatedAccountInstructionDataEncoder().encode({}),
     programAddress,
@@ -214,8 +219,13 @@ export function parseThawDelegatedAccountInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedThawDelegatedAccountInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

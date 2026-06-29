@@ -246,13 +246,13 @@ export class PythClient {
     this.hermesUrl = config.hermesUrl ?? HERMES_URL;
   }
 
-  async getPythPrice(feedId: string): Promise<PythPriceFeed | null> {
+  async getPythPriceFeed(feedId: string): Promise<PythPriceFeed | null> {
     const normalizedId = normalizeFeedId(feedId);
     const { feeds } = await this.fetchHermesLatest([normalizedId]);
     return feeds.get(normalizedId) ?? null;
   }
 
-  async getPythPrices(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>> {
+  async getPythPriceFeeds(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>> {
     const normalizedIds = feedIds.map(normalizeFeedId);
     const { feeds } = await this.fetchHermesLatest(normalizedIds);
     return feeds;
@@ -292,22 +292,20 @@ export class PythClient {
   }
 
   async getPythOnchainPrice(priceAccountAddress: Address): Promise<PythOnchainPriceData | null> {
-    try {
-      const accountInfo = await this.connection.rpc
-        .getAccountInfo(priceAccountAddress, { encoding: "base64" })
-        .send();
-      if (!accountInfo.value) return null;
+    // Returns null when the account does not exist. RPC and decode errors are allowed to
+    // propagate rather than being silently swallowed into an indistinguishable null.
+    const accountInfo = await this.connection.rpc
+      .getAccountInfo(priceAccountAddress, { encoding: "base64" })
+      .send();
+    if (!accountInfo.value) return null;
 
-      const [encodedData] = accountInfo.value.data as readonly [string, string];
-      const rawBytes = new Uint8Array(Buffer.from(encodedData, "base64"));
-      return parsePythPriceAccountData(rawBytes);
-    } catch {
-      return null;
-    }
+    const [encodedData] = accountInfo.value.data as readonly [string, string];
+    const rawBytes = new Uint8Array(Buffer.from(encodedData, "base64"));
+    return parsePythPriceAccountData(rawBytes);
   }
 
   async isPythPriceStale(feedId: string, maxAgeSeconds: number): Promise<boolean> {
-    const feed = await this.getPythPrice(feedId);
+    const feed = await this.getPythPriceFeed(feedId);
     if (!feed) return true;
     const ageSeconds = Date.now() / 1000 - feed.price.publishTime;
     return ageSeconds > maxAgeSeconds;
@@ -329,10 +327,10 @@ export class PythClient {
     }));
   }
 
-  watchPythPrice(feedId: string, callback: PythPriceCallback, intervalMs: number = 1000): () => void {
+  watchPythPriceFeed(feedId: string, callback: PythPriceCallback, intervalMs: number = 1000): () => void {
     const poll = async () => {
       try {
-        const feed = await this.getPythPrice(feedId);
+        const feed = await this.getPythPriceFeed(feedId);
         if (feed) {
           callback(null, feed);
         } else {

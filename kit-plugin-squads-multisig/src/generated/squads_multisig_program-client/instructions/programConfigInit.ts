@@ -18,6 +18,8 @@ import {
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -34,14 +36,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const PROGRAM_CONFIG_INIT_DISCRIMINATOR = new Uint8Array([
-  184, 188, 198, 195, 205, 124, 117, 216,
-]);
+export const PROGRAM_CONFIG_INIT_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([184, 188, 198, 195, 205, 124, 117, 216]);
 
-export function getProgramConfigInitDiscriminatorBytes() {
+export function getProgramConfigInitDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     PROGRAM_CONFIG_INIT_DISCRIMINATOR,
   );
@@ -167,7 +171,7 @@ export function getProgramConfigInitInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -182,9 +186,9 @@ export function getProgramConfigInitInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.programConfig),
-      getAccountMeta(accounts.initializer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("programConfig", accounts.programConfig),
+      getAccountMeta("initializer", accounts.initializer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getProgramConfigInitInstructionDataEncoder().encode(
       args as ProgramConfigInitInstructionDataArgs,
@@ -221,8 +225,13 @@ export function parseProgramConfigInitInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedProgramConfigInitInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 3,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

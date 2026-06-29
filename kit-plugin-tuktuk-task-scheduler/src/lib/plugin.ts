@@ -1,7 +1,14 @@
+import { extendClient } from "@solana/kit";
 import type { Address, Instruction, KeyPairSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { TukTukClient } from "./tuktuk-client.js";
-import type { TukTukConfig, QueueTaskParams, CronJobParams, CompiledTransaction } from "./types.js";
+import type {
+  TukTukConfig,
+  QueueTaskParams,
+  CronJobParams,
+  CompiledTransaction,
+  AddressLookupTable,
+} from "./types.js";
 
 export interface TukTukMethods {
   tuktuk: TukTukClient;
@@ -45,23 +52,13 @@ export interface TukTukMethods {
    */
   compileTukTukTransaction: (
     instructions: Array<Instruction>,
-    addressLookupTables?: Array<any>,
+    addressLookupTables?: Array<AddressLookupTable>,
   ) => CompiledTransaction;
 
   /**
    * Gets the address for a cron job by name.
    */
   getCronJobForName: (user: KeyPairSigner, cronName: string) => Promise<Address | null>;
-
-  /**
-   * Lists all tasks in a queue.
-   */
-  listTasks: (taskQueue: Address, descriptionPrefix?: string) => Promise<Array<any>>;
-
-  /**
-   * Closes a task and reclaims rent.
-   */
-  closeTask: (user: KeyPairSigner, taskQueue: Address, taskId: number) => Promise<string>;
 
   /**
    * Funds a task queue with additional SOL.
@@ -72,7 +69,7 @@ export interface TukTukMethods {
 export type ConnectionWithTukTuk = Connection & TukTukMethods;
 
 /**
- * Creates a TukTuk task scheduler plugin for Solana Kite.
+ * Creates a TukTuk task scheduler plugin for Solana Kit.
  *
  * This plugin enables scheduling transactions to run at specific times or on recurring schedules.
  *
@@ -83,11 +80,14 @@ export type ConnectionWithTukTuk = Connection & TukTukMethods;
  *
  * @example
  * ```typescript
- * import { connect } from "solana-kite";
- * import { createKiteTukTukPlugin } from "solana-kite-tuktuk";
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { tuktuk } from "kit-plugin-tuktuk-task-scheduler";
  * import { getAddMemoInstruction } from "@solana-program/memo";
  *
- * const client = connect("devnet").use(createKiteTukTukPlugin());
+ * const client = createClient()
+ *   .use(kite({ clusterNameOrURL: "devnet" }))
+ *   .use(tuktuk());
  *
  * // Get or create a task queue
  * const taskQueue = await client.getOrCreateTaskQueue(wallet, "my-queue");
@@ -111,8 +111,8 @@ export type ConnectionWithTukTuk = Connection & TukTukMethods;
  * });
  * ```
  */
-export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
-  return <T extends Connection>(connection: T): T & TukTukMethods => {
+export const tuktuk = (config: TukTukConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const tukTukClient = new TukTukClient(connection, config.defaultTaskQueueName);
 
     const getOrCreateTaskQueue = async (
@@ -153,25 +153,13 @@ export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
 
     const compileTukTukTransaction = (
       instructions: Array<Instruction>,
-      addressLookupTables: Array<any> = [],
+      addressLookupTables: Array<AddressLookupTable> = [],
     ): CompiledTransaction => {
       return tukTukClient.compileTukTukTransaction(instructions, addressLookupTables);
     };
 
     const getCronJobForName = async (user: KeyPairSigner, cronName: string): Promise<Address | null> => {
       return tukTukClient.getCronJobForName(user, cronName);
-    };
-
-    const listTasks = async (taskQueue: Address, descriptionPrefix?: string): Promise<Array<any>> => {
-      return tukTukClient.listTasks(taskQueue, descriptionPrefix);
-    };
-
-    const closeTask = async (
-      user: KeyPairSigner,
-      taskQueue: Address,
-      taskId: number,
-    ): Promise<string> => {
-      return tukTukClient.closeTask(user, taskQueue, taskId);
     };
 
     const fundTaskQueue = async (
@@ -182,8 +170,7 @@ export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
       return tukTukClient.fundTaskQueue(user, taskQueue, amount);
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       tuktuk: tukTukClient,
       getOrCreateTaskQueue,
       queueTask,
@@ -192,9 +179,8 @@ export const createKiteTukTukPlugin = (config: TukTukConfig = {}) => {
       monitorTask,
       compileTukTukTransaction,
       getCronJobForName,
-      listTasks,
-      closeTask,
       fundTaskQueue,
-    };
+    });
   };
 };
+

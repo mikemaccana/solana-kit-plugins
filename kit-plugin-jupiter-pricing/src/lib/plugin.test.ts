@@ -2,17 +2,17 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import { connect } from "solana-kite";
 import { address } from "@solana/kit";
-import { createKitePricingPlugin } from "./plugin.js";
+import { jupiter } from "./plugin.js";
 import { WRAPPED_SOL_MINT } from "./constants.js";
 
 // Integration tests use quicknode-mainnet instead of public mainnet-beta RPC
 // to avoid rate limits (429 errors) when running the full test suite.
 // Requires QUICKNODE_SOLANA_MAINNET_ENDPOINT environment variable to be set.
 
-describe("createKitePricingPlugin", () => {
+describe("jupiter", () => {
   test("plugin extends connection with pricing methods", () => {
     const connection = connect("devnet");
-    const pricingPlugin = createKitePricingPlugin();
+    const pricingPlugin = jupiter();
     const connectionWithPricing = pricingPlugin(connection);
 
     assert.ok(typeof connectionWithPricing.getTokenPrice === "function");
@@ -30,7 +30,7 @@ describe("createKitePricingPlugin", () => {
 
   test("plugin preserves original connection methods", () => {
     const connection = connect("devnet");
-    const pricingPlugin = createKitePricingPlugin();
+    const pricingPlugin = jupiter();
     const connectionWithPricing = pricingPlugin(connection);
 
     assert.ok(typeof connectionWithPricing.getLamportBalance === "function");
@@ -41,7 +41,7 @@ describe("createKitePricingPlugin", () => {
 
   test("can use plugin with connection.use() pattern", () => {
     const connection = connect("devnet");
-    const pricingPlugin = createKitePricingPlugin();
+    const pricingPlugin = jupiter();
     const connectionWithPricing = connection as any;
 
     assert.ok(connection);
@@ -52,7 +52,7 @@ describe("createKitePricingPlugin", () => {
 describe("getTokenPrice integration", () => {
   test("fetches SOL price successfully", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -69,7 +69,7 @@ describe("getTokenPrice integration", () => {
 describe("getTokenPrices integration", () => {
   test("fetches multiple token prices", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -86,7 +86,7 @@ describe("getTokenPrices integration", () => {
 describe("getTokenValueInUsd integration", () => {
   test("calculates USD value for token amount", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -99,7 +99,7 @@ describe("getTokenValueInUsd integration", () => {
 
   test("returns null for non-existent token", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -114,7 +114,7 @@ describe("getTokenValueInUsd integration", () => {
 describe("getPortfolioBreakdown integration", () => {
   test("gets portfolio breakdown for address with balance", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -134,7 +134,7 @@ describe("getPortfolioBreakdown integration", () => {
 describe("getPortfolioValue integration", () => {
   test("gets total portfolio value", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -150,7 +150,7 @@ describe("getPortfolioValue integration", () => {
 describe("getTopHoldings integration", () => {
   test("gets top holdings limited to specified count", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -170,7 +170,7 @@ describe("getTopHoldings integration", () => {
 describe("convertBetweenTokens integration", () => {
   test("converts SOL amount to USDC equivalent", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -188,7 +188,7 @@ describe("convertBetweenTokens integration", () => {
 describe("formatUsdValue", () => {
   test("formats USD values correctly", () => {
     const connection = connect("devnet");
-    const pricingPlugin = createKitePricingPlugin();
+    const pricingPlugin = jupiter();
     const client = pricingPlugin(connection);
 
     const formatted = client.formatUsdValue(1234.56);
@@ -199,7 +199,7 @@ describe("formatUsdValue", () => {
 describe("watchTokenPrice", () => {
   test("watches token price and calls callback", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -231,7 +231,7 @@ describe("watchTokenPrice", () => {
 describe("watchPortfolioValue", () => {
   test("watches portfolio value and calls callback", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -265,7 +265,7 @@ describe("watchPortfolioValue", () => {
 describe("enhanced transferTokens", () => {
   test("resolves token symbol to mint address", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);
@@ -282,7 +282,7 @@ describe("enhanced transferTokens", () => {
 
   test("returns null for invalid token symbol", async () => {
     const connection = connect("quicknode-mainnet");
-    const pricingPlugin = createKitePricingPlugin({
+    const pricingPlugin = jupiter({
       jupiterApiKey: process.env.JUPITER_API_KEY,
     });
     const client = pricingPlugin(connection);

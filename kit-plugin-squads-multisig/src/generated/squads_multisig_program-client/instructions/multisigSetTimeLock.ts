@@ -22,6 +22,8 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -41,14 +43,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const MULTISIG_SET_TIME_LOCK_DISCRIMINATOR = new Uint8Array([
-  148, 154, 121, 77, 212, 254, 155, 72,
-]);
+export const MULTISIG_SET_TIME_LOCK_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([148, 154, 121, 77, 212, 254, 155, 72]);
 
-export function getMultisigSetTimeLockDiscriminatorBytes() {
+export function getMultisigSetTimeLockDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     MULTISIG_SET_TIME_LOCK_DISCRIMINATOR,
   );
@@ -195,7 +199,7 @@ export function getMultisigSetTimeLockInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -204,10 +208,10 @@ export function getMultisigSetTimeLockInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.configAuthority),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("configAuthority", accounts.configAuthority),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getMultisigSetTimeLockInstructionDataEncoder().encode(
       args as MultisigSetTimeLockInstructionDataArgs,
@@ -252,8 +256,13 @@ export function parseMultisigSetTimeLockInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedMultisigSetTimeLockInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

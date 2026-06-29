@@ -1,8 +1,8 @@
-# Solana Kite TukTuk Task Scheduler
+# kit-plugin-tuktuk-task-scheduler
 
-TukTuk task scheduler plugin for Solana Kite enabling scheduled and recurring transactions.
+TukTuk task scheduler plugin for Solana Kit enabling scheduled and recurring transactions.
 
-This plugin extends Solana Kite with TukTuk integration, allowing you to schedule transactions to run at specific times or on recurring schedules.
+This plugin extends Solana Kit with TukTuk integration, allowing you to schedule transactions to run at specific times or on recurring schedules.
 
 ## Features
 
@@ -16,7 +16,7 @@ This plugin extends Solana Kite with TukTuk integration, allowing you to schedul
 ## Installation
 
 ```bash
-npm install solana-kite-tuktuk solana-kite @solana/kit
+npm install kit-plugin-tuktuk-task-scheduler solana-kite @solana/kit
 ```
 
 ## Important Notes
@@ -30,11 +30,12 @@ npm install solana-kite-tuktuk solana-kite @solana/kit
 ### One-Time Task
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteTukTukPlugin } from "solana-kite-tuktuk";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { tuktuk } from "kit-plugin-tuktuk-task-scheduler";
 import { getAddMemoInstruction } from "@solana-program/memo";
 
-const connection = connect("devnet").addPlugin(createKiteTukTukPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "devnet" })).use(tuktuk());
 const wallet = await connection.loadWalletFromEnvironment("WALLET_SECRET_KEY");
 
 // Get or create a task queue
@@ -183,22 +184,6 @@ Compiles instructions into TukTuk transaction format.
 const compiledTx = connection.compileTukTukTransaction([instruction1, instruction2]);
 ```
 
-#### `listTasks(taskQueue, descriptionPrefix?): Promise<Array<any>>`
-
-Lists all pending tasks in a queue, optionally filtered by description prefix.
-
-```typescript
-const tasks = await connection.listTasks(taskQueue, "memo:");
-```
-
-#### `closeTask(user, taskQueue, taskId): Promise<string>`
-
-Closes a task and reclaims rent. Use this to remove failed tasks that won't execute.
-
-```typescript
-await connection.closeTask(wallet, taskQueue, 123);
-```
-
 #### `fundTaskQueue(user, taskQueue, amount): Promise<string>`
 
 Funds a task queue with additional SOL. Needed for queues that create recursive tasks (like cron jobs).
@@ -314,7 +299,7 @@ npm test
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 2.0+
 
 ## Implementation Status
@@ -329,4 +314,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite. Based on [TukTuk](https://github.com/helium/tuktuk) by the Helium Foundation.
+Built for Solana Kit. Based on [TukTuk](https://github.com/helium/tuktuk) by the Helium Foundation.

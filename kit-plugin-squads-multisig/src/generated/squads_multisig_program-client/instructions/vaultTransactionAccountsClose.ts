@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type Address,
@@ -27,14 +29,16 @@ import {
   type ReadonlyUint8Array,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const VAULT_TRANSACTION_ACCOUNTS_CLOSE_DISCRIMINATOR = new Uint8Array([
-  196, 71, 187, 176, 2, 35, 170, 165,
-]);
+export const VAULT_TRANSACTION_ACCOUNTS_CLOSE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([196, 71, 187, 176, 2, 35, 170, 165]);
 
-export function getVaultTransactionAccountsCloseDiscriminatorBytes() {
+export function getVaultTransactionAccountsCloseDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     VAULT_TRANSACTION_ACCOUNTS_CLOSE_DISCRIMINATOR,
   );
@@ -160,7 +164,7 @@ export function getVaultTransactionAccountsCloseInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Resolve default values.
@@ -172,11 +176,11 @@ export function getVaultTransactionAccountsCloseInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.proposal),
-      getAccountMeta(accounts.transaction),
-      getAccountMeta(accounts.rentCollector),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("proposal", accounts.proposal),
+      getAccountMeta("transaction", accounts.transaction),
+      getAccountMeta("rentCollector", accounts.rentCollector),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getVaultTransactionAccountsCloseInstructionDataEncoder().encode({}),
     programAddress,
@@ -217,8 +221,13 @@ export function parseVaultTransactionAccountsCloseInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedVaultTransactionAccountsCloseInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

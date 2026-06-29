@@ -16,6 +16,8 @@ import {
   getStructEncoder,
   getU32Decoder,
   getU32Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -33,14 +35,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { CRON_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const REMOVE_CRON_TRANSACTION_V0_DISCRIMINATOR = new Uint8Array([
-  207, 237, 8, 195, 65, 111, 124, 247,
-]);
+export const REMOVE_CRON_TRANSACTION_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([207, 237, 8, 195, 65, 111, 124, 247]);
 
-export function getRemoveCronTransactionV0DiscriminatorBytes() {
+export function getRemoveCronTransactionV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     REMOVE_CRON_TRANSACTION_V0_DISCRIMINATOR,
   );
@@ -172,7 +176,7 @@ export function getRemoveCronTransactionV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -187,11 +191,11 @@ export function getRemoveCronTransactionV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.rentRefund),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.cronJob),
-      getAccountMeta(accounts.cronJobTransaction),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("rentRefund", accounts.rentRefund),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("cronJob", accounts.cronJob),
+      getAccountMeta("cronJobTransaction", accounts.cronJobTransaction),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getRemoveCronTransactionV0InstructionDataEncoder().encode(
       args as RemoveCronTransactionV0InstructionDataArgs,
@@ -231,8 +235,13 @@ export function parseRemoveCronTransactionV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedRemoveCronTransactionV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

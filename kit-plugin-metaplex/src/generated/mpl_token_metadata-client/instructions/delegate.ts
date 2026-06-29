@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -29,8 +31,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getDelegateArgsDecoder,
   getDelegateArgsEncoder,
@@ -40,7 +45,7 @@ import {
 
 export const DELEGATE_DISCRIMINATOR = 44;
 
-export function getDelegateDiscriminatorBytes() {
+export function getDelegateDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(DELEGATE_DISCRIMINATOR);
 }
 
@@ -283,7 +288,7 @@ export function getDelegateInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -302,20 +307,23 @@ export function getDelegateInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.delegateRecord),
-      getAccountMeta(accounts.delegate),
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.masterEdition),
-      getAccountMeta(accounts.tokenRecord),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.token),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.sysvarInstructions),
-      getAccountMeta(accounts.splTokenProgram),
-      getAccountMeta(accounts.authorizationRulesProgram),
-      getAccountMeta(accounts.authorizationRules),
+      getAccountMeta("delegateRecord", accounts.delegateRecord),
+      getAccountMeta("delegate", accounts.delegate),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("masterEdition", accounts.masterEdition),
+      getAccountMeta("tokenRecord", accounts.tokenRecord),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("token", accounts.token),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("sysvarInstructions", accounts.sysvarInstructions),
+      getAccountMeta("splTokenProgram", accounts.splTokenProgram),
+      getAccountMeta(
+        "authorizationRulesProgram",
+        accounts.authorizationRulesProgram,
+      ),
+      getAccountMeta("authorizationRules", accounts.authorizationRules),
     ],
     data: getDelegateInstructionDataEncoder().encode(
       args as DelegateInstructionDataArgs,
@@ -387,8 +395,13 @@ export function parseDelegateInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedDelegateInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 14) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 14,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

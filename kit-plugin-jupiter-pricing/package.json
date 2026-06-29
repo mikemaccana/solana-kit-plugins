@@ -1,5 +1,5 @@
 {
-  "name": "solana-kite-pricing",
+  "name": "kit-plugin-jupiter-pricing",
   "version": "0.1.0",
   "description": "Jupiter Price API plugin for Solana Kit providing price-aware token operations",
   "type": "module",
@@ -19,7 +19,8 @@
   "scripts": {
     "build": "tsc",
     "test": "tsx --test src/**/*.test.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:ci": "tsx --test src/**/*.unit.test.ts"
   },
   "keywords": [
     "solana",
@@ -32,13 +33,13 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "solana-kite": "^3.0.0",
-    "@solana/kit": "^2.0.0"
+    "solana-kite": "^3.2.0",
+    "@solana/kit": "^6.0.0"
   },
   "devDependencies": {
-    "@solana/kit": "^2.1.6",
+    "@solana/kit": "^6.9.0",
     "@types/node": "^22.10.5",
-    "solana-kite": "^3.1.0",
+    "solana-kite": "^3.2.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   },

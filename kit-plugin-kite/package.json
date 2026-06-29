@@ -1,0 +1,46 @@
+{
+  "name": "kit-plugin-kite",
+  "version": "0.1.0",
+  "description": "Solana Kit plugin that adds Solana Kite's high-level capabilities (wallets, token operations, transaction helpers, PDAs) to a Kit client",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "npm run build",
+    "test:ci": "tsx --test src/**/*.unit.test.ts"
+  },
+  "keywords": [
+    "solana",
+    "kit",
+    "kite",
+    "plugin",
+    "web3"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@solana/kit": "^6.0.0",
+    "solana-kite": "^3.2.0"
+  },
+  "devDependencies": {
+    "@solana/kit": "^6.9.0",
+    "@types/node": "^22.10.5",
+    "solana-kite": "^3.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {}
+}

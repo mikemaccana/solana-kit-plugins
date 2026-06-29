@@ -49,11 +49,10 @@ import {
   type VaultTransactionMessageArgs,
 } from "../types";
 
-export const VAULT_TRANSACTION_DISCRIMINATOR = new Uint8Array([
-  168, 250, 162, 100, 81, 14, 162, 207,
-]);
+export const VAULT_TRANSACTION_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([168, 250, 162, 100, 81, 14, 162, 207]);
 
-export function getVaultTransactionDiscriminatorBytes() {
+export function getVaultTransactionDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     VAULT_TRANSACTION_DISCRIMINATOR,
   );

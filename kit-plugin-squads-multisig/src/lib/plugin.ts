@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner, Commitment, Instruction } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { SquadsClient } from "./squads-client.js";
@@ -84,7 +85,7 @@ export interface SquadsMethods {
 export type ConnectionWithSquads = Connection & SquadsMethods;
 
 /**
- * Creates a Squads multisig plugin for Solana Kite.
+ * Creates a Squads multisig plugin for Solana Kit.
  *
  * This plugin provides a clean, web3.js-free interface to Squads Protocol v4,
  * enabling multisig wallet management using Solana Kit.
@@ -95,10 +96,13 @@ export type ConnectionWithSquads = Connection & SquadsMethods;
  *
  * @example
  * ```typescript
- * import { connect } from "solana-kite";
- * import { createKiteSquadsPlugin } from "solana-kite-squads-multisig";
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { squads } from "kit-plugin-squads-multisig";
  *
- * const client = connect("devnet").use(createKiteSquadsPlugin());
+ * const client = createClient()
+ *   .use(kite({ clusterNameOrURL: "devnet" }))
+ *   .use(squads());
  *
  * // Create a 2-of-3 multisig
  * const { multisig } = await client.createMultisig({
@@ -121,8 +125,8 @@ export type ConnectionWithSquads = Connection & SquadsMethods;
  * await client.executeProposal({ multisig, transactionIndex, member: member1 });
  * ```
  */
-export const createKiteSquadsPlugin = (config: SquadsConfig = {}) => {
-  return <T extends Connection>(connection: T): T & SquadsMethods => {
+export const squads = (config: SquadsConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const squadsClient = new SquadsClient(connection);
 
     const createMultisig = async (params: {
@@ -189,8 +193,7 @@ export const createKiteSquadsPlugin = (config: SquadsConfig = {}) => {
       return squadsClient.getVaultAddress(multisig, vaultIndex);
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       squads: squadsClient,
       createMultisig,
       createProposal,
@@ -202,6 +205,7 @@ export const createKiteSquadsPlugin = (config: SquadsConfig = {}) => {
       getMultisigAddress,
       getProposalAddress,
       getVaultAddress,
-    };
+    });
   };
 };
+

@@ -45,11 +45,10 @@ import {
   type TransactionSourceV0Args,
 } from "../types";
 
-export const CRON_JOB_TRANSACTION_V0_DISCRIMINATOR = new Uint8Array([
-  117, 255, 57, 94, 180, 229, 113, 39,
-]);
+export const CRON_JOB_TRANSACTION_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([117, 255, 57, 94, 180, 229, 113, 39]);
 
-export function getCronJobTransactionV0DiscriminatorBytes() {
+export function getCronJobTransactionV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     CRON_JOB_TRANSACTION_V0_DISCRIMINATOR,
   );

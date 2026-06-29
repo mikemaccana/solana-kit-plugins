@@ -1,10 +1,11 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { SOL } from "solana-kite";
 import { JupiterClient } from "./jupiter.js";
 import { WRAPPED_SOL_MINT } from "./constants.js";
 import type {
-  KitePricingConfig,
+  JupiterPricingConfig,
   TokenPriceInfo,
   PortfolioBreakdown,
   PortfolioToken,
@@ -25,6 +26,23 @@ type EnhancedTransferTokensParams = {
   | { usdValue: number; amount?: never }
 );
 
+// Minimal shape of a parsed SPL token account as returned by getTokenAccounts.
+interface ParsedTokenAccountInfo {
+  account: {
+    data: {
+      parsed: {
+        info: {
+          mint: Address;
+          tokenAmount: {
+            amount: string;
+            decimals: number;
+          };
+        };
+      };
+    };
+  };
+}
+
 export interface PricingMethods {
   jupiter: JupiterClient;
   getTokenPrice: (mint: Address) => Promise<TokenPriceInfo | null>;
@@ -42,8 +60,8 @@ export interface PricingMethods {
 
 export type ConnectionWithPricing = Connection & PricingMethods;
 
-export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
-  return <T extends Connection>(connection: T): T & PricingMethods => {
+export const jupiter = (config: JupiterPricingConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const jupiter = new JupiterClient(config.jupiterApiKey, config.cacheTimeMs, config.vsToken);
 
     const getTokenPrice = async (mint: Address): Promise<TokenPriceInfo | null> => {
@@ -78,7 +96,7 @@ export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
 
       const rawTokenAccounts = await connection.getTokenAccounts(address, true);
 
-      const tokenAccountsWithBalance = rawTokenAccounts.map((accountInfo: any) => {
+      const tokenAccountsWithBalance = rawTokenAccounts.map((accountInfo: ParsedTokenAccountInfo) => {
         const parsedInfo = accountInfo.account.data.parsed.info;
         return {
           mint: parsedInfo.mint,
@@ -279,8 +297,7 @@ export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
       };
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       jupiter,
       getTokenPrice,
       getTokenPrices,
@@ -293,6 +310,7 @@ export const createKitePricingPlugin = (config: KitePricingConfig = {}) => {
       formatUsdValue,
       watchPortfolioValue,
       watchTokenPrice,
-    };
+    });
   };
 };
+

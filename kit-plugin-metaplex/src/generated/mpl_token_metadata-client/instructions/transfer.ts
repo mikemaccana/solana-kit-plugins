@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -29,8 +31,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getTransferArgsDecoder,
   getTransferArgsEncoder,
@@ -40,7 +45,7 @@ import {
 
 export const TRANSFER_DISCRIMINATOR = 49;
 
-export function getTransferDiscriminatorBytes() {
+export function getTransferDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(TRANSFER_DISCRIMINATOR);
 }
 
@@ -327,7 +332,7 @@ export function getTransferInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -354,23 +359,26 @@ export function getTransferInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.token),
-      getAccountMeta(accounts.tokenOwner),
-      getAccountMeta(accounts.destination),
-      getAccountMeta(accounts.destinationOwner),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.edition),
-      getAccountMeta(accounts.ownerTokenRecord),
-      getAccountMeta(accounts.destinationTokenRecord),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.sysvarInstructions),
-      getAccountMeta(accounts.splTokenProgram),
-      getAccountMeta(accounts.splAtaProgram),
-      getAccountMeta(accounts.authorizationRulesProgram),
-      getAccountMeta(accounts.authorizationRules),
+      getAccountMeta("token", accounts.token),
+      getAccountMeta("tokenOwner", accounts.tokenOwner),
+      getAccountMeta("destination", accounts.destination),
+      getAccountMeta("destinationOwner", accounts.destinationOwner),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("edition", accounts.edition),
+      getAccountMeta("ownerTokenRecord", accounts.ownerTokenRecord),
+      getAccountMeta("destinationTokenRecord", accounts.destinationTokenRecord),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("sysvarInstructions", accounts.sysvarInstructions),
+      getAccountMeta("splTokenProgram", accounts.splTokenProgram),
+      getAccountMeta("splAtaProgram", accounts.splAtaProgram),
+      getAccountMeta(
+        "authorizationRulesProgram",
+        accounts.authorizationRulesProgram,
+      ),
+      getAccountMeta("authorizationRules", accounts.authorizationRules),
     ],
     data: getTransferInstructionDataEncoder().encode(
       args as TransferInstructionDataArgs,
@@ -451,8 +459,13 @@ export function parseTransferInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedTransferInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 17) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 17,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

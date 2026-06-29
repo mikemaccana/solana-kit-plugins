@@ -1,15 +1,15 @@
-# Solana Kite Metaplex
+# kit-plugin-metaplex
 
-Metaplex token metadata plugin for Solana Kite supporting both Metaplex Token Metadata and Token-2022 metadata extension.
+Metaplex token metadata plugin for Solana Kit supporting both Metaplex Token Metadata and Token Extensions metadata extension.
 
 This plugin intelligently handles BOTH metadata standards, automatically detecting which system a token uses and returning the appropriate metadata.
 
 ## Features
 
-- **Dual Metadata Support**: Automatically checks both Metaplex Token Metadata AND Token-2022 metadata extension
-- **Smart Detection**: Prefers Metaplex by default (more common for NFTs), falls back to Token-2022
+- **Dual Metadata Support**: Automatically checks both Metaplex Token Metadata AND Token Extensions metadata extension
+- **Smart Detection**: Prefers Metaplex by default (more common for NFTs), falls back to Token Extensions
 - **Metaplex-Specific Fields**: Access creators, collections, royalties (sellerFeeBasisPoints)
-- **Off-Chain Data**: Fetch and parse JSON metadata from URIs
+- **Offchain Data**: Fetch and parse JSON metadata from URIs
 - **Batch Operations**: Get metadata for multiple tokens in parallel
 - **Intelligent Caching**: Built-in caching to minimize RPC calls
 - **Type-Safe**: Full TypeScript support with proper types for both standards
@@ -18,7 +18,7 @@ This plugin intelligently handles BOTH metadata standards, automatically detecti
 ## Installation
 
 ```bash
-npm install solana-kite-metaplex solana-kite @solana/kit
+npm install kit-plugin-metaplex solana-kite @solana/kit
 ```
 
 ## Quick Start
@@ -26,19 +26,20 @@ npm install solana-kite-metaplex solana-kite @solana/kit
 ### Basic Usage
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { metaplex } from "kit-plugin-metaplex";
 import { address } from "@solana/kit";
 
-const connection = connect("mainnet-beta").addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(metaplex());
 
 const mintAddress = address("YourTokenMintAddress...");
 
-// Automatically checks both Metaplex and Token-2022
+// Automatically checks both Metaplex and Token Extensions
 const metadata = await connection.getTokenMetadata(mintAddress);
 
 if (metadata) {
-  console.log(`Source: ${metadata.source}`); // "metaplex" or "token-2022"
+  console.log(`Source: ${metadata.source}`); // "metaplex" or "token-extensions"
   console.log(`Name: ${metadata.name}`);
   console.log(`Symbol: ${metadata.symbol}`);
   console.log(`URI: ${metadata.uri}`);
@@ -64,16 +65,16 @@ if (metadata) {
 ### Get Complete NFT Data
 
 ```typescript
-// Get both on-chain and off-chain metadata
+// Get both onchain and offchain metadata
 const complete = await connection.getCompleteMetadata(nftMintAddress);
 
 if (complete) {
-  // On-chain data
+  // Onchain data
   console.log(`Name: ${complete.onChain.name}`);
   console.log(`Symbol: ${complete.onChain.symbol}`);
   console.log(`Source: ${complete.onChain.source}`);
 
-  // Off-chain data (from JSON URI)
+  // Offchain data (from JSON URI)
   console.log(`Description: ${complete.offChain.description}`);
   console.log(`Image: ${complete.offChain.image}`);
 
@@ -124,7 +125,7 @@ interface MetaplexConfig {
 
 #### `getTokenMetadata(mintAddress, useCache?): Promise<TokenMetadata | null>`
 
-Intelligently gets token metadata, checking both Metaplex and Token-2022 sources.
+Intelligently gets token metadata, checking both Metaplex and Token Extensions sources.
 
 ```typescript
 const metadata = await connection.getTokenMetadata(mintAddress);
@@ -135,7 +136,7 @@ const freshMetadata = await connection.getTokenMetadata(mintAddress, false); // 
 
 ```typescript
 interface TokenMetadata {
-  source: "metaplex" | "token-2022";
+  source: "metaplex" | "token-extensions";
   name: string;
   symbol: string;
   uri: string;
@@ -149,14 +150,14 @@ interface TokenMetadata {
   isMutable?: boolean;
   primarySaleHappened?: boolean;
 
-  // Token-2022 specific (only present if source is "token-2022")
+  // Token Extensions specific (only present if source is "token-extensions")
   additionalMetadata?: Map<string, string>;
 }
 ```
 
 #### `getMetaplexMetadata(mintAddress): Promise<TokenMetadata | null>`
 
-Gets only Metaplex metadata (does not fall back to Token-2022).
+Gets only Metaplex metadata (does not fall back to Token Extensions).
 
 ```typescript
 const metaplexMetadata = await connection.getMetaplexMetadata(mintAddress);
@@ -166,14 +167,14 @@ if (metaplexMetadata) {
 }
 ```
 
-#### `getToken2022Metadata(mintAddress): Promise<TokenMetadata | null>`
+#### `getTokenExtensionsMetadata(mintAddress): Promise<TokenMetadata | null>`
 
-Gets only Token-2022 metadata (does not fall back to Metaplex).
+Gets only Token Extensions metadata (does not fall back to Metaplex).
 
 ```typescript
-const token2022Metadata = await connection.getToken2022Metadata(mintAddress);
-if (token2022Metadata) {
-  console.log("This uses Token-2022 metadata extension");
+const tokenExtensionsMetadata = await connection.getTokenExtensionsMetadata(mintAddress);
+if (tokenExtensionsMetadata) {
+  console.log("This uses Token Extensions metadata extension");
 }
 ```
 
@@ -189,7 +190,7 @@ console.log(jsonMetadata.attributes);
 
 #### `getCompleteMetadata(mintAddress): Promise<{onChain, offChain} | null>`
 
-Gets both on-chain and off-chain metadata in one call.
+Gets both onchain and offchain metadata in one call.
 
 ```typescript
 const complete = await connection.getCompleteMetadata(mintAddress);
@@ -217,9 +218,9 @@ const isValid = await connection.validateMetadataUri("https://arweave.net/...");
 
 #### `updateTokenMetadata(params): Promise<string>`
 
-Updates token metadata, intelligently handling both Metaplex and Token-2022 sources.
+Updates token metadata, intelligently handling both Metaplex and Token Extensions sources.
 
-**Token-2022**: Fully supported - updates name, symbol, uri, and additional metadata fields.
+**Token Extensions**: Fully supported - updates name, symbol, uri, and additional metadata fields.
 
 **Metaplex**: Fully supported using Codama-generated Metaplex Token Metadata connection. Updates name, symbol, and uri while preserving existing creators, collection, and seller fees. Note that Metaplex updates replace all metadata fields, so this method fetches existing metadata and merges your updates with it.
 
@@ -228,9 +229,9 @@ import { loadWalletFromEnvironment } from "solana-kite";
 
 const updateAuthority = await loadWalletFromEnvironment("UPDATE_AUTHORITY_SECRET_KEY");
 
-// Works for Token-2022 tokens
+// Works for Token Extensions tokens
 const signature = await connection.updateTokenMetadata({
-  mintAddress: token2022MintAddress,
+  mintAddress: tokenExtensionsMintAddress,
   updateAuthority,
   name: "New Token Name",
   symbol: "NEW",
@@ -267,13 +268,13 @@ The original NFT standard on Solana. Metadata is stored in a separate PDA accoun
 
 Most NFTs on Solana use this standard.
 
-### Token-2022 Metadata Extension
+### Token Extensions Metadata Extension
 
-Newer standard built into SPL Token-2022. Metadata is stored directly in the mint account:
+Newer standard built into SPL Token Extensions. Metadata is stored directly in the mint account:
 - Simpler structure (name, symbol, URI)
 - Additional metadata key-value pairs
 - More gas-efficient
-- Used by newer tokens created with Token-2022
+- Used by newer tokens created with Token Extensions
 
 ## Examples
 
@@ -373,12 +374,12 @@ Token metadata changes infrequently, so aggressive caching is appropriate.
 
 ## Configuration
 
-### Prefer Token-2022
+### Prefer Token Extensions
 
 ```typescript
-// Check Token-2022 first, then fall back to Metaplex
-const connection = connect("mainnet-beta").addPlugin(
-  createKiteMetaplexPlugin({ preferMetaplex: false })
+// Check Token Extensions first, then fall back to Metaplex
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(
+  metaplex({ preferMetaplex: false })
 );
 ```
 
@@ -386,21 +387,22 @@ const connection = connect("mainnet-beta").addPlugin(
 
 ```typescript
 // Cache for 30 minutes
-const connection = connect("mainnet-beta").addPlugin(
-  createKiteMetaplexPlugin({ cacheTime: 1800000 })
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" })).use(
+  metaplex({ cacheTime: 1800000 })
 );
 ```
 
 ## Composing with Other Plugins
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiter } from "kit-plugin-jupiter-pricing";
+import { metaplex } from "kit-plugin-metaplex";
 
-const connection = connect("mainnet-beta")
-  .addPlugin(createKitePricingPlugin({ jupiterApiKey: process.env.JUPITER_API_KEY }))
-  .addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiter({ jupiterApiKey: process.env.JUPITER_API_KEY }))
+  .use(metaplex());
 
 // Use both pricing and metadata features
 const metadata = await connection.getTokenMetadata(mintAddress);
@@ -418,17 +420,17 @@ npm test
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 5.0+
 
 ## Implementation Status
 
 ✅ **Metaplex Metadata Reading**: Full support for Metaplex Token Metadata V1
 ✅ **Metaplex Metadata Updating**: Full support using Codama-generated client
-✅ **Token-2022 Reading**: Full support via Kite's existing functionality
-✅ **Token-2022 Updating**: Full support for updating Token-2022 metadata fields
+✅ **Token Extensions Reading**: Full support via the connection's existing functionality
+✅ **Token Extensions Updating**: Full support for updating Token Extensions metadata fields
 ✅ **Intelligent Detection**: Automatically detects and uses correct metadata source
-✅ **Off-Chain JSON**: Full support for fetching and parsing NFT metadata JSON
+✅ **Offchain JSON**: Full support for fetching and parsing NFT metadata JSON
 ✅ **Batch Operations**: Parallel metadata fetching for multiple tokens
 ✅ **Caching**: Built-in caching system
 
@@ -444,4 +446,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite. Compatible with both Metaplex Token Metadata and SPL Token-2022 metadata standards.
+Built for Solana Kit. Compatible with both Metaplex Token Metadata and SPL Token Extensions metadata standards.

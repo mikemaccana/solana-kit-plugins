@@ -18,6 +18,8 @@ import {
   getStructEncoder,
   getU16Decoder,
   getU16Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -34,14 +36,17 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const RUN_TASK_V0_DISCRIMINATOR = new Uint8Array([
+export const RUN_TASK_V0_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   52, 184, 39, 129, 126, 245, 176, 237,
 ]);
 
-export function getRunTaskV0DiscriminatorBytes() {
+export function getRunTaskV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(RUN_TASK_V0_DISCRIMINATOR);
 }
 
@@ -183,7 +188,7 @@ export function getRunTaskV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -202,12 +207,12 @@ export function getRunTaskV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.crankTurner),
-      getAccountMeta(accounts.rentRefund),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.task),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.sysvarInstructions),
+      getAccountMeta("crankTurner", accounts.crankTurner),
+      getAccountMeta("rentRefund", accounts.rentRefund),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("task", accounts.task),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("sysvarInstructions", accounts.sysvarInstructions),
     ],
     data: getRunTaskV0InstructionDataEncoder().encode(
       args as RunTaskV0InstructionDataArgs,
@@ -254,8 +259,13 @@ export function parseRunTaskV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedRunTaskV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 6) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 6,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

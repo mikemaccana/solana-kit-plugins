@@ -599,7 +599,7 @@ export type MplTokenMetadataError =
 let mplTokenMetadataErrorMessages:
   | Record<MplTokenMetadataError, string>
   | undefined;
-if (process.env.NODE_ENV !== "production") {
+if (process.env["NODE_ENV"] !== "production") {
   mplTokenMetadataErrorMessages = {
     [MPL_TOKEN_METADATA_ERROR__ADDRESS_NOT_IN_RESERVATION]: ``,
     [MPL_TOKEN_METADATA_ERROR__ALREADY_INITIALIZED]: `Already initialized`,
@@ -800,7 +800,7 @@ if (process.env.NODE_ENV !== "production") {
 export function getMplTokenMetadataErrorMessage(
   code: MplTokenMetadataError,
 ): string {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env["NODE_ENV"] !== "production") {
     return (
       mplTokenMetadataErrorMessages as Record<MplTokenMetadataError, string>
     )[code];

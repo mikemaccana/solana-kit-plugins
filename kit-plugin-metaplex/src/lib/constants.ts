@@ -16,6 +16,6 @@ export const METADATA_DISCRIMINATOR = [112, 113, 118, 119, 120]; // First 5 byte
  */
 export enum MetadataSource {
   METAPLEX = "metaplex",
-  TOKEN_2022 = "token-2022",
+  TOKEN_EXTENSIONS = "token-extensions",
   NONE = "none",
 }

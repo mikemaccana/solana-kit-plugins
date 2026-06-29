@@ -1,0 +1,20 @@
+// Offline test: plugin construction. Runs in CI without network access.
+import { describe, test } from "node:test";
+import assert from "node:assert";
+import { connect } from "solana-kite";
+import { tuktuk } from "./plugin.js";
+
+describe("tuktuk() plugin", () => {
+  test("extends a client with tuktuk methods (offline construction)", () => {
+    const client = tuktuk()(connect("devnet"));
+
+    assert.ok(client.tuktuk, "exposes the tuktuk client");
+    assert.strictEqual(typeof client.getOrCreateTaskQueue, "function");
+    assert.strictEqual(typeof client.queueTask, "function");
+    assert.strictEqual(typeof client.createCronJob, "function");
+    assert.strictEqual(typeof client.compileTukTukTransaction, "function");
+    // The underlying connection is preserved.
+    assert.strictEqual(typeof client.getLamportBalance, "function");
+    assert.ok(client.rpc, "preserves the rpc");
+  });
+});

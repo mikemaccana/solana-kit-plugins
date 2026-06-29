@@ -1,4 +1,5 @@
 import type { Address, TransactionSendingSigner } from "@solana/kit";
+import type { Connection } from "solana-kite";
 
 export interface PythPrice {
   /** The price as a floating-point number (raw_price * 10^exponent) */
@@ -57,25 +58,29 @@ export type PythPriceCallback = (error: Error | null, feed: PythPriceFeed | null
 
 export interface PythMethods {
   /** Fetch the latest price for a single feed from the Hermes API */
-  getPythPrice(feedId: string): Promise<PythPriceFeed | null>;
+  getPythPriceFeed(feedId: string): Promise<PythPriceFeed | null>;
   /** Fetch the latest prices for multiple feeds in one request */
-  getPythPrices(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>>;
-  /** Read a legacy push-oracle Pyth price account directly from on-chain state */
+  getPythPriceFeeds(feedIds: Array<string>): Promise<Map<string, PythPriceFeed>>;
+  /**
+   * Decode a legacy push-oracle Pyth price account from onchain state. NOTE: these push-oracle
+   * accounts are no longer published on mainnet (Pyth uses the pull oracle); this is for
+   * decoding existing/snapshotted accounts. Returns null if the account does not exist.
+   */
   getPythOnchainPrice(priceAccountAddress: Address): Promise<PythOnchainPriceData | null>;
   /** Returns true if the feed's last publish time exceeds maxAgeSeconds */
   isPythPriceStale(feedId: string, maxAgeSeconds: number): Promise<boolean>;
   /** Search Pyth's feed catalogue by name or symbol */
   searchPythFeeds(query: string, assetType?: string): Promise<Array<PythFeedInfo>>;
   /** Subscribe to price updates, calling callback on each poll */
-  watchPythPrice(feedId: string, callback: PythPriceCallback, intervalMs?: number): () => void;
+  watchPythPriceFeed(feedId: string, callback: PythPriceCallback, intervalMs?: number): () => void;
   /**
-   * Post a single Pyth pull-oracle price update on-chain via the Pyth Receiver program.
+   * Post a single Pyth pull-oracle price update onchain via the Pyth Receiver program.
    * Returns the address of the temporary PriceUpdateV2 account that was created.
    * Call reclaimPythPriceUpdateRent() to close the account and recover rent when done.
    */
   postPythPriceUpdate(feedId: string, payer: TransactionSendingSigner): Promise<Address>;
   /**
-   * Post multiple Pyth pull-oracle price updates on-chain in parallel (one transaction per feed).
+   * Post multiple Pyth pull-oracle price updates onchain in parallel (one transaction per feed).
    * Returns the addresses of the temporary PriceUpdateV2 accounts in the same order as feedIds.
    */
   postPythPriceUpdates(feedIds: Array<string>, payer: TransactionSendingSigner): Promise<Array<Address>>;
@@ -86,6 +91,6 @@ export interface PythMethods {
   reclaimPythPriceUpdateRent(priceUpdateAccount: Address, payer: TransactionSendingSigner): Promise<string>;
 }
 
-export type ConnectionWithPyth = {
+export type ConnectionWithPyth = Connection & {
   pyth: PythMethods;
 };

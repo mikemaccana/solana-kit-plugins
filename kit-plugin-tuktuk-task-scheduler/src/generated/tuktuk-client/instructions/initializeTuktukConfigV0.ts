@@ -12,11 +12,12 @@ import {
   fixEncoderSize,
   getBytesDecoder,
   getBytesEncoder,
-  getProgramDerivedAddress,
   getStructDecoder,
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -34,14 +35,17 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
+import { findTuktukConfigPda } from "../pdas";
 import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const INITIALIZE_TUKTUK_CONFIG_V0_DISCRIMINATOR = new Uint8Array([
-  67, 128, 98, 227, 103, 60, 179, 214,
-]);
+export const INITIALIZE_TUKTUK_CONFIG_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([67, 128, 98, 227, 103, 60, 179, 214]);
 
-export function getInitializeTuktukConfigV0DiscriminatorBytes() {
+export function getInitializeTuktukConfigV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     INITIALIZE_TUKTUK_CONFIG_V0_DISCRIMINATOR,
   );
@@ -174,7 +178,7 @@ export async function getInitializeTuktukConfigV0InstructionAsync<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -182,16 +186,7 @@ export async function getInitializeTuktukConfigV0InstructionAsync<
 
   // Resolve default values.
   if (!accounts.tuktukConfig.value) {
-    accounts.tuktukConfig.value = await getProgramDerivedAddress({
-      programAddress,
-      seeds: [
-        getBytesEncoder().encode(
-          new Uint8Array([
-            116, 117, 107, 116, 117, 107, 95, 99, 111, 110, 102, 105, 103,
-          ]),
-        ),
-      ],
-    });
+    accounts.tuktukConfig.value = await findTuktukConfigPda();
   }
   if (!accounts.systemProgram.value) {
     accounts.systemProgram.value =
@@ -201,11 +196,11 @@ export async function getInitializeTuktukConfigV0InstructionAsync<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.approver),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.tuktukConfig),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("approver", accounts.approver),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("tuktukConfig", accounts.tuktukConfig),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getInitializeTuktukConfigV0InstructionDataEncoder().encode(
       args as InitializeTuktukConfigV0InstructionDataArgs,
@@ -273,7 +268,7 @@ export function getInitializeTuktukConfigV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -288,11 +283,11 @@ export function getInitializeTuktukConfigV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.approver),
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.tuktukConfig),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("approver", accounts.approver),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("tuktukConfig", accounts.tuktukConfig),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getInitializeTuktukConfigV0InstructionDataEncoder().encode(
       args as InitializeTuktukConfigV0InstructionDataArgs,
@@ -332,8 +327,13 @@ export function parseInitializeTuktukConfigV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedInitializeTuktukConfigV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 5) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 5,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

@@ -22,6 +22,8 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -41,8 +43,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getMemberDecoder,
   getMemberEncoder,
@@ -50,11 +55,10 @@ import {
   type MemberArgs,
 } from "../types";
 
-export const MULTISIG_ADD_MEMBER_DISCRIMINATOR = new Uint8Array([
-  1, 219, 215, 108, 184, 229, 214, 8,
-]);
+export const MULTISIG_ADD_MEMBER_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([1, 219, 215, 108, 184, 229, 214, 8]);
 
-export function getMultisigAddMemberDiscriminatorBytes() {
+export function getMultisigAddMemberDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     MULTISIG_ADD_MEMBER_DISCRIMINATOR,
   );
@@ -198,7 +202,7 @@ export function getMultisigAddMemberInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -207,10 +211,10 @@ export function getMultisigAddMemberInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.configAuthority),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("configAuthority", accounts.configAuthority),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getMultisigAddMemberInstructionDataEncoder().encode(
       args as MultisigAddMemberInstructionDataArgs,
@@ -255,8 +259,13 @@ export function parseMultisigAddMemberInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedMultisigAddMemberInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

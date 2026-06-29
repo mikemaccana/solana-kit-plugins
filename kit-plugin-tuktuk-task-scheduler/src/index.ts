@@ -1,4 +1,4 @@
-export { createKiteTukTukPlugin, TukTukClient } from "./lib/index.js";
+export { tuktuk, TukTukClient } from "./lib/index.js";
 export type {
   TukTukConfig,
   TaskTrigger,

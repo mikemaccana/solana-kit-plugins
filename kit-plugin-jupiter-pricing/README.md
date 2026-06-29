@@ -1,8 +1,8 @@
-# Solana Kite Pricing
+# kit-plugin-jupiter-pricing
 
-Jupiter Price API plugin for Solana Kite providing price-aware token operations.
+Jupiter Price API plugin for Solana Kit providing price-aware token operations.
 
-This plugin extends Solana Kite with price data from Jupiter, enabling you to work with USD values, calculate portfolio values, monitor prices, and convert between tokens.
+This plugin extends Solana Kit with price data from Jupiter, enabling you to work with USD values, calculate portfolio values, monitor prices, and convert between tokens.
 
 ## Features
 
@@ -16,7 +16,7 @@ This plugin extends Solana Kite with price data from Jupiter, enabling you to wo
 ## Installation
 
 ```bash
-npm install solana-kite-pricing solana-kite @solana/kit
+npm install kit-plugin-jupiter-pricing solana-kite @solana/kit
 ```
 
 ## Setup
@@ -29,37 +29,33 @@ export JUPITER_API_KEY="your-api-key-here"
 
 ## Quick Start
 
-### Basic Usage with connect()
+### Basic Usage with createClient().use(kite())
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 
-const connection = createKitePricingPlugin({
-  jupiterApiKey: process.env.JUPITER_API_KEY,
-})(connect("mainnet-beta"));
+const connection = createClient()
+  .use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiter({ jupiterApiKey: process.env.JUPITER_API_KEY }));
 
 const solPrice = await connection.getTokenPrice("So11111111111111111111111111111111111111112");
 console.log(`SOL price: $${solPrice.priceUsd}`);
 ```
 
-### Advanced Usage with Solana Kit Plugin Pattern
+### Configuration options
 
 ```typescript
-import { createSolanaRpc, createDefaultRpcTransport } from "@solana/kit";
-import { createKitePlugin } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 
-const transport = createDefaultRpcTransport({
-  url: "https://api.mainnet-beta.solana.com"
-});
-const rpc = createSolanaRpc(transport);
-
-const connection = rpc
-  .use(createKitePlugin({ clusterNameOrURL: "mainnet-beta" }))
-  .use(createKitePricingPlugin({
+const connection = createClient()
+  .use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiter({
     jupiterApiKey: process.env.JUPITER_API_KEY,
-    cacheTimeMs: 60000
+    cacheTimeMs: 60000,
   }));
 
 const portfolioValue = await connection.getPortfolioValue(someAddress);
@@ -71,7 +67,7 @@ console.log(`Portfolio value: $${portfolioValue.toFixed(2)}`);
 ### Configuration
 
 ```typescript
-interface KitePricingConfig {
+interface JupiterPricingConfig {
   jupiterApiKey?: string;
   cacheTimeMs?: number;
   vsToken?: string;
@@ -179,7 +175,7 @@ console.log(`1 SOL = ${Number(usdcAmount) / 1e6} USDC`);
 
 #### `transferTokens(params): Promise<string>`
 
-Enhanced version of Kite's `transferTokens` that supports token symbols and USD values. When the pricing plugin is applied, you can send tokens by symbol name (like "SOL", "USDC") and specify amounts in USD instead of base units.
+Enhanced version of the connection's `transferTokens` that supports token symbols and USD values. When the pricing plugin is applied, you can send tokens by symbol name (like "SOL", "USDC") and specify amounts in USD instead of base units.
 
 ```typescript
 import { address } from "@solana/kit";
@@ -323,12 +319,13 @@ interface PortfolioBreakdown {
 
 ```typescript
 import { address } from "@solana/kit";
-import { connect } from "solana-kite";
-import { createKitePricingPlugin } from "solana-kite-pricing";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { jupiter } from "kit-plugin-jupiter-pricing";
 
-const connection = createKitePricingPlugin({
-  jupiterApiKey: process.env.JUPITER_API_KEY,
-})(connect("mainnet-beta"));
+const connection = createClient()
+  .use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(jupiter({ jupiterApiKey: process.env.JUPITER_API_KEY }));
 
 const walletAddress = address("dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8");
 
@@ -403,7 +400,7 @@ async function calculateSwap(fromMint: string, toMint: string, amount: bigint) {
 
 ### Send USD-Valued Transfers
 
-The pricing plugin enhances Kite's `transferTokens` to support token symbols and USD values - perfect for "send $100 worth of X" operations.
+The pricing plugin enhances the connection's `transferTokens` to support token symbols and USD values - perfect for "send $100 worth of X" operations.
 
 ```typescript
 import { address } from "@solana/kit";
@@ -470,4 +467,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite by the Kite community. Uses Jupiter's Price API v3.
+Built for Solana Kit. Uses Jupiter's Price API v3.

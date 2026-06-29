@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,8 +30,11 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getVerificationArgsDecoder,
   getVerificationArgsEncoder,
@@ -39,7 +44,7 @@ import {
 
 export const VERIFY_DISCRIMINATOR = 52;
 
-export function getVerifyDiscriminatorBytes() {
+export function getVerifyDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(VERIFY_DISCRIMINATOR);
 }
 
@@ -213,7 +218,7 @@ export function getVerifyInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -232,14 +237,17 @@ export function getVerifyInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.delegateRecord),
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.collectionMint),
-      getAccountMeta(accounts.collectionMetadata),
-      getAccountMeta(accounts.collectionMasterEdition),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.sysvarInstructions),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("delegateRecord", accounts.delegateRecord),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("collectionMint", accounts.collectionMint),
+      getAccountMeta("collectionMetadata", accounts.collectionMetadata),
+      getAccountMeta(
+        "collectionMasterEdition",
+        accounts.collectionMasterEdition,
+      ),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("sysvarInstructions", accounts.sysvarInstructions),
     ],
     data: getVerifyInstructionDataEncoder().encode(
       args as VerifyInstructionDataArgs,
@@ -293,8 +301,13 @@ export function parseVerifyInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedVerifyInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 8) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 8,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

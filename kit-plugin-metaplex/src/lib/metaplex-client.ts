@@ -1,4 +1,4 @@
-import type { Address, TransactionSendingSigner } from "@solana/kit";
+import type { Address, TransactionSendingSigner, Commitment } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import type { TokenMetadata, NFTMetadataJson, MetadataCacheEntry } from "./types.js";
 import { METADATA_PROGRAM_ID, MetadataSource } from "./constants.js";
@@ -51,7 +51,7 @@ export class MetaplexClient {
       } else if (typeof accountInfo.value.data === "string") {
         accountData = new Uint8Array(Buffer.from(accountInfo.value.data, "base64"));
       } else {
-        accountData = new Uint8Array(accountInfo.value.data as any);
+        accountData = new Uint8Array(accountInfo.value.data as unknown as ArrayLike<number>);
       }
 
       const metadata = deserializeMetaplexMetadata(accountData, mintAddress);
@@ -62,9 +62,9 @@ export class MetaplexClient {
   }
 
   /**
-   * Attempts to fetch Token-2022 metadata extension for a mint.
+   * Attempts to fetch Token Extensions metadata extension for a mint.
    */
-  private async fetchToken2022Metadata(mintAddress: Address): Promise<TokenMetadata | null> {
+  private async fetchTokenExtensionsMetadata(mintAddress: Address): Promise<TokenMetadata | null> {
     try {
       const metadata = await this.connection.getTokenMetadata(mintAddress);
 
@@ -77,7 +77,7 @@ export class MetaplexClient {
         : undefined;
 
       return {
-        source: MetadataSource.TOKEN_2022,
+        source: MetadataSource.TOKEN_EXTENSIONS,
         name: metadata.name,
         symbol: metadata.symbol,
         uri: metadata.uri,
@@ -90,9 +90,9 @@ export class MetaplexClient {
   }
 
   /**
-   * Gets token metadata, checking both Metaplex and Token-2022 sources.
+   * Gets token metadata, checking both Metaplex and Token Extensions sources.
    * By default, checks Metaplex first (since it's more common for NFTs),
-   * then falls back to Token-2022 if not found.
+   * then falls back to Token Extensions if not found.
    */
   async getTokenMetadata(mintAddress: Address, useCache: boolean = true): Promise<TokenMetadata | null> {
     const cacheKey = `metadata:${mintAddress}`;
@@ -109,10 +109,10 @@ export class MetaplexClient {
     if (this.preferMetaplex) {
       metadata = await this.fetchMetaplexMetadata(mintAddress);
       if (!metadata) {
-        metadata = await this.fetchToken2022Metadata(mintAddress);
+        metadata = await this.fetchTokenExtensionsMetadata(mintAddress);
       }
     } else {
-      metadata = await this.fetchToken2022Metadata(mintAddress);
+      metadata = await this.fetchTokenExtensionsMetadata(mintAddress);
       if (!metadata) {
         metadata = await this.fetchMetaplexMetadata(mintAddress);
       }
@@ -129,17 +129,17 @@ export class MetaplexClient {
   }
 
   /**
-   * Gets only Metaplex metadata (does not fall back to Token-2022).
+   * Gets only Metaplex metadata (does not fall back to Token Extensions).
    */
   async getMetaplexMetadata(mintAddress: Address): Promise<TokenMetadata | null> {
     return this.fetchMetaplexMetadata(mintAddress);
   }
 
   /**
-   * Gets only Token-2022 metadata (does not fall back to Metaplex).
+   * Gets only Token Extensions metadata (does not fall back to Metaplex).
    */
-  async getToken2022Metadata(mintAddress: Address): Promise<TokenMetadata | null> {
-    return this.fetchToken2022Metadata(mintAddress);
+  async getTokenExtensionsMetadata(mintAddress: Address): Promise<TokenMetadata | null> {
+    return this.fetchTokenExtensionsMetadata(mintAddress);
   }
 
   /**
@@ -159,7 +159,7 @@ export class MetaplexClient {
   }
 
   /**
-   * Gets complete metadata including on-chain and off-chain data.
+   * Gets complete metadata including onchain and offchain data.
    */
   async getCompleteMetadata(
     mintAddress: Address,
@@ -215,8 +215,8 @@ export class MetaplexClient {
   }
 
   /**
-   * Updates token metadata, intelligently handling both Metaplex and Token-2022 sources.
-   * For Token-2022, delegates to the base Kite updateTokenMetadata function.
+   * Updates token metadata, intelligently handling both Metaplex and Token Extensions sources.
+   * For Token Extensions, delegates to the base updateTokenMetadata function.
    * For Metaplex, uses the Codama-generated UpdateMetadataAccountV2 instruction.
    *
    * NOTE: Metaplex updates replace all metadata fields. This method fetches existing metadata
@@ -237,7 +237,7 @@ export class MetaplexClient {
     symbol?: string;
     uri?: string;
     additionalMetadata?: Record<string, string>;
-    commitment?: any;
+    commitment?: Commitment;
   }): Promise<string> {
     // First, detect which metadata system this token uses
     const metadata = await this.getTokenMetadata(mintAddress, false);
@@ -246,8 +246,8 @@ export class MetaplexClient {
       throw new Error(`No metadata found for mint: ${mintAddress}`);
     }
 
-    if (metadata.source === MetadataSource.TOKEN_2022) {
-      // Delegate to the base Kite updateTokenMetadata for Token-2022
+    if (metadata.source === MetadataSource.TOKEN_EXTENSIONS) {
+      // Delegate to the base updateTokenMetadata for Token Extensions
       return await this.connection.updateTokenMetadata({
         mintAddress,
         updateAuthority,

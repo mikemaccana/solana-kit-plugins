@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -27,12 +29,15 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const UPDATE_METADATA_ACCOUNT_DISCRIMINATOR = 1;
 
-export function getUpdateMetadataAccountDiscriminatorBytes() {
+export function getUpdateMetadataAccountDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(UPDATE_METADATA_ACCOUNT_DISCRIMINATOR);
 }
 
@@ -120,14 +125,14 @@ export function getUpdateMetadataAccountInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.updateAuthority),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("updateAuthority", accounts.updateAuthority),
     ],
     data: getUpdateMetadataAccountInstructionDataEncoder().encode({}),
     programAddress,
@@ -161,8 +166,13 @@ export function parseUpdateMetadataAccountInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedUpdateMetadataAccountInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 2) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 2,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

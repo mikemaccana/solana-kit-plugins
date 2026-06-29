@@ -24,6 +24,8 @@ import {
   getU32Encoder,
   getUtf8Decoder,
   getUtf8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -43,14 +45,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const MULTISIG_CHANGE_THRESHOLD_DISCRIMINATOR = new Uint8Array([
-  141, 42, 15, 126, 169, 92, 62, 181,
-]);
+export const MULTISIG_CHANGE_THRESHOLD_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([141, 42, 15, 126, 169, 92, 62, 181]);
 
-export function getMultisigChangeThresholdDiscriminatorBytes() {
+export function getMultisigChangeThresholdDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     MULTISIG_CHANGE_THRESHOLD_DISCRIMINATOR,
   );
@@ -197,7 +201,7 @@ export function getMultisigChangeThresholdInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -206,10 +210,10 @@ export function getMultisigChangeThresholdInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.configAuthority),
-      getAccountMeta(accounts.rentPayer),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("configAuthority", accounts.configAuthority),
+      getAccountMeta("rentPayer", accounts.rentPayer),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getMultisigChangeThresholdInstructionDataEncoder().encode(
       args as MultisigChangeThresholdInstructionDataArgs,
@@ -254,8 +258,13 @@ export function parseMultisigChangeThresholdInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedMultisigChangeThresholdInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

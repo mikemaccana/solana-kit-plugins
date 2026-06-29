@@ -1,14 +1,14 @@
-# Solana Kite Squads Multisig
+# kit-plugin-squads-multisig
 
-A production-ready Kite plugin for Squads Protocol v4 multisig operations, built with Codama-generated clients and zero web3.js dependencies.
+A production-ready Kit plugin for Squads Protocol v4 multisig operations, built with Codama-generated clients and zero web3.js dependencies.
 
 ## Features
 
 ✅ **Zero web3.js dependency** - Pure Solana Kit implementation
 ✅ **Type-safe** - Full TypeScript support via Codama-generated client
 ✅ **Modern tooling** - Codama types instead of legacy Beet
-✅ **Kite consistency** - Same patterns as other Kite operations
-✅ **Plugin composability** - Works seamlessly with other Kite plugins
+✅ **Consistency** - Same patterns as other connection operations
+✅ **Plugin composability** - Works seamlessly with other Kit plugins
 ✅ **Squads v4** - Supports latest Squads Protocol with roles, permissions, and spending limits
 
 ## Why This Plugin?
@@ -17,13 +17,13 @@ The official `@sqds/multisig` uses web3.js v1. This plugin provides a modern alt
 
 - **No web3.js legacy code** - Built on Solana Kit from the ground up
 - **Better performance** - No unnecessary dependencies
-- **Consistent API** - Follows Kite plugin patterns
+- **Consistent API** - Follows Kit plugin patterns
 - **Future-proof** - Uses current Solana tooling standards
 
 ## Installation
 
 ```bash
-npm install solana-kite-squads-multisig solana-kite @solana/kit
+npm install kit-plugin-squads-multisig solana-kite @solana/kit
 ```
 
 ## Quick Start
@@ -31,11 +31,12 @@ npm install solana-kite-squads-multisig solana-kite @solana/kit
 ### Create a Multisig
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteSquadsPlugin } from "solana-kite-squads-multisig";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { squads } from "kit-plugin-squads-multisig";
 import { loadWalletFromEnvironment } from "solana-kite";
 
-const connection = connect("devnet").addPlugin(createKiteSquadsPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "devnet" })).use(squads());
 const creator = await loadWalletFromEnvironment("CREATOR_SECRET_KEY");
 
 // Create a 2-of-3 multisig
@@ -258,13 +259,14 @@ await connection.executeProposal({ multisig, transactionIndex, member: member1 }
 ### Composing with Other Plugins
 
 ```typescript
-import { connect } from "solana-kite";
-import { createKiteSquadsPlugin } from "solana-kite-squads-multisig";
-import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+import { createClient } from "@solana/kit";
+import { kite } from "kit-plugin-kite";
+import { squads } from "kit-plugin-squads-multisig";
+import { metaplex } from "kit-plugin-metaplex";
 
-const connection = connect("mainnet-beta")
-  .addPlugin(createKiteSquadsPlugin())
-  .addPlugin(createKiteMetaplexPlugin());
+const connection = createClient().use(kite({ clusterNameOrURL: "mainnet-beta" }))
+  .use(squads())
+  .use(metaplex());
 
 // Use multisig to update NFT metadata
 const vault = await connection.getVaultAddress(multisig);
@@ -288,7 +290,7 @@ npm test
 ## Requirements
 
 - Node.js 18+
-- Solana Kite 3.0+
+- solana-kite ^3.2
 - Solana Kit 5.0+
 
 ## Implementation Status
@@ -311,4 +313,4 @@ MIT
 
 ## Credits
 
-Built for Solana Kite. Uses Squads Protocol v4 IDL via Codama for type-safe multisig operations.
+Built for Solana Kit. Uses Squads Protocol v4 IDL via Codama for type-safe multisig operations.

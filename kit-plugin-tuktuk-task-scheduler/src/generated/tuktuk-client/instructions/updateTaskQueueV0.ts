@@ -26,6 +26,8 @@ import {
   getU32Encoder,
   getU64Decoder,
   getU64Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -45,14 +47,16 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { TUKTUK_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const UPDATE_TASK_QUEUE_V0_DISCRIMINATOR = new Uint8Array([
-  107, 147, 81, 119, 75, 1, 18, 41,
-]);
+export const UPDATE_TASK_QUEUE_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([107, 147, 81, 119, 75, 1, 18, 41]);
 
-export function getUpdateTaskQueueV0DiscriminatorBytes() {
+export function getUpdateTaskQueueV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     UPDATE_TASK_QUEUE_V0_DISCRIMINATOR,
   );
@@ -196,7 +200,7 @@ export function getUpdateTaskQueueV0Instruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -211,10 +215,10 @@ export function getUpdateTaskQueueV0Instruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.updateAuthority),
-      getAccountMeta(accounts.taskQueue),
-      getAccountMeta(accounts.systemProgram),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("updateAuthority", accounts.updateAuthority),
+      getAccountMeta("taskQueue", accounts.taskQueue),
+      getAccountMeta("systemProgram", accounts.systemProgram),
     ],
     data: getUpdateTaskQueueV0InstructionDataEncoder().encode(
       args as UpdateTaskQueueV0InstructionDataArgs,
@@ -252,8 +256,13 @@ export function parseUpdateTaskQueueV0Instruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedUpdateTaskQueueV0Instruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 4) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 4,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

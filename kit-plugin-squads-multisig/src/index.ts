@@ -1,4 +1,4 @@
-export { createKiteSquadsPlugin, SquadsClient, SQUADS_PROGRAM_ID } from "./lib/index.js";
+export { squads, SquadsClient, SQUADS_PROGRAM_ID } from "./lib/index.js";
 export type {
   SquadsConfig,
   MultisigConfig,

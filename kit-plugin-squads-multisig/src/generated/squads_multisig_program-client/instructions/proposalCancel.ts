@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -30,8 +32,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getProposalVoteArgsDecoder,
   getProposalVoteArgsEncoder,
@@ -39,11 +44,11 @@ import {
   type ProposalVoteArgsArgs,
 } from "../types";
 
-export const PROPOSAL_CANCEL_DISCRIMINATOR = new Uint8Array([
-  27, 42, 127, 237, 38, 163, 84, 203,
-]);
+export const PROPOSAL_CANCEL_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array(
+  [27, 42, 127, 237, 38, 163, 84, 203],
+);
 
-export function getProposalCancelDiscriminatorBytes() {
+export function getProposalCancelDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     PROPOSAL_CANCEL_DISCRIMINATOR,
   );
@@ -149,7 +154,7 @@ export function getProposalCancelInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -158,9 +163,9 @@ export function getProposalCancelInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.member),
-      getAccountMeta(accounts.proposal),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("member", accounts.member),
+      getAccountMeta("proposal", accounts.proposal),
     ],
     data: getProposalCancelInstructionDataEncoder().encode(
       args as ProposalCancelInstructionDataArgs,
@@ -196,8 +201,13 @@ export function parseProposalCancelInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedProposalCancelInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 3,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

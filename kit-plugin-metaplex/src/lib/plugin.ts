@@ -1,3 +1,4 @@
+import { extendClient } from "@solana/kit";
 import type { Address, TransactionSendingSigner, Commitment } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import { MetaplexClient } from "./metaplex-client.js";
@@ -7,27 +8,27 @@ export interface MetaplexMethods {
   metaplex: MetaplexClient;
 
   /**
-   * Gets token metadata, intelligently checking both Metaplex and Token-2022 sources.
+   * Gets token metadata, intelligently checking both Metaplex and Token Extensions sources.
    */
   getTokenMetadata: (mintAddress: Address, useCache?: boolean) => Promise<TokenMetadata | null>;
 
   /**
-   * Gets only Metaplex metadata (does not fall back to Token-2022).
+   * Gets only Metaplex metadata (does not fall back to Token Extensions).
    */
   getMetaplexMetadata: (mintAddress: Address) => Promise<TokenMetadata | null>;
 
   /**
-   * Gets only Token-2022 metadata (does not fall back to Metaplex).
+   * Gets only Token Extensions metadata (does not fall back to Metaplex).
    */
-  getToken2022Metadata: (mintAddress: Address) => Promise<TokenMetadata | null>;
+  getTokenExtensionsMetadata: (mintAddress: Address) => Promise<TokenMetadata | null>;
 
   /**
-   * Fetches the off-chain JSON metadata from a URI.
+   * Fetches the offchain JSON metadata from a URI.
    */
   fetchMetadataJson: (uri: string) => Promise<NFTMetadataJson>;
 
   /**
-   * Gets complete metadata including on-chain and off-chain data.
+   * Gets complete metadata including onchain and offchain data.
    */
   getCompleteMetadata: (
     mintAddress: Address,
@@ -44,8 +45,8 @@ export interface MetaplexMethods {
   validateMetadataUri: (uri: string) => Promise<boolean>;
 
   /**
-   * Updates token metadata, intelligently handling both Metaplex and Token-2022 sources.
-   * For Token-2022, updates the metadata using the Token-2022 program.
+   * Updates token metadata, intelligently handling both Metaplex and Token Extensions sources.
+   * For Token Extensions, updates the metadata using the Token Extensions program.
    * For Metaplex, updates using the Codama-generated Metaplex Token Metadata client.
    */
   updateTokenMetadata: (params: {
@@ -62,27 +63,30 @@ export interface MetaplexMethods {
 export type ConnectionWithMetaplex = Connection & MetaplexMethods;
 
 /**
- * Creates a Metaplex token metadata plugin for Solana Kite.
+ * Creates a Metaplex token metadata plugin for Solana Kit.
  *
- * This plugin intelligently handles both Metaplex Token Metadata and Token-2022
+ * This plugin intelligently handles both Metaplex Token Metadata and Token Extensions
  * metadata extension, checking which one exists and returning the appropriate metadata.
  *
  * @param config - Configuration options
  * @param config.cluster - Cluster to use (default: inherits from connection)
  * @param config.cacheTime - Cache duration in milliseconds (default: 3600000 = 1 hour)
- * @param config.preferMetaplex - Check Metaplex first before Token-2022 (default: true)
+ * @param config.preferMetaplex - Check Metaplex first before Token Extensions (default: true)
  * @returns A plugin function that extends connections with Metaplex functionality
  *
  * @example
  * ```typescript
- * import { connect } from "solana-kite";
- * import { createKiteMetaplexPlugin } from "solana-kite-metaplex";
+ * import { createClient } from "@solana/kit";
+ * import { kite } from "kit-plugin-kite";
+ * import { metaplex } from "kit-plugin-metaplex";
  *
- * const client = connect("mainnet-beta").use(createKiteMetaplexPlugin());
+ * const client = createClient()
+ *   .use(kite({ clusterNameOrURL: "mainnet" }))
+ *   .use(metaplex());
  *
- * // Automatically checks both Metaplex and Token-2022
+ * // Automatically checks both Metaplex and Token Extensions
  * const metadata = await client.getTokenMetadata(mintAddress);
- * console.log(`Source: ${metadata.source}`); // "metaplex" or "token-2022"
+ * console.log(`Source: ${metadata.source}`); // "metaplex" or "token-extensions"
  * console.log(`Token: ${metadata.name} (${metadata.symbol})`);
  *
  * // Metaplex-specific fields (only present if source is "metaplex")
@@ -93,7 +97,7 @@ export type ConnectionWithMetaplex = Connection & MetaplexMethods;
  *   console.log("Collection:", metadata.collection.key);
  * }
  *
- * // Get complete metadata including off-chain data
+ * // Get complete metadata including offchain data
  * const complete = await client.getCompleteMetadata(mintAddress);
  * if (complete) {
  *   console.log(`Name: ${complete.onChain.name}`);
@@ -112,12 +116,12 @@ export type ConnectionWithMetaplex = Connection & MetaplexMethods;
  * // Get only Metaplex metadata (no fallback)
  * const metaplexOnly = await client.getMetaplexMetadata(mintAddress);
  *
- * // Get only Token-2022 metadata (no fallback)
- * const token2022Only = await client.getToken2022Metadata(mintAddress);
+ * // Get only Token Extensions metadata (no fallback)
+ * const tokenExtensionsOnly = await client.getTokenExtensionsMetadata(mintAddress);
  * ```
  */
-export const createKiteMetaplexPlugin = (config: MetaplexConfig = {}) => {
-  return <T extends Connection>(connection: T): T & MetaplexMethods => {
+export const metaplex = (config: MetaplexConfig = {}) => {
+  return <T extends Connection>(connection: T) => {
     const metaplexClient = new MetaplexClient(connection, config.cacheTime, config.preferMetaplex);
 
     const getTokenMetadata = async (
@@ -131,8 +135,8 @@ export const createKiteMetaplexPlugin = (config: MetaplexConfig = {}) => {
       return metaplexClient.getMetaplexMetadata(mintAddress);
     };
 
-    const getToken2022Metadata = async (mintAddress: Address): Promise<TokenMetadata | null> => {
-      return metaplexClient.getToken2022Metadata(mintAddress);
+    const getTokenExtensionsMetadata = async (mintAddress: Address): Promise<TokenMetadata | null> => {
+      return metaplexClient.getTokenExtensionsMetadata(mintAddress);
     };
 
     const fetchMetadataJson = async (uri: string): Promise<NFTMetadataJson> => {
@@ -167,17 +171,17 @@ export const createKiteMetaplexPlugin = (config: MetaplexConfig = {}) => {
       return metaplexClient.updateTokenMetadata(params);
     };
 
-    return {
-      ...connection,
+    return extendClient(connection, {
       metaplex: metaplexClient,
       getTokenMetadata,
       getMetaplexMetadata,
-      getToken2022Metadata,
+      getTokenExtensionsMetadata,
       fetchMetadataJson,
       getCompleteMetadata,
       getBatchTokenMetadata,
       validateMetadataUri,
       updateTokenMetadata,
-    };
+    });
   };
 };
+

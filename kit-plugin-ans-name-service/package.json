@@ -1,0 +1,49 @@
+{
+  "name": "kit-plugin-ans-name-service",
+  "version": "0.1.0",
+  "description": "AllDomains Name Service plugin for Solana Kit enabling .abc and custom TLD resolution",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test src/**/*.test.ts",
+    "prepublishOnly": "npm run build",
+    "test:ci": "tsx --test src/**/*.unit.test.ts"
+  },
+  "keywords": [
+    "solana",
+    "kit",
+    "kite",
+    "ans",
+    "alldomains",
+    "name-service",
+    "domains",
+    "web3"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "solana-kite": "^3.2.0",
+    "@solana/kit": "^6.0.0"
+  },
+  "devDependencies": {
+    "@solana/kit": "^6.9.0",
+    "@types/node": "^22.10.5",
+    "solana-kite": "^3.2.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {}
+}

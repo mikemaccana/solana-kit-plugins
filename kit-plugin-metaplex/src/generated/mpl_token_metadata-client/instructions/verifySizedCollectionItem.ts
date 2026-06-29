@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -29,12 +31,15 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
 export const VERIFY_SIZED_COLLECTION_ITEM_DISCRIMINATOR = 30;
 
-export function getVerifySizedCollectionItemDiscriminatorBytes() {
+export function getVerifySizedCollectionItemDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(VERIFY_SIZED_COLLECTION_ITEM_DISCRIMINATOR);
 }
 
@@ -191,19 +196,25 @@ export function getVerifySizedCollectionItemInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.collectionAuthority),
-      getAccountMeta(accounts.payer),
-      getAccountMeta(accounts.collectionMint),
-      getAccountMeta(accounts.collection),
-      getAccountMeta(accounts.collectionMasterEditionAccount),
-      getAccountMeta(accounts.collectionAuthorityRecord),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("collectionAuthority", accounts.collectionAuthority),
+      getAccountMeta("payer", accounts.payer),
+      getAccountMeta("collectionMint", accounts.collectionMint),
+      getAccountMeta("collection", accounts.collection),
+      getAccountMeta(
+        "collectionMasterEditionAccount",
+        accounts.collectionMasterEditionAccount,
+      ),
+      getAccountMeta(
+        "collectionAuthorityRecord",
+        accounts.collectionAuthorityRecord,
+      ),
     ],
     data: getVerifySizedCollectionItemInstructionDataEncoder().encode({}),
     programAddress,
@@ -252,8 +263,13 @@ export function parseVerifySizedCollectionItemInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedVerifySizedCollectionItemInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 7) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 7,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

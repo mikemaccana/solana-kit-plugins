@@ -1,3 +1,4 @@
+import { isSignerRole, isWritableRole } from "@solana/kit";
 import type { Address, Instruction, KeyPairSigner } from "@solana/kit";
 import type { Connection } from "solana-kite";
 import type {
@@ -6,6 +7,7 @@ import type {
   TaskQueueParams,
   QueueTaskParams,
   CronJobParams,
+  AddressLookupTable,
 } from "./types.js";
 import {
   getAddQueueAuthorityV0Instruction,
@@ -17,6 +19,8 @@ import {
   getInitializeTaskQueueV0Instruction,
   fetchMaybeTuktukConfigV0,
   fetchTaskQueueV0,
+  getTaskQueueV0Decoder,
+  type TransactionSourceV0Args,
 } from "../generated/tuktuk-client/index.js";
 import {
   CRON_PROGRAM_ADDRESS,
@@ -89,26 +93,8 @@ export class TukTukClient {
    * Parses TaskQueueV0 account data to extract task bitmap.
    */
   private parseTaskQueueV0(accountData: Uint8Array) {
-    const TASK_QUEUE_V0_OFFSETS = {
-      CAPACITY: 124,
-      TASK_BITMAP_LEN: 143,
-      TASK_BITMAP: 147,
-    };
-
-    const capacity = new DataView(accountData.buffer, accountData.byteOffset).getUint16(
-      TASK_QUEUE_V0_OFFSETS.CAPACITY,
-      true,
-    );
-    const bitmapLen = new DataView(accountData.buffer, accountData.byteOffset).getUint32(
-      TASK_QUEUE_V0_OFFSETS.TASK_BITMAP_LEN,
-      true,
-    );
-    const taskBitmap = accountData.slice(
-      TASK_QUEUE_V0_OFFSETS.TASK_BITMAP,
-      TASK_QUEUE_V0_OFFSETS.TASK_BITMAP + bitmapLen,
-    );
-
-    return { capacity, taskBitmap };
+    const taskQueue = getTaskQueueV0Decoder().decode(accountData);
+    return { capacity: taskQueue.capacity, taskBitmap: new Uint8Array(taskQueue.taskBitmap) };
   }
 
   /**
@@ -131,7 +117,8 @@ export class TukTukClient {
 
     const getTaskQueueNameMappings = this.connection.getAccountsFactory(
       TUKTUK_PROGRAM_ADDRESS,
-      TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR,
+      // Codama emits discriminators as ReadonlyUint8Array; getAccountsFactory wants a mutable Uint8Array.
+      new Uint8Array(TASK_QUEUE_NAME_MAPPING_V0_DISCRIMINATOR),
       getTaskQueueNameMappingV0Decoder(),
     );
 
@@ -166,7 +153,7 @@ export class TukTukClient {
       const STALE_TASK_AGE_SECONDS = 48 * HOURS_IN_SECONDS;
 
       const createTaskQueueInstruction = getInitializeTaskQueueV0Instruction({
-        payer: user as any,
+        payer: user,
         tuktukConfig,
         updateAuthority: user.address,
         taskQueue,
@@ -179,7 +166,7 @@ export class TukTukClient {
       });
 
       await this.connection.sendTransactionFromInstructions({
-        feePayer: user as any,
+        feePayer: user,
         instructions: [createTaskQueueInstruction],
       });
 
@@ -196,15 +183,15 @@ export class TukTukClient {
       console.log("Adding queue authority...");
 
       const addAuthorityInstruction = getAddQueueAuthorityV0Instruction({
-        payer: user as any,
-        updateAuthority: user as any,
+        payer: user,
+        updateAuthority: user,
         queueAuthority: user.address,
         taskQueueAuthority,
         taskQueue,
       });
 
       await this.connection.sendTransactionFromInstructions({
-        feePayer: user as any,
+        feePayer: user,
         instructions: [addAuthorityInstruction],
       });
       console.log("✅ Queue authority added");
@@ -238,7 +225,7 @@ export class TukTukClient {
     } else if (typeof taskQueueAccount.value.data === "string") {
       accountData = new Uint8Array(Buffer.from(taskQueueAccount.value.data, "base64"));
     } else {
-      accountData = new Uint8Array(taskQueueAccount.value.data as any);
+      accountData = new Uint8Array(taskQueueAccount.value.data as unknown as ArrayLike<number>);
     }
 
     const { taskBitmap } = this.parseTaskQueueV0(accountData);
@@ -251,21 +238,28 @@ export class TukTukClient {
     const taskPda = await this.connection.getPDAAndBump(TUKTUK_PROGRAM_ADDRESS, ["task", taskQueue, taskIdBuffer]);
     const taskAddress = taskPda.pda;
 
+    // The on-chain instruction takes a TransactionSourceV0 enum: a compiled transaction
+    // inline (CompiledV0) or a URL to fetch the transaction from at run time (RemoteV0).
+    const transactionSource: TransactionSourceV0Args =
+      "url" in params.transaction
+        ? { __kind: "RemoteV0", url: params.transaction.url, signer: user.address }
+        : { __kind: "CompiledV0", fields: [params.transaction] };
+
     const instruction = await getQueueTaskV0InstructionAsync({
-      payer: user as any,
-      queueAuthority: user as any,
+      payer: user,
+      queueAuthority: user,
       taskQueue,
       task: taskAddress,
       id: taskId,
-      trigger: params.trigger as any,
-      transaction: params.transaction as any,
+      trigger: params.trigger,
+      transaction: transactionSource,
       crankReward: params.crankReward || null,
       freeTasks: params.freeTasks || 0,
       description: params.description || "",
     });
 
     const signature = await this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [instruction],
     });
 
@@ -322,9 +316,9 @@ export class TukTukClient {
     const task = taskPda.pda;
 
     const initInstruction = await getInitializeCronJobV0InstructionAsync({
-      payer: user as any,
-      queueAuthority: user as any,
-      authority: user as any,
+      payer: user,
+      queueAuthority: user,
+      authority: user,
       cronJob,
       cronJobNameMapping: cronJobNameMappingPda.pda,
       taskQueue,
@@ -336,7 +330,7 @@ export class TukTukClient {
     });
 
     await this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [initInstruction],
     });
 
@@ -364,19 +358,19 @@ export class TukTukClient {
     ]);
 
     const addTransactionInstruction = getAddCronTransactionV0Instruction({
-      payer: user as any,
-      authority: user as any,
+      payer: user,
+      authority: user,
       cronJob,
       cronJobTransaction: cronJobTransactionPda.pda,
       index: transactionId,
       transactionSource: {
         __kind: "CompiledV0" as const,
-        fields: [compiledTransaction as any],
+        fields: [compiledTransaction],
       },
     });
 
     const signature = await this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [addTransactionInstruction],
     });
 
@@ -423,7 +417,7 @@ export class TukTukClient {
    */
   compileTukTukTransaction(
     instructions: Array<Instruction>,
-    addressLookupTables: Array<any> = [],
+    addressLookupTables: Array<AddressLookupTable> = [],
   ): CompiledTransaction {
     const accountSet = new Set<string>();
     const accountMetas: Array<{ address: string; isSigner: boolean; isWritable: boolean }> = [];
@@ -435,9 +429,8 @@ export class TukTukClient {
             accountSet.add(account.address);
             accountMetas.push({
               address: account.address,
-              isSigner:
-                (account.role as any) === "ReadonlySigner" || (account.role as any) === "WritableSigner",
-              isWritable: (account.role as any) === "Writable" || (account.role as any) === "WritableSigner",
+              isSigner: isSignerRole(account.role),
+              isWritable: isWritableRole(account.role),
             });
           }
         }
@@ -483,7 +476,7 @@ export class TukTukClient {
       accounts,
       instructions: compiledInstructions,
       signerSeeds: [],
-    } as any;
+    };
   }
 
   /**
@@ -510,20 +503,6 @@ export class TukTukClient {
   }
 
   /**
-   * Lists all tasks in a queue with optional filtering by description prefix.
-   */
-  async listTasks(taskQueue: Address, descriptionPrefix?: string): Promise<Array<any>> {
-    throw new Error("List tasks not yet implemented");
-  }
-
-  /**
-   * Closes a task and reclaims rent.
-   */
-  async closeTask(user: KeyPairSigner, taskQueue: Address, taskId: number): Promise<string> {
-    throw new Error("Close task not yet implemented");
-  }
-
-  /**
    * Funds a task queue with additional SOL.
    */
   async fundTaskQueue(user: KeyPairSigner, taskQueue: Address, amount: bigint): Promise<string> {
@@ -536,7 +515,7 @@ export class TukTukClient {
     });
 
     return this.connection.sendTransactionFromInstructions({
-      feePayer: user as any,
+      feePayer: user,
       instructions: [transferInstruction],
     });
   }

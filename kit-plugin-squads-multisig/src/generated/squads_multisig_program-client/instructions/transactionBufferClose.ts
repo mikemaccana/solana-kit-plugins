@@ -14,6 +14,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -30,14 +32,16 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const TRANSACTION_BUFFER_CLOSE_DISCRIMINATOR = new Uint8Array([
-  17, 182, 208, 228, 136, 24, 178, 102,
-]);
+export const TRANSACTION_BUFFER_CLOSE_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([17, 182, 208, 228, 136, 24, 178, 102]);
 
-export function getTransactionBufferCloseDiscriminatorBytes() {
+export function getTransactionBufferCloseDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TRANSACTION_BUFFER_CLOSE_DISCRIMINATOR,
   );
@@ -144,15 +148,15 @@ export function getTransactionBufferCloseInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.multisig),
-      getAccountMeta(accounts.transactionBuffer),
-      getAccountMeta(accounts.creator),
+      getAccountMeta("multisig", accounts.multisig),
+      getAccountMeta("transactionBuffer", accounts.transactionBuffer),
+      getAccountMeta("creator", accounts.creator),
     ],
     data: getTransactionBufferCloseInstructionDataEncoder().encode({}),
     programAddress,
@@ -187,8 +191,13 @@ export function parseTransactionBufferCloseInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedTransactionBufferCloseInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 3) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 3,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

@@ -43,11 +43,10 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const CRON_JOB_NAME_MAPPING_V0_DISCRIMINATOR = new Uint8Array([
-  80, 161, 45, 135, 20, 80, 18, 234,
-]);
+export const CRON_JOB_NAME_MAPPING_V0_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([80, 161, 45, 135, 20, 80, 18, 234]);
 
-export function getCronJobNameMappingV0DiscriminatorBytes() {
+export function getCronJobNameMappingV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     CRON_JOB_NAME_MAPPING_V0_DISCRIMINATOR,
   );

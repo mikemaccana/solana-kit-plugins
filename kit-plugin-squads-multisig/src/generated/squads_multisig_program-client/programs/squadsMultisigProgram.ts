@@ -7,13 +7,150 @@
  */
 
 import {
+  assertIsInstructionWithAccounts,
   containsBytes,
+  extendClient,
   fixEncoderSize,
   getBytesEncoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_ACCOUNT,
+  SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+  SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+  SolanaError,
   type Address,
+  type ClientWithRpc,
+  type ClientWithTransactionPlanning,
+  type ClientWithTransactionSending,
+  type GetAccountInfoApi,
+  type GetMultipleAccountsApi,
+  type Instruction,
+  type InstructionWithData,
   type ReadonlyUint8Array,
 } from "@solana/kit";
 import {
+  addSelfFetchFunctions,
+  addSelfPlanAndSendFunctions,
+  type SelfFetchFunctions,
+  type SelfPlanAndSendFunctions,
+} from "@solana/program-client-core";
+import {
+  getBatchCodec,
+  getConfigTransactionCodec,
+  getMultisigCodec,
+  getProgramConfigCodec,
+  getProposalCodec,
+  getSpendingLimitCodec,
+  getTransactionBufferCodec,
+  getVaultBatchTransactionCodec,
+  getVaultTransactionCodec,
+  type Batch,
+  type BatchArgs,
+  type ConfigTransaction,
+  type ConfigTransactionArgs,
+  type Multisig,
+  type MultisigArgs,
+  type ProgramConfig,
+  type ProgramConfigArgs,
+  type Proposal,
+  type ProposalArgs,
+  type SpendingLimit,
+  type SpendingLimitArgs,
+  type TransactionBuffer,
+  type TransactionBufferArgs,
+  type VaultBatchTransaction,
+  type VaultBatchTransactionArgs,
+  type VaultTransaction,
+  type VaultTransactionArgs,
+} from "../accounts";
+import {
+  getBatchAccountsCloseInstruction,
+  getBatchAddTransactionInstruction,
+  getBatchCreateInstruction,
+  getBatchExecuteTransactionInstruction,
+  getConfigTransactionAccountsCloseInstruction,
+  getConfigTransactionCreateInstruction,
+  getConfigTransactionExecuteInstruction,
+  getMultisigAddMemberInstruction,
+  getMultisigAddSpendingLimitInstruction,
+  getMultisigChangeThresholdInstruction,
+  getMultisigCreateInstruction,
+  getMultisigCreateV2Instruction,
+  getMultisigRemoveMemberInstruction,
+  getMultisigRemoveSpendingLimitInstruction,
+  getMultisigSetConfigAuthorityInstruction,
+  getMultisigSetRentCollectorInstruction,
+  getMultisigSetTimeLockInstruction,
+  getProgramConfigInitInstruction,
+  getProgramConfigSetAuthorityInstruction,
+  getProgramConfigSetMultisigCreationFeeInstruction,
+  getProgramConfigSetTreasuryInstruction,
+  getProposalActivateInstruction,
+  getProposalApproveInstruction,
+  getProposalCancelInstruction,
+  getProposalCancelV2Instruction,
+  getProposalCreateInstruction,
+  getProposalRejectInstruction,
+  getSpendingLimitUseInstruction,
+  getTransactionBufferCloseInstruction,
+  getTransactionBufferCreateInstruction,
+  getTransactionBufferExtendInstruction,
+  getVaultBatchTransactionAccountCloseInstruction,
+  getVaultTransactionAccountsCloseInstruction,
+  getVaultTransactionCreateFromBufferInstruction,
+  getVaultTransactionCreateInstruction,
+  getVaultTransactionExecuteInstruction,
+  parseBatchAccountsCloseInstruction,
+  parseBatchAddTransactionInstruction,
+  parseBatchCreateInstruction,
+  parseBatchExecuteTransactionInstruction,
+  parseConfigTransactionAccountsCloseInstruction,
+  parseConfigTransactionCreateInstruction,
+  parseConfigTransactionExecuteInstruction,
+  parseMultisigAddMemberInstruction,
+  parseMultisigAddSpendingLimitInstruction,
+  parseMultisigChangeThresholdInstruction,
+  parseMultisigCreateInstruction,
+  parseMultisigCreateV2Instruction,
+  parseMultisigRemoveMemberInstruction,
+  parseMultisigRemoveSpendingLimitInstruction,
+  parseMultisigSetConfigAuthorityInstruction,
+  parseMultisigSetRentCollectorInstruction,
+  parseMultisigSetTimeLockInstruction,
+  parseProgramConfigInitInstruction,
+  parseProgramConfigSetAuthorityInstruction,
+  parseProgramConfigSetMultisigCreationFeeInstruction,
+  parseProgramConfigSetTreasuryInstruction,
+  parseProposalActivateInstruction,
+  parseProposalApproveInstruction,
+  parseProposalCancelInstruction,
+  parseProposalCancelV2Instruction,
+  parseProposalCreateInstruction,
+  parseProposalRejectInstruction,
+  parseSpendingLimitUseInstruction,
+  parseTransactionBufferCloseInstruction,
+  parseTransactionBufferCreateInstruction,
+  parseTransactionBufferExtendInstruction,
+  parseVaultBatchTransactionAccountCloseInstruction,
+  parseVaultTransactionAccountsCloseInstruction,
+  parseVaultTransactionCreateFromBufferInstruction,
+  parseVaultTransactionCreateInstruction,
+  parseVaultTransactionExecuteInstruction,
+  type BatchAccountsCloseInput,
+  type BatchAddTransactionInput,
+  type BatchCreateInput,
+  type BatchExecuteTransactionInput,
+  type ConfigTransactionAccountsCloseInput,
+  type ConfigTransactionCreateInput,
+  type ConfigTransactionExecuteInput,
+  type MultisigAddMemberInput,
+  type MultisigAddSpendingLimitInput,
+  type MultisigChangeThresholdInput,
+  type MultisigCreateInput,
+  type MultisigCreateV2Input,
+  type MultisigRemoveMemberInput,
+  type MultisigRemoveSpendingLimitInput,
+  type MultisigSetConfigAuthorityInput,
+  type MultisigSetRentCollectorInput,
+  type MultisigSetTimeLockInput,
   type ParsedBatchAccountsCloseInstruction,
   type ParsedBatchAddTransactionInstruction,
   type ParsedBatchCreateInstruction,
@@ -50,6 +187,25 @@ import {
   type ParsedVaultTransactionCreateFromBufferInstruction,
   type ParsedVaultTransactionCreateInstruction,
   type ParsedVaultTransactionExecuteInstruction,
+  type ProgramConfigInitInput,
+  type ProgramConfigSetAuthorityInput,
+  type ProgramConfigSetMultisigCreationFeeInput,
+  type ProgramConfigSetTreasuryInput,
+  type ProposalActivateInput,
+  type ProposalApproveInput,
+  type ProposalCancelInput,
+  type ProposalCancelV2Input,
+  type ProposalCreateInput,
+  type ProposalRejectInput,
+  type SpendingLimitUseInput,
+  type TransactionBufferCloseInput,
+  type TransactionBufferCreateInput,
+  type TransactionBufferExtendInput,
+  type VaultBatchTransactionAccountCloseInput,
+  type VaultTransactionAccountsCloseInput,
+  type VaultTransactionCreateFromBufferInput,
+  type VaultTransactionCreateInput,
+  type VaultTransactionExecuteInput,
 } from "../instructions";
 
 export const SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS =
@@ -170,8 +326,9 @@ export function identifySquadsMultisigProgramAccount(
   ) {
     return SquadsMultisigProgramAccount.VaultTransaction;
   }
-  throw new Error(
-    "The provided account could not be identified as a squadsMultisigProgram account.",
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_ACCOUNT,
+    { accountData: data, programName: "squadsMultisigProgram" },
   );
 }
 
@@ -614,8 +771,9 @@ export function identifySquadsMultisigProgramInstruction(
   ) {
     return SquadsMultisigProgramInstruction.BatchAccountsClose;
   }
-  throw new Error(
-    "The provided instruction could not be identified as a squadsMultisigProgram instruction.",
+  throw new SolanaError(
+    SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION,
+    { instructionData: data, programName: "squadsMultisigProgram" },
   );
 }
 
@@ -730,3 +888,687 @@ export type ParsedSquadsMultisigProgramInstruction<
   | ({
       instructionType: SquadsMultisigProgramInstruction.BatchAccountsClose;
     } & ParsedBatchAccountsCloseInstruction<TProgram>);
+
+export function parseSquadsMultisigProgramInstruction<TProgram extends string>(
+  instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
+): ParsedSquadsMultisigProgramInstruction<TProgram> {
+  const instructionType = identifySquadsMultisigProgramInstruction(instruction);
+  switch (instructionType) {
+    case SquadsMultisigProgramInstruction.ProgramConfigInit: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProgramConfigInit,
+        ...parseProgramConfigInitInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProgramConfigSetAuthority: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.ProgramConfigSetAuthority,
+        ...parseProgramConfigSetAuthorityInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProgramConfigSetMultisigCreationFee: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.ProgramConfigSetMultisigCreationFee,
+        ...parseProgramConfigSetMultisigCreationFeeInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProgramConfigSetTreasury: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.ProgramConfigSetTreasury,
+        ...parseProgramConfigSetTreasuryInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigCreate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.MultisigCreate,
+        ...parseMultisigCreateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigCreateV2: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.MultisigCreateV2,
+        ...parseMultisigCreateV2Instruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigAddMember: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.MultisigAddMember,
+        ...parseMultisigAddMemberInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigRemoveMember: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.MultisigRemoveMember,
+        ...parseMultisigRemoveMemberInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigSetTimeLock: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.MultisigSetTimeLock,
+        ...parseMultisigSetTimeLockInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigChangeThreshold: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.MultisigChangeThreshold,
+        ...parseMultisigChangeThresholdInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigSetConfigAuthority: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.MultisigSetConfigAuthority,
+        ...parseMultisigSetConfigAuthorityInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigSetRentCollector: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.MultisigSetRentCollector,
+        ...parseMultisigSetRentCollectorInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigAddSpendingLimit: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.MultisigAddSpendingLimit,
+        ...parseMultisigAddSpendingLimitInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.MultisigRemoveSpendingLimit: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.MultisigRemoveSpendingLimit,
+        ...parseMultisigRemoveSpendingLimitInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ConfigTransactionCreate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.ConfigTransactionCreate,
+        ...parseConfigTransactionCreateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ConfigTransactionExecute: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.ConfigTransactionExecute,
+        ...parseConfigTransactionExecuteInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.VaultTransactionCreate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.VaultTransactionCreate,
+        ...parseVaultTransactionCreateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.TransactionBufferCreate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.TransactionBufferCreate,
+        ...parseTransactionBufferCreateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.TransactionBufferClose: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.TransactionBufferClose,
+        ...parseTransactionBufferCloseInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.TransactionBufferExtend: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.TransactionBufferExtend,
+        ...parseTransactionBufferExtendInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.VaultTransactionCreateFromBuffer: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.VaultTransactionCreateFromBuffer,
+        ...parseVaultTransactionCreateFromBufferInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.VaultTransactionExecute: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.VaultTransactionExecute,
+        ...parseVaultTransactionExecuteInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.BatchCreate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.BatchCreate,
+        ...parseBatchCreateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.BatchAddTransaction: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.BatchAddTransaction,
+        ...parseBatchAddTransactionInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.BatchExecuteTransaction: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.BatchExecuteTransaction,
+        ...parseBatchExecuteTransactionInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProposalCreate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProposalCreate,
+        ...parseProposalCreateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProposalActivate: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProposalActivate,
+        ...parseProposalActivateInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProposalApprove: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProposalApprove,
+        ...parseProposalApproveInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProposalReject: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProposalReject,
+        ...parseProposalRejectInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProposalCancel: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProposalCancel,
+        ...parseProposalCancelInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ProposalCancelV2: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.ProposalCancelV2,
+        ...parseProposalCancelV2Instruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.SpendingLimitUse: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.SpendingLimitUse,
+        ...parseSpendingLimitUseInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.ConfigTransactionAccountsClose: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.ConfigTransactionAccountsClose,
+        ...parseConfigTransactionAccountsCloseInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.VaultTransactionAccountsClose: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.VaultTransactionAccountsClose,
+        ...parseVaultTransactionAccountsCloseInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.VaultBatchTransactionAccountClose: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType:
+          SquadsMultisigProgramInstruction.VaultBatchTransactionAccountClose,
+        ...parseVaultBatchTransactionAccountCloseInstruction(instruction),
+      };
+    }
+    case SquadsMultisigProgramInstruction.BatchAccountsClose: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: SquadsMultisigProgramInstruction.BatchAccountsClose,
+        ...parseBatchAccountsCloseInstruction(instruction),
+      };
+    }
+    default:
+      throw new SolanaError(
+        SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE,
+        {
+          instructionType: instructionType as string,
+          programName: "squadsMultisigProgram",
+        },
+      );
+  }
+}
+
+export type SquadsMultisigProgramPlugin = {
+  accounts: SquadsMultisigProgramPluginAccounts;
+  instructions: SquadsMultisigProgramPluginInstructions;
+};
+
+export type SquadsMultisigProgramPluginAccounts = {
+  batch: ReturnType<typeof getBatchCodec> &
+    SelfFetchFunctions<BatchArgs, Batch>;
+  vaultBatchTransaction: ReturnType<typeof getVaultBatchTransactionCodec> &
+    SelfFetchFunctions<VaultBatchTransactionArgs, VaultBatchTransaction>;
+  configTransaction: ReturnType<typeof getConfigTransactionCodec> &
+    SelfFetchFunctions<ConfigTransactionArgs, ConfigTransaction>;
+  multisig: ReturnType<typeof getMultisigCodec> &
+    SelfFetchFunctions<MultisigArgs, Multisig>;
+  programConfig: ReturnType<typeof getProgramConfigCodec> &
+    SelfFetchFunctions<ProgramConfigArgs, ProgramConfig>;
+  proposal: ReturnType<typeof getProposalCodec> &
+    SelfFetchFunctions<ProposalArgs, Proposal>;
+  spendingLimit: ReturnType<typeof getSpendingLimitCodec> &
+    SelfFetchFunctions<SpendingLimitArgs, SpendingLimit>;
+  transactionBuffer: ReturnType<typeof getTransactionBufferCodec> &
+    SelfFetchFunctions<TransactionBufferArgs, TransactionBuffer>;
+  vaultTransaction: ReturnType<typeof getVaultTransactionCodec> &
+    SelfFetchFunctions<VaultTransactionArgs, VaultTransaction>;
+};
+
+export type SquadsMultisigProgramPluginInstructions = {
+  programConfigInit: (
+    input: ProgramConfigInitInput,
+  ) => ReturnType<typeof getProgramConfigInitInstruction> &
+    SelfPlanAndSendFunctions;
+  programConfigSetAuthority: (
+    input: ProgramConfigSetAuthorityInput,
+  ) => ReturnType<typeof getProgramConfigSetAuthorityInstruction> &
+    SelfPlanAndSendFunctions;
+  programConfigSetMultisigCreationFee: (
+    input: ProgramConfigSetMultisigCreationFeeInput,
+  ) => ReturnType<typeof getProgramConfigSetMultisigCreationFeeInstruction> &
+    SelfPlanAndSendFunctions;
+  programConfigSetTreasury: (
+    input: ProgramConfigSetTreasuryInput,
+  ) => ReturnType<typeof getProgramConfigSetTreasuryInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigCreate: (
+    input: MultisigCreateInput,
+  ) => ReturnType<typeof getMultisigCreateInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigCreateV2: (
+    input: MultisigCreateV2Input,
+  ) => ReturnType<typeof getMultisigCreateV2Instruction> &
+    SelfPlanAndSendFunctions;
+  multisigAddMember: (
+    input: MultisigAddMemberInput,
+  ) => ReturnType<typeof getMultisigAddMemberInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigRemoveMember: (
+    input: MultisigRemoveMemberInput,
+  ) => ReturnType<typeof getMultisigRemoveMemberInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigSetTimeLock: (
+    input: MultisigSetTimeLockInput,
+  ) => ReturnType<typeof getMultisigSetTimeLockInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigChangeThreshold: (
+    input: MultisigChangeThresholdInput,
+  ) => ReturnType<typeof getMultisigChangeThresholdInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigSetConfigAuthority: (
+    input: MultisigSetConfigAuthorityInput,
+  ) => ReturnType<typeof getMultisigSetConfigAuthorityInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigSetRentCollector: (
+    input: MultisigSetRentCollectorInput,
+  ) => ReturnType<typeof getMultisigSetRentCollectorInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigAddSpendingLimit: (
+    input: MultisigAddSpendingLimitInput,
+  ) => ReturnType<typeof getMultisigAddSpendingLimitInstruction> &
+    SelfPlanAndSendFunctions;
+  multisigRemoveSpendingLimit: (
+    input: MultisigRemoveSpendingLimitInput,
+  ) => ReturnType<typeof getMultisigRemoveSpendingLimitInstruction> &
+    SelfPlanAndSendFunctions;
+  configTransactionCreate: (
+    input: ConfigTransactionCreateInput,
+  ) => ReturnType<typeof getConfigTransactionCreateInstruction> &
+    SelfPlanAndSendFunctions;
+  configTransactionExecute: (
+    input: ConfigTransactionExecuteInput,
+  ) => ReturnType<typeof getConfigTransactionExecuteInstruction> &
+    SelfPlanAndSendFunctions;
+  vaultTransactionCreate: (
+    input: VaultTransactionCreateInput,
+  ) => ReturnType<typeof getVaultTransactionCreateInstruction> &
+    SelfPlanAndSendFunctions;
+  transactionBufferCreate: (
+    input: TransactionBufferCreateInput,
+  ) => ReturnType<typeof getTransactionBufferCreateInstruction> &
+    SelfPlanAndSendFunctions;
+  transactionBufferClose: (
+    input: TransactionBufferCloseInput,
+  ) => ReturnType<typeof getTransactionBufferCloseInstruction> &
+    SelfPlanAndSendFunctions;
+  transactionBufferExtend: (
+    input: TransactionBufferExtendInput,
+  ) => ReturnType<typeof getTransactionBufferExtendInstruction> &
+    SelfPlanAndSendFunctions;
+  vaultTransactionCreateFromBuffer: (
+    input: VaultTransactionCreateFromBufferInput,
+  ) => ReturnType<typeof getVaultTransactionCreateFromBufferInstruction> &
+    SelfPlanAndSendFunctions;
+  vaultTransactionExecute: (
+    input: VaultTransactionExecuteInput,
+  ) => ReturnType<typeof getVaultTransactionExecuteInstruction> &
+    SelfPlanAndSendFunctions;
+  batchCreate: (
+    input: BatchCreateInput,
+  ) => ReturnType<typeof getBatchCreateInstruction> & SelfPlanAndSendFunctions;
+  batchAddTransaction: (
+    input: BatchAddTransactionInput,
+  ) => ReturnType<typeof getBatchAddTransactionInstruction> &
+    SelfPlanAndSendFunctions;
+  batchExecuteTransaction: (
+    input: BatchExecuteTransactionInput,
+  ) => ReturnType<typeof getBatchExecuteTransactionInstruction> &
+    SelfPlanAndSendFunctions;
+  proposalCreate: (
+    input: ProposalCreateInput,
+  ) => ReturnType<typeof getProposalCreateInstruction> &
+    SelfPlanAndSendFunctions;
+  proposalActivate: (
+    input: ProposalActivateInput,
+  ) => ReturnType<typeof getProposalActivateInstruction> &
+    SelfPlanAndSendFunctions;
+  proposalApprove: (
+    input: ProposalApproveInput,
+  ) => ReturnType<typeof getProposalApproveInstruction> &
+    SelfPlanAndSendFunctions;
+  proposalReject: (
+    input: ProposalRejectInput,
+  ) => ReturnType<typeof getProposalRejectInstruction> &
+    SelfPlanAndSendFunctions;
+  proposalCancel: (
+    input: ProposalCancelInput,
+  ) => ReturnType<typeof getProposalCancelInstruction> &
+    SelfPlanAndSendFunctions;
+  proposalCancelV2: (
+    input: ProposalCancelV2Input,
+  ) => ReturnType<typeof getProposalCancelV2Instruction> &
+    SelfPlanAndSendFunctions;
+  spendingLimitUse: (
+    input: SpendingLimitUseInput,
+  ) => ReturnType<typeof getSpendingLimitUseInstruction> &
+    SelfPlanAndSendFunctions;
+  configTransactionAccountsClose: (
+    input: ConfigTransactionAccountsCloseInput,
+  ) => ReturnType<typeof getConfigTransactionAccountsCloseInstruction> &
+    SelfPlanAndSendFunctions;
+  vaultTransactionAccountsClose: (
+    input: VaultTransactionAccountsCloseInput,
+  ) => ReturnType<typeof getVaultTransactionAccountsCloseInstruction> &
+    SelfPlanAndSendFunctions;
+  vaultBatchTransactionAccountClose: (
+    input: VaultBatchTransactionAccountCloseInput,
+  ) => ReturnType<typeof getVaultBatchTransactionAccountCloseInstruction> &
+    SelfPlanAndSendFunctions;
+  batchAccountsClose: (
+    input: BatchAccountsCloseInput,
+  ) => ReturnType<typeof getBatchAccountsCloseInstruction> &
+    SelfPlanAndSendFunctions;
+};
+
+export type SquadsMultisigProgramPluginRequirements = ClientWithRpc<
+  GetAccountInfoApi & GetMultipleAccountsApi
+> &
+  ClientWithTransactionPlanning &
+  ClientWithTransactionSending;
+
+export function squadsMultisigProgramProgram() {
+  return <T extends SquadsMultisigProgramPluginRequirements>(
+    client: T,
+  ): Omit<T, "squadsMultisigProgram"> & {
+    squadsMultisigProgram: SquadsMultisigProgramPlugin;
+  } => {
+    return extendClient(client, {
+      squadsMultisigProgram: <SquadsMultisigProgramPlugin>{
+        accounts: {
+          batch: addSelfFetchFunctions(client, getBatchCodec()),
+          vaultBatchTransaction: addSelfFetchFunctions(
+            client,
+            getVaultBatchTransactionCodec(),
+          ),
+          configTransaction: addSelfFetchFunctions(
+            client,
+            getConfigTransactionCodec(),
+          ),
+          multisig: addSelfFetchFunctions(client, getMultisigCodec()),
+          programConfig: addSelfFetchFunctions(client, getProgramConfigCodec()),
+          proposal: addSelfFetchFunctions(client, getProposalCodec()),
+          spendingLimit: addSelfFetchFunctions(client, getSpendingLimitCodec()),
+          transactionBuffer: addSelfFetchFunctions(
+            client,
+            getTransactionBufferCodec(),
+          ),
+          vaultTransaction: addSelfFetchFunctions(
+            client,
+            getVaultTransactionCodec(),
+          ),
+        },
+        instructions: {
+          programConfigInit: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProgramConfigInitInstruction(input),
+            ),
+          programConfigSetAuthority: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProgramConfigSetAuthorityInstruction(input),
+            ),
+          programConfigSetMultisigCreationFee: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProgramConfigSetMultisigCreationFeeInstruction(input),
+            ),
+          programConfigSetTreasury: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProgramConfigSetTreasuryInstruction(input),
+            ),
+          multisigCreate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigCreateInstruction(input),
+            ),
+          multisigCreateV2: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigCreateV2Instruction(input),
+            ),
+          multisigAddMember: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigAddMemberInstruction(input),
+            ),
+          multisigRemoveMember: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigRemoveMemberInstruction(input),
+            ),
+          multisigSetTimeLock: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigSetTimeLockInstruction(input),
+            ),
+          multisigChangeThreshold: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigChangeThresholdInstruction(input),
+            ),
+          multisigSetConfigAuthority: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigSetConfigAuthorityInstruction(input),
+            ),
+          multisigSetRentCollector: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigSetRentCollectorInstruction(input),
+            ),
+          multisigAddSpendingLimit: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigAddSpendingLimitInstruction(input),
+            ),
+          multisigRemoveSpendingLimit: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getMultisigRemoveSpendingLimitInstruction(input),
+            ),
+          configTransactionCreate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getConfigTransactionCreateInstruction(input),
+            ),
+          configTransactionExecute: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getConfigTransactionExecuteInstruction(input),
+            ),
+          vaultTransactionCreate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getVaultTransactionCreateInstruction(input),
+            ),
+          transactionBufferCreate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getTransactionBufferCreateInstruction(input),
+            ),
+          transactionBufferClose: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getTransactionBufferCloseInstruction(input),
+            ),
+          transactionBufferExtend: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getTransactionBufferExtendInstruction(input),
+            ),
+          vaultTransactionCreateFromBuffer: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getVaultTransactionCreateFromBufferInstruction(input),
+            ),
+          vaultTransactionExecute: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getVaultTransactionExecuteInstruction(input),
+            ),
+          batchCreate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getBatchCreateInstruction(input),
+            ),
+          batchAddTransaction: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getBatchAddTransactionInstruction(input),
+            ),
+          batchExecuteTransaction: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getBatchExecuteTransactionInstruction(input),
+            ),
+          proposalCreate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProposalCreateInstruction(input),
+            ),
+          proposalActivate: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProposalActivateInstruction(input),
+            ),
+          proposalApprove: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProposalApproveInstruction(input),
+            ),
+          proposalReject: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProposalRejectInstruction(input),
+            ),
+          proposalCancel: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProposalCancelInstruction(input),
+            ),
+          proposalCancelV2: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getProposalCancelV2Instruction(input),
+            ),
+          spendingLimitUse: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getSpendingLimitUseInstruction(input),
+            ),
+          configTransactionAccountsClose: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getConfigTransactionAccountsCloseInstruction(input),
+            ),
+          vaultTransactionAccountsClose: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getVaultTransactionAccountsCloseInstruction(input),
+            ),
+          vaultBatchTransactionAccountClose: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getVaultBatchTransactionAccountCloseInstruction(input),
+            ),
+          batchAccountsClose: (input) =>
+            addSelfPlanAndSendFunctions(
+              client,
+              getBatchAccountsCloseInstruction(input),
+            ),
+        },
+      },
+    });
+  };
+}

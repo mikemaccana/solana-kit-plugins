@@ -16,6 +16,8 @@ import {
   getStructEncoder,
   getU64Decoder,
   getU64Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -31,13 +33,16 @@ import {
   type TransactionSigner,
   type WritableAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { SQUADS_MULTISIG_PROGRAM_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 
-export const PROGRAM_CONFIG_SET_MULTISIG_CREATION_FEE_DISCRIMINATOR =
+export const PROGRAM_CONFIG_SET_MULTISIG_CREATION_FEE_DISCRIMINATOR: ReadonlyUint8Array =
   new Uint8Array([101, 160, 249, 63, 154, 215, 153, 13]);
 
-export function getProgramConfigSetMultisigCreationFeeDiscriminatorBytes() {
+export function getProgramConfigSetMultisigCreationFeeDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     PROGRAM_CONFIG_SET_MULTISIG_CREATION_FEE_DISCRIMINATOR,
   );
@@ -138,7 +143,7 @@ export function getProgramConfigSetMultisigCreationFeeInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -147,8 +152,8 @@ export function getProgramConfigSetMultisigCreationFeeInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.programConfig),
-      getAccountMeta(accounts.authority),
+      getAccountMeta("programConfig", accounts.programConfig),
+      getAccountMeta("authority", accounts.authority),
     ],
     data: getProgramConfigSetMultisigCreationFeeInstructionDataEncoder().encode(
       args as ProgramConfigSetMultisigCreationFeeInstructionDataArgs,
@@ -185,8 +190,13 @@ export function parseProgramConfigSetMultisigCreationFeeInstruction<
   TAccountMetas
 > {
   if (instruction.accounts.length < 2) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 2,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

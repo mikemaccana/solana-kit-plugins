@@ -12,6 +12,8 @@ import {
   getStructEncoder,
   getU8Decoder,
   getU8Encoder,
+  SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+  SolanaError,
   transformEncoder,
   type AccountMeta,
   type AccountSignerMeta,
@@ -28,8 +30,11 @@ import {
   type WritableAccount,
   type WritableSignerAccount,
 } from "@solana/kit";
+import {
+  getAccountMetaFactory,
+  type ResolvedInstructionAccount,
+} from "@solana/program-client-core";
 import { MPL_TOKEN_METADATA_PROGRAM_ADDRESS } from "../programs";
-import { getAccountMetaFactory, type ResolvedAccount } from "../shared";
 import {
   getBurnArgsDecoder,
   getBurnArgsEncoder,
@@ -39,7 +44,7 @@ import {
 
 export const BURN_DISCRIMINATOR = 41;
 
-export function getBurnDiscriminatorBytes() {
+export function getBurnDiscriminatorBytes(): ReadonlyUint8Array {
   return getU8Encoder().encode(BURN_DISCRIMINATOR);
 }
 
@@ -281,7 +286,7 @@ export function getBurnInstruction<
   };
   const accounts = originalAccounts as Record<
     keyof typeof originalAccounts,
-    ResolvedAccount
+    ResolvedInstructionAccount
   >;
 
   // Original args.
@@ -304,20 +309,20 @@ export function getBurnInstruction<
   const getAccountMeta = getAccountMetaFactory(programAddress, "programId");
   return Object.freeze({
     accounts: [
-      getAccountMeta(accounts.authority),
-      getAccountMeta(accounts.collectionMetadata),
-      getAccountMeta(accounts.metadata),
-      getAccountMeta(accounts.edition),
-      getAccountMeta(accounts.mint),
-      getAccountMeta(accounts.token),
-      getAccountMeta(accounts.masterEdition),
-      getAccountMeta(accounts.masterEditionMint),
-      getAccountMeta(accounts.masterEditionToken),
-      getAccountMeta(accounts.editionMarker),
-      getAccountMeta(accounts.tokenRecord),
-      getAccountMeta(accounts.systemProgram),
-      getAccountMeta(accounts.sysvarInstructions),
-      getAccountMeta(accounts.splTokenProgram),
+      getAccountMeta("authority", accounts.authority),
+      getAccountMeta("collectionMetadata", accounts.collectionMetadata),
+      getAccountMeta("metadata", accounts.metadata),
+      getAccountMeta("edition", accounts.edition),
+      getAccountMeta("mint", accounts.mint),
+      getAccountMeta("token", accounts.token),
+      getAccountMeta("masterEdition", accounts.masterEdition),
+      getAccountMeta("masterEditionMint", accounts.masterEditionMint),
+      getAccountMeta("masterEditionToken", accounts.masterEditionToken),
+      getAccountMeta("editionMarker", accounts.editionMarker),
+      getAccountMeta("tokenRecord", accounts.tokenRecord),
+      getAccountMeta("systemProgram", accounts.systemProgram),
+      getAccountMeta("sysvarInstructions", accounts.sysvarInstructions),
+      getAccountMeta("splTokenProgram", accounts.splTokenProgram),
     ],
     data: getBurnInstructionDataEncoder().encode(
       args as BurnInstructionDataArgs,
@@ -389,8 +394,13 @@ export function parseBurnInstruction<
     InstructionWithData<ReadonlyUint8Array>,
 ): ParsedBurnInstruction<TProgram, TAccountMetas> {
   if (instruction.accounts.length < 14) {
-    // TODO: Coded error.
-    throw new Error("Not enough accounts");
+    throw new SolanaError(
+      SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS,
+      {
+        actualAccountMetas: instruction.accounts.length,
+        expectedAccountMetas: 14,
+      },
+    );
   }
   let accountIndex = 0;
   const getNextAccount = () => {

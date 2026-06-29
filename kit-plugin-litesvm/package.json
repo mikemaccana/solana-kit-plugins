@@ -1,0 +1,48 @@
+{
+  "name": "kit-plugin-litesvm",
+  "version": "0.1.0",
+  "description": "Run Solana Kit plugins against an in-process LiteSVM, exposing it as a Kite Connection for fast, network-free integration tests",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test src/*.test.ts",
+    "test:ci": "tsx --test src/*.unit.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "solana",
+    "kit",
+    "kite",
+    "litesvm",
+    "testing",
+    "plugin"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@solana/kit": "^6.0.0",
+    "solana-kite": "^3.2.0"
+  },
+  "dependencies": {
+    "litesvm": "^1.1.0"
+  },
+  "devDependencies": {
+    "@solana/kit": "^6.9.0",
+    "@types/node": "^22.10.5",
+    "solana-kite": "^3.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

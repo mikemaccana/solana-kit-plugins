@@ -43,11 +43,10 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const TRANSACTION_BUFFER_DISCRIMINATOR = new Uint8Array([
-  90, 36, 35, 219, 93, 225, 110, 96,
-]);
+export const TRANSACTION_BUFFER_DISCRIMINATOR: ReadonlyUint8Array =
+  new Uint8Array([90, 36, 35, 219, 93, 225, 110, 96]);
 
-export function getTransactionBufferDiscriminatorBytes() {
+export function getTransactionBufferDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(
     TRANSACTION_BUFFER_DISCRIMINATOR,
   );

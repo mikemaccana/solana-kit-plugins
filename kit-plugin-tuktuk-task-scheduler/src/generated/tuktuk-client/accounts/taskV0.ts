@@ -59,11 +59,11 @@ import {
   type TriggerV0Args,
 } from "../types";
 
-export const TASK_V0_DISCRIMINATOR = new Uint8Array([
+export const TASK_V0_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   242, 93, 213, 169, 42, 94, 239, 80,
 ]);
 
-export function getTaskV0DiscriminatorBytes() {
+export function getTaskV0DiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(TASK_V0_DISCRIMINATOR);
 }
 

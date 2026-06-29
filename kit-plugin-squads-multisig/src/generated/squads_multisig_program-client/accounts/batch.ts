@@ -41,11 +41,11 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 
-export const BATCH_DISCRIMINATOR = new Uint8Array([
+export const BATCH_DISCRIMINATOR: ReadonlyUint8Array = new Uint8Array([
   156, 194, 70, 44, 22, 88, 137, 44,
 ]);
 
-export function getBatchDiscriminatorBytes() {
+export function getBatchDiscriminatorBytes(): ReadonlyUint8Array {
   return fixEncoderSize(getBytesEncoder(), 8).encode(BATCH_DISCRIMINATOR);
 }
 
